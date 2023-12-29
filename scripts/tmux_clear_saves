@@ -1,0 +1,21 @@
+#!/bin/sh
+
+RESURRECT_DIR=$HOME/.local/share/tmux/resurrect
+
+number_of_deletions=$1
+
+if [ "$number_of_deletions" -ge 0 ] 2>/dev/null; then
+	saves=$(ls "$RESURRECT_DIR" -tp | grep '.txt' | sort | head -n +$number_of_deletions)
+
+	echo "Deleting $number_of_deletions saves from tmux resurrect saves directory..."
+	for save in $saves; do
+		rm "$RESURRECT_DIR/$save"
+	done
+
+	echo "Done."
+
+	exit 0
+else
+	echo "Enter a number more than or equal to 1 as argument."
+	exit 1
+fi

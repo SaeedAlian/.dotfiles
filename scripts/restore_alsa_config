@@ -1,0 +1,4 @@
+#! /bin/bash
+
+## Restore Alsamixer config
+alsactl --file ~/.config/asound.state restore

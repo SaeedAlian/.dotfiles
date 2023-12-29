@@ -1,0 +1,16 @@
+configuration {
+  display-drun: "Apps: ";
+  display-window: "Windows: ";
+  drun-display-format: "{icon} {name}";
+  font: "JetBrainsMono Nerd Font Medium 16";
+  modi: "window,run,drun";
+  
+  show-icons: true;
+  icon-theme: "Papirus";
+  kb-row-up: "Control+k";
+  kb-row-down: "Control+j";
+  kb-accept-entry: "Return,KP_Enter";
+  kb-remove-to-eol: "Control+Shift+k";
+}
+
+@theme "theme.rasi"

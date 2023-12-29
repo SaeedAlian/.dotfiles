@@ -1,0 +1,259 @@
+### basic config
+
+set previewer ~/.config/lf/preview
+set cleaner ~/.config/lf/clean
+set hidden true
+set ignorecase true
+set drawbox true
+set icons
+set period 5
+set colors
+set hiddenfiles ".*:*.aux:*.log:*.bbl:*.bcf:*.blg:*.run.xml"
+set scrolloff 10
+set ifs "\n"
+set autoquit true
+
+# shell options
+set shellopts '-eu'
+
+# make sure trash folder exists
+%mkdir -p ~/.trash
+
+### CMD commands
+
+# open file
+cmd open &{{
+    case $(file --mime-type -Lb $f) in
+        text/*) lf -remote "send $id \$$EDITOR \$fx";;
+        video/*) vlc $f >/dev/null 2>&1 ;;
+        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
+    esac
+}}
+
+# create directory
+cmd mkdir ${{
+  printf "Directory Name: "
+  read ans
+  mkdir $ans
+}}
+
+# create file
+cmd mkfile ${{
+  printf "File Name: "
+  read ans
+  $EDITOR $ans
+}}
+
+# extract compressed file
+cmd extract ${{
+	set -f
+	printf "Extract? [y/n]"
+	read ans
+	[ $ans = "y" ] && {
+		case $fx in
+			*.tar.bz2)   tar xjf $fx     ;;
+			*.tar.gz)    tar xzf $fx     ;;
+			*.bz2)       bunzip2 $fx     ;;
+			*.rar)       unrar e $fx     ;;
+			*.gz)        gunzip $fx      ;;
+			*.tar)       tar xf $fx      ;;
+			*.tbz2)      tar xjf $fx     ;;
+			*.tgz)       tar xzf $fx     ;;
+			*.zip)       unzip $fx       ;;
+			*.Z)         uncompress $fx  ;;
+			*.7z)        7z x $fx        ;;
+			*.tar.xz)    tar xf $fx      ;;
+		esac
+	}
+}}
+
+# move current file or selected files to trash folder
+cmd trash %set -f; mv $fx ~/.trash
+
+# remove selected files
+cmd remove ${{
+  files_string=$(printf "$fx" | tr '\n' ';')
+  IFS=';' read -r -a files <<< "$files_string"
+
+  echo "--- Selected files: "
+  for file in ${files[@]}
+  do
+    echo "----> $file"
+  done
+
+  if [ ${#files[@]} -gt 1 ]; then
+    printf "Do you want to delete selected files/directories? [y/n]: "
+    read ans
+  else
+    [[ -d $file ]] && type=directory || type=file
+
+    printf "Do you want to delete selected $type? [y/n]: "
+    read ans
+  fi
+
+  if [ $ans == 'y' ]; then
+    for file in ${files[@]}
+    do
+      if [[ -d "$file" ]]; then
+        rm -rf $file
+      elif [[ -f "$file" ]]; then
+        rm $file
+      fi
+    done
+  fi
+}}
+
+# control move inside the parent directory
+cmd move-parent &{{
+  dironly="setlocal '$(dirname "$PWD")' dironly"
+    lf -remote "send $id :updir; $dironly true; $1; $dironly false; open"
+}}
+
+# use fzf to find non hidden directories
+cmd find_non_hidden_directories ${{
+  res="$(find ~ -maxdepth 4 -not -path '*/\.*' -type d | fzf +m)"
+
+  if [ -d "$res" ] ; then
+      cmd="cd"
+  else
+      exit 0
+  fi
+
+  lf -remote "send $id $cmd \"$res\""
+}}
+
+# use fzf to find hidden directories
+cmd find_hidden_directories ${{
+  res="$(find ~ -maxdepth 2 -path '*/\.*' -type d | fzf +m)"
+
+  if [ -d "$res" ] ; then
+      cmd="cd"
+  else
+      exit 0
+  fi
+
+  lf -remote "send $id $cmd \"$res\""
+}}
+
+# use rg and fzf to find files inside current directory
+cmd find_files ${{
+  res="$(rg --files | fzf +m)"
+
+  if [ -f "$res" ] ; then
+      cmd="select"
+  else
+      exit 0
+  fi
+
+  lf -remote "send $id $cmd \"$res\""
+}}
+
+# bulkrename file
+cmd bulkrename ${{
+    tmpfile_old="$(mktemp)"
+    tmpfile_new="$(mktemp)"
+
+    [ -n "$fs" ] && fs=$(basename -a $fs) || fs=$(ls)
+
+    echo "$fs" > "$tmpfile_old"
+    echo "$fs" > "$tmpfile_new"
+    $EDITOR "$tmpfile_new"
+
+    [ "$(wc -l < "$tmpfile_old")" -eq "$(wc -l < "$tmpfile_new")" ] || { rm -f "$tmpfile_old" "$tmpfile_new"; exit 1; }
+
+    paste "$tmpfile_old" "$tmpfile_new" | while IFS="$(printf '\t')" read -r src dst
+    do
+        [ "$src" = "$dst" ] || [ -e "$dst" ] || mv -- "$src" "$dst"
+    done
+
+    rm -f "$tmpfile_old" "$tmpfile_new"
+    lf -remote "send $id unselect"
+}}
+
+# runs file_organizer inside the current directory
+cmd run_file_organizer ${{
+    file_organizer $PWD
+}}
+
+# runs update_music inside the current directory
+cmd run_update_music ${{
+    update_music $PWD
+}}
+
+# runs wallpaper with --add-wall flag to add the selected image to wallpapers directory
+cmd add_wallpaper ${{
+  file_path=$f
+  file_name=${f##*/}
+
+  wallpaper -a $file_name
+}}
+
+# runs wallpaper with --set-wall flag to set the selected image as wallpaper
+# !! Must run inside the wallpapers directory
+cmd set_wallpaper ${{
+  file_path=$f
+  file_name=${f##*/}
+  file_name=${file_name%.*}
+
+  wallpaper -sw $file_name
+}}
+
+### key bindings
+
+map J move-parent down
+map K move-parent up
+
+map d
+map f
+map w
+map m
+map gh
+
+map S shell
+
+map { half-up
+map } half-down
+map . set hidden!
+map dd trash
+map D remove
+map p paste
+map x cut
+map X moveto
+map y copy
+map Y copyto
+map <enter> open
+map R reload
+map mf mkfile
+map md mkdir
+map B bulkrename
+map I :rename; cmd-home # at the very beginning
+map i :rename # before extension
+map A :rename; cmd-end # at the very end
+map a :rename; cmd-right # after extension
+map c push A<c-u> # new rename
+map C clear
+map ` !true
+map Z zip
+map T tar
+map E extract
+map of run_file_organizer
+map om run_update_music
+map wa add_wallpaper
+map ws set_wallpaper
+
+map Pd set previewer # disable previewer
+
+map gD cd ~/Documents
+map gd cd ~/Downloads
+map gp cd ~/Pictures
+map gs cd ~/scripts
+map gc cd ~/.config
+map gt cd ~/.trash
+map gm cd /mnt
+
+map fd find_non_hidden_directories
+map fh find_hidden_directories
+map ff find_files
+
+map V push :!$EDITOR<enter>
+map W $setsid -f $TERMINAL >/dev/null 2>&1
