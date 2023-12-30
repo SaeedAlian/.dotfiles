@@ -1,6 +1,6 @@
 #!/bin/sh
 
-WALLPAPERS_DIR="$HOME/Pictures/wallpapers"
+WALLPAPERS_DIR="$HOME/pictures/wallpapers"
 LOCKSCREENS_DIR="$WALLPAPERS_DIR/lockscreen"
 I3CONFIG_PATH="$XDG_CONFIG_HOME/i3"
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIRECTORIES="$HOME/Documents/Projects/Main $HOME/Documents/Projects/Tutorial $HOME/Documents/Projects/Misc"
+DIRECTORIES="$HOME/projects"
 
 if [ $# -eq 1 ]; then
 	selected_dir=$1

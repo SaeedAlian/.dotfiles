@@ -243,9 +243,9 @@ map ws set_wallpaper
 
 map Pd set previewer # disable previewer
 
-map gD cd ~/Documents
-map gd cd ~/Downloads
-map gp cd ~/Pictures
+map gD cd ~/documents
+map gd cd ~/downloads
+map gp cd ~/pictures
 map gs cd ~/scripts
 map gc cd ~/.config
 map gt cd ~/.trash
