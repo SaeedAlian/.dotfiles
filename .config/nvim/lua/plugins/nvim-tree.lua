@@ -17,23 +17,25 @@ local function attach(bufnr)
 	map("n", "N", api.fs.rename_basename, "Rename basename", opts)
 end
 
+local config = function()
+	require("nvim-tree").setup({
+		on_attach = attach,
+		filters = {
+			dotfiles = false,
+		},
+		view = {
+			width = 32,
+		},
+		git = {
+			enable = true,
+			ignore = true,
+			timeout = 499,
+		},
+	})
+end
+
 return {
 	"nvim-tree/nvim-tree.lua",
 	lazy = false,
-	config = function()
-		require("nvim-tree").setup({
-			on_attach = attach,
-			filters = {
-				dotfiles = false,
-			},
-			view = {
-				adaptive_size = true,
-			},
-			git = {
-				enable = true,
-				ignore = true,
-				timeout = 500,
-			},
-		})
-	end,
+	config = config,
 }
