@@ -25,31 +25,15 @@ local config = function()
 			"json",
 			"javascript",
 			"typescript",
-			"yaml",
 			"html",
 			"tsx",
-			"query",
 			"css",
 			"bash",
 			"lua",
 			"dockerfile",
 			"gitignore",
-			"python",
-			"vue",
-			"svelte",
-			"vim",
-			"vimdoc",
-			"php",
-			"http",
-			"graphql",
 			"sql",
-			"comment",
-			"htmldjango",
-			"jsdoc",
-			"json5",
-			"jsonc",
 			"regex",
-			"rst",
 		},
 		auto_install = true,
 		parser_install_dir = "$HOME/.local/share/treesitter",
@@ -106,14 +90,28 @@ local config = function()
 	})
 end
 
+local context_conf = function()
+	require("treesitter-context").setup({
+		enable = true,
+		max_lines = 4,
+		line_numbers = true,
+	})
+end
+
 return {
-	"nvim-treesitter/nvim-treesitter",
-	config = config,
-	lazy = false,
-	dependencies = {
-		"nvim-treesitter/nvim-treesitter-textobjects",
-		"windwp/nvim-ts-autotag",
+	{
+		"nvim-treesitter/nvim-treesitter",
+		config = config,
+		lazy = false,
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter-textobjects",
+			"windwp/nvim-ts-autotag",
+			"nvim-treesitter/nvim-treesitter-context",
+			"nvim-treesitter/playground",
+		},
+	},
+	{
 		"nvim-treesitter/nvim-treesitter-context",
-		"nvim-treesitter/playground",
+		config = context_conf,
 	},
 }
