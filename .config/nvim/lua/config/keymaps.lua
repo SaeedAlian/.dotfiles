@@ -92,10 +92,10 @@ map("n", "<C-h>", "<C-w>h", "Navigate left through panes") -- navigate left
 map("n", "<C-k>", "<C-w>k", "Navigate up through panes") -- navigate up
 map("n", "<C-l>", "<C-w>l", "Navigate right through panes") -- navigate right
 map("n", "<C-j>", "<C-w>j", "Navigate down through panes") -- navigate down
-map("n", "<C-left>", "<C-w><", "Resize pane left side") -- resize left
-map("n", "<C-up>", "<C-w>+", "Resize pane up side") -- resize up
-map("n", "<C-right>", "<C-w>>", "Resize pane right side") -- resize right
-map("n", "<C-down>", "<C-w>-", "Resize pane down side") -- resize down
+map("n", "<A-h>", "<C-w><", "Resize pane left side") -- resize left
+map("n", "<A-k>", "<C-w>+", "Resize pane up side") -- resize up
+map("n", "<A-l>", "<C-w>>", "Resize pane right side") -- resize right
+map("n", "<A-j>", "<C-w>-", "Resize pane down side") -- resize down
 
 -- buffer management
 map("n", "<tab>", ":bnext<Return>", "Next buffer") -- next buffer
