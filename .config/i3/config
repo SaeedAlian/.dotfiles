@@ -6,6 +6,9 @@
 # set mod key
 set $mod Mod4
 
+# set wallpapers directory
+set $wallsdir "$HOME/pictures/wallpapers"
+
 # set background image name
 set $bgname "sekiro_2"
 
