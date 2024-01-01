@@ -61,22 +61,14 @@ local config = function()
 		on_attach = on_attach,
 	})
 
-	-- graphql
-	lspconfig["graphql"].setup({
-		capabilities = capabilities,
-		on_attach = on_attach,
-		filetypes = { "graphql", "gql", "svelte", "typescriptreact", "javascriptreact" },
-	})
-
-	-- emmet
-	lspconfig["emmet_ls"].setup({
-		capabilities = capabilities,
-		on_attach = on_attach,
-		filetypes = { "html", "typescriptreact", "javascriptreact", "css", "sass", "scss", "less", "svelte" },
-	})
-
 	-- python
 	lspconfig["pyright"].setup({
+		capabilities = capabilities,
+		on_attach = on_attach,
+	})
+
+	-- bash
+	lspconfig["bashls"].setup({
 		capabilities = capabilities,
 		on_attach = on_attach,
 	})
@@ -92,6 +84,10 @@ local config = function()
 		capabilities = capabilities,
 		on_attach = on_attach,
 		filetypes = { "cpp", "c", "h", "hpp", "cc" },
+		cmd = {
+			"clangd",
+			"--offset-encoding=utf-16",
+		},
 	})
 
 	-- lua

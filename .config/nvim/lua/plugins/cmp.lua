@@ -1,9 +1,6 @@
 local config = function()
 	local cmp = require("cmp")
 	local luasnip = require("luasnip")
-	local lspkind = require("lspkind")
-
-	require("luasnip/loaders/from_vscode").lazy_load()
 
 	vim.opt.completeopt = "menu,menuone,noselect"
 
@@ -20,32 +17,54 @@ local config = function()
 			["<C-f>"] = cmp.mapping.scroll_docs(4),
 			["<C-Space>"] = cmp.mapping.complete(),
 			["<C-e>"] = cmp.mapping.abort(),
-			["<CR>"] = cmp.mapping.confirm({ select = false }),
+			["<CR>"] = cmp.mapping.confirm({ select = true }),
 		}),
 		sources = cmp.config.sources({
-			{ name = "nvim_lsp" }, -- lsp
-			{ name = "luasnip" }, -- snippets
-			{ name = "buffer" }, -- text within current buffer
-			{ name = "path" }, -- file system paths
+			{ name = "nvim_lsp", keyword_length = 1 },
+			{ name = "luasnip", keyword_length = 2 },
+		}, {
+			{ name = "buffer", keyword_length = 3 },
 		}),
 		formatting = {
-			format = lspkind.cmp_format({
-				maxwidth = 50,
-				ellipsis_char = "...",
-			}),
+			fields = { "menu", "abbr", "kind" },
+			format = function(entry, item)
+				local menu_icon = {
+					nvim_lsp = "λ",
+					luasnip = "⋗",
+					buffer = "Ω",
+					path = "🖫",
+				}
+
+				item.menu = menu_icon[entry.source.name]
+
+				return item
+			end,
 		},
 	})
 end
 
+local luasnip_conf = function()
+	require("luasnip.loaders.from_vscode").lazy_load()
+end
+
 return {
-	"hrsh7th/nvim-cmp",
-	config = config,
-	dependencies = {
-		"onsails/lspkind.nvim",
-		{
-			"L3MON4D3/LuaSnip",
-			version = "2.*",
-			build = "make install_jsregexp",
+	{
+		"hrsh7th/nvim-cmp",
+		lazy = false,
+		config = config,
+	},
+	{
+		"hrsh7th/cmp-nvim-lsp",
+		lazy = false,
+		config = true,
+	},
+	{
+		"L3MON4D3/LuaSnip",
+		lazy = false,
+		config = luasnip_conf,
+		dependencies = {
+			"rafamadriz/friendly-snippets",
+			"saadparwaiz1/cmp_luasnip",
 		},
 	},
 }
