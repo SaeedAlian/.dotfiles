@@ -23,13 +23,15 @@ local opt = {
 	},
 }
 
+local config = function()
+	require("onedark").setup(opt)
+	vim.cmd.colorscheme("onedark")
+end
+
 return {
 	"navarasu/onedark.nvim",
 	name = "onedark",
 	priority = 1000,
 	lazy = false,
-	config = function()
-		require("onedark").setup(opt)
-		vim.cmd.colorscheme("onedark")
-	end,
+	config = config,
 }
