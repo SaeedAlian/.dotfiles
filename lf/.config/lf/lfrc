@@ -22,6 +22,7 @@ set shellopts '-eu'
 ### CMD commands
 
 # open file
+## TODO: FIX the default openers
 cmd open &{{
     case $(file --mime-type -Lb $f) in
         text/*) lf -remote "send $id \$$EDITOR \$fx";;

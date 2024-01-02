@@ -14,8 +14,8 @@ export BROWSER="firefox"
 export SAVEHIST=2000
 export HISTFILE="$HOME/.zsh_history"
 
-# adds ~/.local/bin and subfolders to $PATH
-export PATH="$PATH:$HOME/.local/share/go/bin:${$(find ~/.local/bin -maxdepth 1 -type d -printf %p:)%%:}"
+# path variable
+export PATH="$PATH:$HOME/.local/share/go/bin:/usr/local/bin:/bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 # path to oh-my-zsh installation.
 export ZSH="$HOME/.config/oh-my-zsh"
@@ -42,38 +42,48 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git)
 
+# source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
+#### User configuration ####
 
 # run tmux session fuzzy finder
-bindkey -s ^f "$HOME/scripts/tmux_fzf_session\n"
+bindkey -s ^f "tmux_fzf_session\n"
 
-# aliases
-alias zshc="nvim $XDG_CONFIG_HOME/zsh"
+### aliases ###
+
+# source aliases
 alias zshsrc="source $XDG_CONFIG_HOME/zsh/.zshrc"
-alias ohmyzsh="nvim $ZSH"
-alias kittc="nvim $XDG_CONFIG_HOME/kitty"
-alias i3c="nvim $XDG_CONFIG_HOME/i3"
-alias tmuxc="nvim $XDG_CONFIG_HOME/tmux"
-alias lfc="nvim $XDG_CONFIG_HOME/lf"
-alias vic="nvim $XDG_CONFIG_HOME/nvim"
-alias picomc="nvim $XDG_CONFIG_HOME/picom"
-alias pbarc="nvim $XDG_CONFIG_HOME/polybar"
-alias rofic="nvim $XDG_CONFIG_HOME/rofi"
-alias scripted="nvim $HOME/scripts"
+
+# edit config aliases
+alias zshc="$EDITOR $XDG_CONFIG_HOME/zsh"
+alias ohmyzsh="$EDITOR $ZSH"
+alias kittc="$EDITOR $XDG_CONFIG_HOME/kitty"
+alias i3c="$EDITOR $XDG_CONFIG_HOME/i3"
+alias tmuxc="$EDITOR $XDG_CONFIG_HOME/tmux"
+alias lfc="$EDITOR $XDG_CONFIG_HOME/lf"
+alias vic="$EDITOR $XDG_CONFIG_HOME/nvim"
+alias picomc="$EDITOR $XDG_CONFIG_HOME/picom"
+alias pbarc="$EDITOR $XDG_CONFIG_HOME/polybar"
+alias rofic="$EDITOR $XDG_CONFIG_HOME/rofi"
+alias scriptedit="$EDITOR $HOME/.local/bin"
+
 alias vi="nvim"
 alias la="ls -a"
 alias lla="ll -a"
 alias slf="sudo lf"
-alias fo="$HOME/scripts/file_organizer"
-alias upmusic="$HOME/scripts/update_music"
+alias fo="file_organizer"
+alias upmusic="update_music"
 alias icat="kitty +kitten icat"
-alias clearmux="$HOME/scripts/tmux_clear_saves"
-alias clearmuxlast="$HOME/scripts/tmux_clear_last_save"
+alias clearmux="tmux_clear_saves"
+alias clearmuxlast="tmux_clear_last_save"
 
 # alias for running nekoray as sudo
 alias rv="sudo ~/vpn/nekoray/launcher"
 
 # To customize prompt, run `p10k configure` or edit ~/.config/zsh/.p10k.zsh.
 [[ ! -f ~/.config/zsh/.p10k.zsh ]] || source ~/.config/zsh/.p10k.zsh
+
+# setup nvm
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm

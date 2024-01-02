@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 declare -A musicExtensions=([mp3]=1 [flac]=1)
 
@@ -46,7 +46,7 @@ read -e -p "Please enter the artist name : " -i "" artist
 read -e -p "Please enter the album name : " -i "" album
 read -e -p "Please enter the year : " -i "" year
 
-newAlbumDirectory="$HOME/Music/$artist-($year)-$album"
+newAlbumDirectory="$HOME/music/$artist-($year)-$album"
 
 mkdir "$newAlbumDirectory"
 

@@ -158,45 +158,45 @@ esac
 
 echo "Error: Invalid argument"
 echo "
-  Valid commands:
-    1.
-      --add-wall /path/to/image
-      -a /path/to/image
-    
-      For adding an image to wallpapers directory,
-      and create a lockscreen image from it.
-    2.
-      --create-lockscreen imagename
-      -cl imagename
+Valid commands:
+  1.
+    --add-wall /path/to/image
+    -a /path/to/image
+  
+    For adding an image to wallpapers directory,
+    and create a lockscreen image from it.
+  2.
+    --create-lockscreen imagename
+    -cl imagename
 
-      For creating a lockscreen image from an image
-      inside your wallpapers directory.
+    For creating a lockscreen image from an image
+    inside your wallpapers directory.
 
-      Note that the image must be inside your
-      lockscreen directory.
+    Note that the image must be inside your
+    lockscreen directory.
 
-      For adding an image outside
-      the wallpapers dir, simply use --add-wall
+    For adding an image outside
+    the wallpapers dir, simply use --add-wall
 
-    3.
-      --set-lockscreens
-      -sl
+  3.
+    --set-lockscreens
+    -sl
 
-      This command will create lockscreen images
-      from all of your wallpapers.
+    This command will create lockscreen images
+    from all of your wallpapers.
 
-      Use this command to reset your
-      lockscreen images directory.
+    Use this command to reset your
+    lockscreen images directory.
 
-    4.
-      --set-wall imagename
-      -sw imagename
+  4.
+    --set-wall imagename
+    -sw imagename
 
-      For setting a wallpaper for your i3
+    For setting a wallpaper for your i3
 
-      Note that the image must be inside your
-      lockscreen directory.
+    Note that the image must be inside your
+    lockscreen directory.
 
-      For adding an image outside
-      the wallpapers dir, simply use --add-wall
+    For adding an image outside
+    the wallpapers dir, simply use --add-wall
 "
