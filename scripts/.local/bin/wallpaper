@@ -101,7 +101,7 @@ set_i3_background() {
 
 	i3_config_file_path=$I3CONFIG_PATH/config
 
-	grep bgname "$i3_config_file_path" | sed -i "s/\".*\"/\"$image_name\"/" "$i3_config_file_path"
+	grep bgname "$i3_config_file_path" | sed -i "/set \$bgname/s/\"[^\"]*\"/\"$image_name\"/" "$i3_config_file_path"
 
 	echo "I3 config updated."
 	echo "Please restart your i3 to change the wallpaper."
