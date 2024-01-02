@@ -1,0 +1,162 @@
+env:
+  TERM: xterm-256color 
+
+window:
+  dimensions:
+    columns: 25
+    lines: 75
+
+  padding:
+    x: 15
+    y: 15
+
+  # Spread additional padding evenly around the terminal content.
+  dynamic_padding: true 
+
+  opacity: 0.95
+
+  title: Alacritty
+
+  class:
+    instance: Alacritty
+    general: Alacritty
+
+scrolling:
+  history: 8000
+
+tabspaces: 2
+
+font:
+  normal:
+    family: JetBrainsMono Nerd Font
+    style: Regular
+
+  bold:
+    family: JetBrainsMono Nerd Font
+    style: Bold
+
+  italic:
+    family: JetBrainsMono Nerd Font
+    style: Italic
+
+  bold_italic:
+    family: JetBrainsMono Nerd Font
+    style: Bold Italic
+
+  size: 15.0
+
+  offset:
+    x: 0
+    y: 0
+
+  glyph_offset:
+    x: 0
+    y: 0
+
+draw_bold_text_with_bright_colors: true
+
+schemes:
+  OneDark: &OneDark
+    primary:
+        background: "#0a0a10"
+        foreground: "#F8F8F2"
+        dim_foreground: "#F8F8F2"
+        bright_foreground: "#F8F8F2"
+
+    search:
+        matches:
+            foreground: "#1E1E2E"
+            background: "#A6ADC8"
+        focused_match:
+            foreground: "#1E1E2E"
+            background: "#98c379"
+        footer_bar:
+            foreground: "#1E1E2E"
+            background: "#A6ADC8"
+
+    hints:
+        start:
+            foreground: "#1E1E2E"
+            background: "#e5c07b"
+        end:
+            foreground: "#1E1E2E"
+            background: "#A6ADC8"
+
+    selection:
+        text: "#1E1E2E"
+        background: "#e5c07b"
+
+    normal:
+        black: "#373B41"
+        red: "#e06c75"
+        green: "#98c379"
+        yellow: "#e5c07b"
+        blue: "#3080d0"
+        magenta: "#c678dd"
+        cyan: "#56b6c2"
+        white: "#f5f8d6"
+
+    # Bright colors
+    bright:
+        black: "#474B51"
+        red: "#f07c75"
+        green: "#9ac37f"
+        yellow: "#eacc7b"
+        blue: "#417fcf"
+        magenta: "#c678dd"
+        cyan: "#66c6c2"
+        white: "#f5f8d6"
+
+    # Dim colors
+    dim:
+        black: "#272B31"
+        red: "#e06c65"
+        green: "#98c379"
+        yellow: "#e5c07b"
+        blue: "#417fdf"
+        magenta: "#c678dd"
+        cyan: "#56b6c2"
+        white: "#e5e8e6"
+
+mouse:
+  hide_when_typing: true 
+
+mouse_bindings:
+  - { mouse: Middle, action: Paste }
+  - { mouse: Left, action: Copy }
+
+selection:
+  semantic_escape_chars: ",│`|:\"' ()[]{}<>"
+  save_to_clipboard: false
+
+colors: *OneDark
+
+shell:
+  program: /bin/zsh
+
+debug:
+  render_timer: false
+  persistent_logging: false
+
+  # Values for `log_level`:
+  #   - OFF
+  #   - ERROR
+  #   - WARN
+  #   - INFO
+  #   - DEBUG
+  #   - TRACE
+  log_level: OFF
+
+key_bindings:
+  - { key: V,         mods: Control|Shift, action: Paste                                        }
+  - { key: C,         mods: Control|Shift, action: Copy                                         }
+  - { key: Insert,    mods: Shift,         action: PasteSelection                               }
+  - { key: Key0,      mods: Control,       action: ResetFontSize                                }
+  - { key: Equals,    mods: Control,       action: IncreaseFontSize                             }
+  - { key: Plus,      mods: Control,       action: IncreaseFontSize                             }
+  - { key: Minus,     mods: Control,       action: DecreaseFontSize                             }
+  - { key: L,         mods: Control,       action: ClearLogNotice                               }
+  - { key: K,         mods: Control,       action: ScrollPageUp,         mode: ~Alt             }
+  - { key: J,         mods: Control,       action: ScrollPageDown,       mode: ~Alt             }
+  - { key: P,         mods: Control,       action: ScrollToTop,          mode: ~Alt             }
+  - { key: B,         mods: Control,       action: ScrollToBottom,       mode: ~Alt             }
