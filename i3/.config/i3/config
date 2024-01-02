@@ -12,6 +12,9 @@ set $wallsdir "$HOME/pictures/wallpapers"
 # set background image name
 set $bgname "sekiro_2"
 
+# set terminal
+set $terminal kitty
+
 # create screenshots directory
 exec mkdir -p $HOME/pictures/screenshots  
 
