@@ -1,7 +1,7 @@
 local map = require("util.keymapper").map
 
 -- remove some keymaps
--- map("n", "Q", "<nop>", "Remove Q")
+map("n", "Q", "<nop>", "Remove Q")
 map({ "v", "i", "n" }, "<Down>", "<nop>", "Remove down arrow key")
 map({ "v", "i", "n" }, "<Left>", "<nop>", "Remove left arrow key")
 map({ "v", "i", "n" }, "<Right>", "<nop>", "Remove right arrow key")
@@ -9,14 +9,6 @@ map({ "v", "i", "n" }, "<Up>", "<nop>", "Remove up arrow key")
 
 -- Move to the end of line and exclude the \n at the end
 map("v", "$", "$<Left>", "Move to the end of line and exclude the \n at the end")
-
--- swap the capital P and p
--- This is because I don't want to yank the visually selected
--- characters when I paste on them, but sometimes I want that
--- so the <Shift+P> is for yanking when pasting, and <p> is for
--- normal pasting without yanking.
-map("v", "p", "P", "Paste in visual mode without yanking the visually selected characters")
-map("v", "P", "p", "Paste in visual mode with yanking the visually selected characters")
 
 -- delete character without yanking it
 map("n", "x", [["_x]], "Delete single character after cursor without yanking")
@@ -44,7 +36,7 @@ map({ "n", "v" }, "C", [["_c$]], "Delete to the end of line and go to insert mod
 map("n", "<C-a>", "gg<S-v>G", "Select all")
 
 -- tmux session fuzzy finder
--- only works in tmux
+-- only works when tmux is installed
 map("n", "<C-f>", "<cmd>silent !tmux neww ~/scripts/tmux_fzf_session<CR>", "Start tmux session fuzzy finder")
 
 -- make the current file an executable
@@ -68,9 +60,6 @@ map(
 	"Rename selected word (under cursor) globally"
 )
 
--- source the init.lua file
-map("n", "<leader>R", ":source ~/.config/nvim/init.lua<CR>", "Source the init.lua file")
-
 -- force the cursor to be the same place when using J to move the lines into one line
 map("n", "J", "mzJ`z", "Normal J, but the cursor stays fixed")
 
@@ -82,16 +71,9 @@ map("n", "<C-u>", "<C-u>zz", "Move half page up")
 map("n", "n", "nzzzv", "Incremental search forward")
 map("n", "N", "Nzzzv", "Incremental search backward")
 
--- show full file path
-map("n", "<leader>pa", ":echo expand('%:p')<CR>", "Show file path")
-
 -- window management
 map("n", "sv", ":vsplit<Return>", "Vertical split") -- vertical split
 map("n", "ss", ":split<Return>", "Horizontal split") -- horizontal split
-map("n", "<C-h>", "<C-w>h", "Navigate left through panes") -- navigate left
-map("n", "<C-k>", "<C-w>k", "Navigate up through panes") -- navigate up
-map("n", "<C-l>", "<C-w>l", "Navigate right through panes") -- navigate right
-map("n", "<C-j>", "<C-w>j", "Navigate down through panes") -- navigate down
 map("n", "<A-h>", "<C-w><", "Resize pane left side") -- resize left
 map("n", "<A-k>", "<C-w>+", "Resize pane up side") -- resize up
 map("n", "<A-l>", "<C-w>>", "Resize pane right side") -- resize right
@@ -110,8 +92,9 @@ map("v", ">", ">gv", "Indent left", { silent = true })
 -- toggle wrap
 map("n", "<leader>wt", ":set wrap!<Return>", "Toggle wrap line")
 
--- git status
-map("n", "<leader>gs", vim.cmd.Git, "Git status")
+-- git
+map("n", "<leader>gs", ":Git<CR>", "Git status")
+map("n", "<leader>gc", ":Git commit<CR>", "Git status")
 
 -- undotree
 map("n", "<leader>uf", ":UndotreeFocus<CR>", "Undo tree focus")

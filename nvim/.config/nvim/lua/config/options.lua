@@ -49,5 +49,5 @@ opt.clipboard:append({ "unnamedplus" })
 opt.encoding = "UTF-8"
 opt.fileencoding = "UTF-8"
 vim.scriptencoding = "UTF-8"
-opt.iskeyword = "@,48-57,192-255"
+opt.iskeyword = "@,-,_,48-57,192-255"
 opt.wildignore:append({ "*/node_modules/*" })
