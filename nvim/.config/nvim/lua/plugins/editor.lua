@@ -115,6 +115,7 @@ local telescope_config = function()
 		defaults = {
 			file_ignore_patterns = {
 				".git/",
+				"target/",
 				".cache",
 				"build/",
 				"node_modules/",
@@ -192,6 +193,9 @@ local nvim_tree_config = function()
 		on_attach = nvim_tree_attach,
 		filters = {
 			dotfiles = false,
+			custom = {
+				"^\\.git",
+			},
 		},
 		view = {
 			width = 25,
