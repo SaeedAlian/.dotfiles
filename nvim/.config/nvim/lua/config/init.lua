@@ -24,7 +24,7 @@ local plugins_path = "plugins"
 
 local opt = {
 	defaults = {
-		-- lazy = true,
+		lazy = true,
 	},
 	install = {
 		colorscheme = { "onedark" },
