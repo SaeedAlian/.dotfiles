@@ -41,15 +41,39 @@ for file in "$inputAlbumDirectory"/*; do
 	fi
 done
 
-## FIX : Need to set default values for the inputs
+firstFilePath=$(find "$inputAlbumDirectory" -maxdepth 1 -type f | head -n 1)
+
+defaultAlbumArtist=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=album_artist -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultAlbum=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=album -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultArtist=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultYear=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=date -of default=noprint_wrappers=1:nokey=1 "$firstFilePath" | sed 's/-.*//')
+
 read -e -p "Please enter the artist name : " -i "" artist
 read -e -p "Please enter the album name : " -i "" album
 read -e -p "Please enter the year : " -i "" year
 
-newAlbumDirectory="$HOME/music/$artist-($year)-$album"
+if ! [ -n "$artist" ]; then
+	if [ -n "$defaultAlbumArtist" ]; then
+		artist=$defaultAlbumArtist
+	else
+		artist=$defaultArtist
+	fi
+fi
+
+if ! [ -n "$album" ]; then
+	album=$defaultAlbum
+fi
+
+if ! [ -n "$year" ]; then
+	year=$defaultYear
+fi
+
+newAlbumDirectory="$HOME/Music/$artist-($year)-$album"
 
 mkdir "$newAlbumDirectory"
 
 for file in "$inputAlbumDirectory"/*; do
 	editMusicTags "$inputAlbumDirectory" "$newAlbumDirectory" "${file##*/}" "$artist" "$album" "$year"
 done
+
+mv "$inputAlbumDirectory" "$inputAlbumDirectory (done)"
