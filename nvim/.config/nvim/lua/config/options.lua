@@ -1,6 +1,6 @@
 local opt = vim.opt
 
--- Tabs and indentation
+-- tabs and indentation
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.softtabstop = 2
@@ -8,10 +8,10 @@ opt.expandtab = true
 opt.smartindent = true
 opt.wrap = false
 
--- Fast update time
+-- fast update time
 opt.updatetime = 50
 
--- Search
+-- search
 opt.hlsearch = false
 opt.incsearch = true
 opt.ignorecase = true
@@ -30,13 +30,13 @@ opt.guicursor = "n-v-c-sm-i-ci-ve:block,r-cr-o:hor20,a:blinkwait700-blinkoff400-
 opt.pumheight = 5
 opt.showmode = false
 
--- Backup and undo directory
+-- backup and undo directory
 opt.swapfile = false
 opt.backup = false
 opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 opt.undofile = true
 
--- Behaviour
+-- behaviour
 opt.errorbells = false
 opt.hidden = true
 opt.backspace = "indent,eol,start"

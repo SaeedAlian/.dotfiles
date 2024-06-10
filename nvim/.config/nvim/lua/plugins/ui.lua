@@ -2,7 +2,7 @@ local alpha_nvim_config = function()
 	local alpha = require("alpha")
 	local dashboard = require("alpha.themes.dashboard")
 
-	-- Set header
+	-- set header
 	dashboard.section.header.val = {
 		[[                                                                       ]],
 		[[                                                                     ]],
@@ -18,7 +18,7 @@ local alpha_nvim_config = function()
 		[[                                                                       ]],
 	}
 
-	-- Set menu
+	-- set menu
 	dashboard.section.buttons.val = {
 		dashboard.button("e", "  > New File", "<cmd>ene<CR>"),
 		dashboard.button("SPC ee", "  > Toggle file explorer", "<cmd>NvimTreeToggle<CR>"),
@@ -28,10 +28,10 @@ local alpha_nvim_config = function()
 		dashboard.button("q", " > Quit NVIM", "<cmd>qa<CR>"),
 	}
 
-	-- Send config to alpha
+	-- send config to alpha
 	alpha.setup(dashboard.opts)
 
-	-- Disable folding on alpha buffer
+	-- disable folding on alpha buffer
 	vim.cmd([[autocmd FileType alpha setlocal nofoldenable]])
 end
 
@@ -55,23 +55,6 @@ local theme_config = function()
 
 	require("onedark").setup(opt)
 	vim.cmd.colorscheme("onedark")
-end
-
-local bufferline_config = function()
-	require("bufferline").setup({
-		options = {
-			mode = "buffers",
-			diagnostics = false,
-			offsets = {
-				{
-					filetype = "NvimTree",
-					text = "File Explorer",
-					highlight = "Directory",
-					text_align = "left",
-				},
-			},
-		},
-	})
 end
 
 local lualine_config = function()
@@ -117,13 +100,6 @@ return {
 		dependencies = { "nvim-tree/nvim-web-devicons" },
 		lazy = false,
 		config = lualine_config,
-	},
-	{
-		"akinsho/bufferline.nvim",
-		version = "*",
-		lazy = false,
-		config = bufferline_config,
-		dependencies = { "nvim-tree/nvim-web-devicons" },
 	},
 	{
 		"lewis6991/gitsigns.nvim",

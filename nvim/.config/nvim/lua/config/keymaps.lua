@@ -7,7 +7,7 @@ map({ "v", "i", "n" }, "<Left>", "<nop>", "Remove left arrow key")
 map({ "v", "i", "n" }, "<Right>", "<nop>", "Remove right arrow key")
 map({ "v", "i", "n" }, "<Up>", "<nop>", "Remove up arrow key")
 
--- Move to the end of line and exclude the \n at the end
+-- move to the end of line and exclude the \n at the end
 map("v", "$", "$<Left>", "Move to the end of line and exclude the \n at the end")
 
 -- delete character without yanking it
@@ -82,8 +82,6 @@ map("n", "<A-j>", "<C-w>-", "Resize pane down side") -- resize down
 -- buffer management
 map("n", "<tab>", ":bnext<Return>", "Next buffer") -- next buffer
 map("n", "<s-tab>", ":bprev<Return>", "Previous buffer") -- previous buffer
-map("n", "<C-w>", ":Bdelete <CR>", "Close buffer") -- close buffer
-map("n", "<leader><C-w>", ":Bdelete! <CR>", "Force close buffer") -- force close buffer
 
 -- indenting
 map("v", "<", "<gv", "Indent right", { silent = true })
@@ -94,7 +92,8 @@ map("n", "<leader>wt", ":set wrap!<Return>", "Toggle wrap line")
 
 -- git
 map("n", "<leader>gs", ":Git<CR>", "Git status")
-map("n", "<leader>gc", ":Git commit<CR>", "Git status")
+map("n", "<leader>gc", ":Git commit<CR>", "Git commit")
+map("n", "<leader>gp", ":Git push<CR>", "Git push")
 
 -- undotree
 map("n", "<leader>uf", ":UndotreeFocus<CR>", "Undo tree focus")
@@ -102,7 +101,3 @@ map("n", "<leader>u", function()
 	vim.cmd.UndotreeToggle()
 	vim.cmd.UndotreeFocus()
 end, "Undo tree toggle")
-
--- directory navigation
-map("n", "<leader>pd", ":NvimTreeFocus<Return>")
-map("n", "<leader>t", ":NvimTreeToggle<Return>")

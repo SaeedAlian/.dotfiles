@@ -7,4 +7,8 @@ M.diagnostic_signs = {
 	Info = "",
 }
 
+M.file_browser_icons = {
+	Directory = "",
+}
+
 return M
