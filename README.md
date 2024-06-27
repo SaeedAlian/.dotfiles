@@ -43,7 +43,7 @@ Read further for more instructions
 
 ## Images
 
-![](images/screenshot1.jpg)
-![](images/screenshot2.jpg)
-![](images/screenshot3.jpg)
-![](images/screenshot4.jpg)
+![](screenshot1.jpg)
+![](screenshot2.jpg)
+![](screenshot3.jpg)
+![](screenshot4.jpg)
