@@ -1,0 +1,195 @@
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[colors.bright]
+black = "#474B51"
+blue = "#417fcf"
+cyan = "#66c6c2"
+green = "#9ac37f"
+magenta = "#c678dd"
+red = "#f07c75"
+white = "#f5f8d6"
+yellow = "#eacc7b"
+
+[colors.dim]
+black = "#272B31"
+blue = "#417fdf"
+cyan = "#56b6c2"
+green = "#98c379"
+magenta = "#c678dd"
+red = "#e06c65"
+white = "#e5e8e6"
+yellow = "#e5c07b"
+
+[colors.hints.end]
+background = "#A6ADC8"
+foreground = "#1E1E2E"
+
+[colors.hints.start]
+background = "#e5c07b"
+foreground = "#1E1E2E"
+
+[colors.normal]
+black = "#373B41"
+blue = "#3080d0"
+cyan = "#56b6c2"
+green = "#98c379"
+magenta = "#c678dd"
+red = "#e06c75"
+white = "#f5f8d6"
+yellow = "#e5c07b"
+
+[colors.primary]
+background = "#0a0a10"
+bright_foreground = "#F8F8F2"
+dim_foreground = "#F8F8F2"
+foreground = "#F8F8F2"
+
+[colors.search.focused_match]
+background = "#98c379"
+foreground = "#1E1E2E"
+
+[colors.search.matches]
+background = "#A6ADC8"
+foreground = "#1E1E2E"
+
+[colors.selection]
+background = "#e5c07b"
+text = "#1E1E2E"
+
+[debug]
+log_level = "OFF"
+persistent_logging = false
+render_timer = false
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 16.0
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[font.bold_italic]
+family = "JetBrainsMono Nerd Font"
+style = "Bold Italic"
+
+[font.glyph_offset]
+x = 0
+y = 0
+
+[font.italic]
+family = "JetBrainsMono Nerd Font"
+style = "Italic"
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[font.offset]
+x = 0
+y = 0
+
+[[keyboard.bindings]]
+action = "Paste"
+key = "V"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "Copy"
+key = "C"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "PasteSelection"
+key = "Insert"
+mods = "Shift"
+
+[[keyboard.bindings]]
+action = "ResetFontSize"
+key = "Key0"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "IncreaseFontSize"
+key = "Equals"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "IncreaseFontSize"
+key = "Plus"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "DecreaseFontSize"
+key = "Minus"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "ClearLogNotice"
+key = "L"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "ScrollPageUp"
+key = "K"
+mode = "~Alt"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "ScrollPageDown"
+key = "J"
+mode = "~Alt"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "ScrollToTop"
+key = "U"
+mode = "~Alt"
+mods = "Control|Shift"
+
+[[keyboard.bindings]]
+action = "ScrollToBottom"
+key = "D"
+mode = "~Alt"
+mods = "Control|Shift"
+
+[mouse]
+hide_when_typing = true
+
+[[mouse.bindings]]
+action = "Paste"
+mouse = "Middle"
+
+[[mouse.bindings]]
+action = "Copy"
+mouse = "Left"
+
+[scrolling]
+history = 8000
+
+[selection]
+save_to_clipboard = false
+semantic_escape_chars = ",│`|:\"' ()[]{}<>"
+
+[shell]
+program = "/bin/zsh"
+
+[window]
+dynamic_padding = true
+opacity = 0.95
+title = "Alacritty"
+
+[window.class]
+general = "Alacritty"
+instance = "Alacritty"
+
+[window.dimensions]
+columns = 25
+lines = 75
+
+[window.padding]
+x = 15
+y = 15

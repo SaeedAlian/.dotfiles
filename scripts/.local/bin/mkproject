@@ -1,0 +1,95 @@
+#!/usr/bin/sh
+
+read -e -p "Enter the project name: " -i "" project_name
+cd $HOME/projects
+
+if [ -d $project_name ]; then
+  echo "Another directory with this name already exists!"
+  exit 0
+fi
+
+question="What is the project type ??"
+options=("react" "react-ts" "nextjs" "rust-bin" "c" "cpp" "python" "empty" "cancel")
+
+select project_type in "${options[@]}"
+do
+  case $project_type in
+
+  "react")
+    yarn create vite $project_name --template react
+    break
+    ;;
+
+  "react-ts")
+    yarn create vite $project_name --template react-ts
+    break
+    ;;
+
+  "nextjs")
+    npx create-next-app@latest $project_name
+    break
+    ;;
+
+  "rust-bin")
+    cargo init $project_name --bin
+    break
+    ;;
+
+  "c")
+    mkdir $project_name
+    cd $project_name
+    touch main.c
+    touch .gitignore
+    git init
+    break
+    ;;
+
+  "cpp")
+    mkdir $project_name
+    cd $project_name
+    touch main.cpp
+    touch .gitignore
+    git init
+    break
+    ;;
+
+  "python")
+    mkdir $project_name
+    cd $project_name
+    touch main.py
+    touch .gitignore
+    echo ".venv\n/**/**/__pycache__" >.gitignore
+    python3 -m venv .venv
+    git init
+    break
+    ;;
+
+  "empty")
+    mkdir $project_name
+    cd $project_name
+    touch .gitignore
+    git init
+    break
+    ;;
+
+  "cancel")
+    break
+    ;;
+
+  *)
+    echo "Invalid option!"
+    ;;
+  esac
+done
+
+cd $HOME
+
+if ! tmux has-session -t="$project_name" 2>/dev/null; then
+	tmux new-session -ds "$project_name" -c "$HOME/projects/$project_name"
+fi
+
+if [ -z "$TMUX" ]; then
+	tmux attach -t "$project_name"
+else
+	tmux switch-client -t "$project_name"
+fi

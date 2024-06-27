@@ -1,0 +1,202 @@
+#!/bin/sh
+
+WALLPAPERS_DIR="$HOME/pictures/wallpapers/walls"
+LOCKSCREENS_DIR="$HOME/pictures/wallpapers/lockscreens"
+I3CONFIG_PATH="$XDG_CONFIG_HOME/i3"
+
+# converts an image to jpg and moves it into WALLPAPERS directory
+add_wall_image() {
+	image_path=$1
+	new_image_name=$2
+
+	if [ ! -f "$image_path" ]; then
+		echo "Error: File doesn't exists."
+		exit 1
+	fi
+
+	extension=${image_path##*.}
+	mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+
+	if [ "$mimetype" != "image" ]; then
+		echo "Error: Selected file is not an image."
+		exit 1
+	fi
+
+	if [ "$extension" = "jpg" ]; then
+		echo "Copying image into wallpapers directory..."
+		cp "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg"
+		echo "Wallpaper image is moved into wallpapers directory successfully."
+	else
+		echo "File is not jpg, converting to jpg..."
+		ffmpeg -i "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg" -loglevel error
+		echo "Wallpaper image converted into jpg, and moved into wallpapers directory successfully."
+	fi
+}
+
+# selects an image inside WALLPAPERS directory and creates a lockscreen image based on it
+create_lockscreen_image() {
+	image_name=$1
+	silent_flag=$2
+	image_path=$WALLPAPERS_DIR/$image_name
+
+	if [ ! -f "$image_path" ]; then
+		echo "Error: Wallpaper with name: $image_name doesn't exists inside wallpapers directory."
+		exit 1
+	fi
+
+	extension=${image_path##*.}
+	mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+
+	if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
+		echo "Error: Selected file $image_name is not an image or is not jpg."
+		exit 1
+	fi
+
+	image_basename=${image_name%.*}
+
+	lockscreen_path=$LOCKSCREENS_DIR/$image_basename.png
+
+	if [ -f "$lockscreen_path" ]; then
+		[ "$silent_flag" -eq 0 ] && echo "Lockscreen of image $image_name already exists."
+	else
+		[ "$silent_flag" -eq 0 ] && echo "Creating lockscreen image..."
+		ffmpeg -i "$image_path" -vf "scale=1920:1080, boxblur=15" "$lockscreen_path" -loglevel error
+		[ "$silent_flag" -eq 0 ] && echo "Lockscreen image of $image_name has been created successfully."
+	fi
+}
+
+# creates lockscreen image with all the images inside the WALLPAPERS directory
+# (if there is not a lockscreen image exists)
+set_all_lockscreens() {
+	echo "Creating lockscreen image for all wallpapers..."
+
+	for file in "$WALLPAPERS_DIR"/*; do
+
+		if [ -f "$file" ]; then
+			file_name=${file##*/}
+			create_lockscreen_image "$file_name" 1
+		fi
+	done
+
+	echo "Lockscreen images have been created successfully."
+}
+
+# sets the i3 background variable name
+set_i3_background() {
+	image_name=$1
+	image_path=$WALLPAPERS_DIR/$image_name.jpg
+
+	if [ ! -f "$image_path" ]; then
+		echo "Error: Wallpaper with name: $image_name.jpg doesn't exists inside wallpapers directory."
+		exit 1
+	fi
+
+	extension=${image_path##*.}
+	mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+
+	if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
+		echo "Error: Selected file $image_name is not an image or is not jpg."
+		exit 1
+	fi
+
+	i3_config_file_path=$I3CONFIG_PATH/config
+
+	grep bgname "$i3_config_file_path" | sed -i "/set \$bgname/s/\"[^\"]*\"/\"$image_name\"/" "$i3_config_file_path"
+
+	echo "I3 config updated."
+	echo "Please restart your i3 to change the wallpaper."
+}
+
+first_arg=$1
+
+case $first_arg in
+"--add-wall" | "-a")
+	file_name=$2
+	file_path=$PWD/$file_name
+	printf "Enter wallpaper name: "
+	read -r wall_name
+
+	add_wall_image "$file_path" "$wall_name"
+	create_lockscreen_image "$wall_name.jpg" 0
+
+	printf "You want to set the wallpaper? [y/n] "
+	read -r ans
+
+	if [ "$ans" = "y" ]; then
+		set_i3_background "$wall_name"
+	else
+		echo "Wallpaper has been added, now you can set it by running: "
+		echo "wallpaper --set-wall $wall_name"
+	fi
+
+	exit 0
+	;;
+"--create-lockscreen" | "-cl")
+	file_name=$2
+
+	create_lockscreen_image "$file_name" 0
+	exit 0
+	;;
+"--set-lockscreens" | "-sl")
+	printf "Are you sure that you want to set all the lockscreen images? [y/n] "
+	read -r ans
+
+	if [ "$ans" = "y" ]; then
+		set_all_lockscreens
+	fi
+
+	exit 1
+	;;
+"--set-wall" | "-sw")
+	wall_name=$2
+
+	set_i3_background "$wall_name"
+
+	exit 0
+	;;
+esac
+
+echo "Error: Invalid argument"
+echo "
+Valid commands:
+  1.
+    --add-wall /path/to/image
+    -a /path/to/image
+  
+    For adding an image to wallpapers directory,
+    and create a lockscreen image from it.
+  2.
+    --create-lockscreen imagename
+    -cl imagename
+
+    For creating a lockscreen image from an image
+    inside your wallpapers directory.
+
+    Note that the image must be inside your
+    lockscreen directory.
+
+    For adding an image outside
+    the wallpapers dir, simply use --add-wall
+
+  3.
+    --set-lockscreens
+    -sl
+
+    This command will create lockscreen images
+    from all of your wallpapers.
+
+    Use this command to reset your
+    lockscreen images directory.
+
+  4.
+    --set-wall imagename
+    -sw imagename
+
+    For setting a wallpaper for your i3
+
+    Note that the image must be inside your
+    lockscreen directory.
+
+    For adding an image outside
+    the wallpapers dir, simply use --add-wall
+"

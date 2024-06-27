@@ -1,0 +1,7 @@
+#!/bin/bash
+
+PERCENT=`acpi -b | grep Discharging | sed 's/.*Discharging, \([0-9]*\).*/\1/'`
+
+if [[ -n $PERCENT && $PERCENT < 30 ]]; then
+    DISPLAY=:0.0 /usr/bin/notify-send -u critical "Low Battery!!"
+fi

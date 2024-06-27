@@ -1,0 +1,9 @@
+[Default Applications]
+application/octet-stream=org.gnome.gedit.desktop
+audio/mp3=org.clementine_player.Clementine.desktop
+audio/mpeg=org.clementine_player.Clementine.desktop
+audio/flac=org.clementine_player.Clementine.desktop
+audio/ogg=org.clementine_player.Clementine.desktop
+
+[Added Associations]
+application/octet-stream=org.gnome.gedit.desktop;

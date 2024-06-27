@@ -1,0 +1,23 @@
+#!/bin/sh
+
+DIRECTORIES="$HOME/projects"
+
+if [ $# -eq 1 ]; then
+	selected_dir=$1
+else
+	selected_dir=$(find $DIRECTORIES -mindepth 1 -maxdepth 1 -type d | fzf -m)
+fi
+
+selected_dir_basename=$(basename "$selected_dir")
+
+echo $selected_dir
+
+if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
+	tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
+fi
+
+if [ -z "$TMUX" ]; then
+	tmux attach -t "$selected_dir_basename"
+else
+	tmux switch-client -t "$selected_dir_basename"
+fi

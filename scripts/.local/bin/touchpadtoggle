@@ -1,0 +1,10 @@
+#!/bin/bash
+
+TOUCHPAD_ID=$(xinput list | grep -i Touchpad | sed 's/.*id=\(.*\) *\[.*/\1/')
+TOUCHPAD_ENABLED=$(xinput list-props $TOUCHPAD_ID | grep -i "Device Enabled" | sed 's/.*\(.\)$/\1/')
+
+if [ $TOUCHPAD_ENABLED -eq 1 ]; then
+	xinput disable $TOUCHPAD_ID
+else
+	xinput enable $TOUCHPAD_ID
+fi
