@@ -10,7 +10,9 @@ fi
 
 selected_dir_basename=$(basename "$selected_dir")
 
-echo $selected_dir
+if [ -n $selected_dir ]; then
+	exit 0
+fi
 
 if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
 	tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
