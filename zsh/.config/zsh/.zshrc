@@ -66,6 +66,7 @@ alias picomc="$EDITOR $XDG_CONFIG_HOME/picom"
 alias pbarc="$EDITOR $XDG_CONFIG_HOME/polybar"
 alias rofic="$EDITOR $XDG_CONFIG_HOME/rofi"
 alias scriptedit="$EDITOR $HOME/.local/bin"
+alias dot="$EDITOR $HOME/.dotfiles"
 
 alias v="nvim"
 alias la="ls -a"
@@ -77,7 +78,8 @@ alias upmusic="update_music"
 alias mkpj="mkproject"
 alias cleartmux="tmux_clear_saves"
 alias cleartmuxlast="tmux_clear_last_save"
-alias zh="cat $HOME/.zsh_history | grep"
+alias zh="shell_history_search"
+alias zhm="shell_history_search max"
 
 # alias for running nekoray as sudo
 alias rv="sudo ~/vpn/nekoray/launcher"
