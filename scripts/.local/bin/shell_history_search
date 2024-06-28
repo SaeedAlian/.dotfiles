@@ -4,7 +4,7 @@ HISTORY_FILE="$HOME/.zsh_history"
 
 count=$1
 
-if [ $count == "max" ]; then
+if [[ $count == "max" ]]; then
 	selection=$(cat $HISTORY_FILE | fzf -m)
 elif [[ $count =~ ^[0-9]+$ ]]; then
 	selection=$(tail -$count $HISTORY_FILE | fzf -m)
