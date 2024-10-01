@@ -5,11 +5,11 @@ HISTORY_FILE="$HOME/.zsh_history"
 count=$1
 
 if [[ $count == "max" ]]; then
-	selection=$(cat $HISTORY_FILE | fzf -m)
+	selection=$(cat $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
 elif [[ $count =~ ^[0-9]+$ ]]; then
-	selection=$(tail -$count $HISTORY_FILE | fzf -m)
+	selection=$(tail -$count $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
 else
-	selection=$(tail -100 $HISTORY_FILE | fzf -m)
+	selection=$(tail -100 $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
 fi
 
-echo $selection | sed "s/.*;//g" | xclip -selection clipboard
+echo -n $selection | sed "s/\n//" | xclip -selection clipboard
