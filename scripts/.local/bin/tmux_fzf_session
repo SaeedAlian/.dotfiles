@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIRECTORIES="$HOME/projects"
+DIRECTORIES="$HOME/projects $HOME/p-projects"
 
 if [ $# -eq 1 ]; then
 	selected_dir=$1
@@ -10,16 +10,16 @@ fi
 
 selected_dir_basename=$(basename "$selected_dir")
 
-if [ -n $selected_dir ]; then
-	exit 0
-fi
+if [ -n "$selected_dir" ]; then
+	if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
+		tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
+	fi
 
-if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
-	tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
-fi
-
-if [ -z "$TMUX" ]; then
-	tmux attach -t "$selected_dir_basename"
+	if [ -z "$TMUX" ]; then
+		tmux attach -t "$selected_dir_basename"
+	else
+		tmux switch-client -t "$selected_dir_basename"
+	fi
 else
-	tmux switch-client -t "$selected_dir_basename"
+	exit 0
 fi
