@@ -27,6 +27,7 @@ local mason_config = function()
 			"bashls",
 			"clangd",
 			"rust_analyzer",
+			"gopls",
 		},
 		automatic_installation = true,
 	})
@@ -40,6 +41,9 @@ local mason_config = function()
 			"clang-format",
 			"blackd-client",
 			"black",
+			"golines",
+			"gofumpt",
+			"goimports-reviser",
 		},
 		automatic_installation = true,
 	})
@@ -56,6 +60,9 @@ local none_ls_config = function()
 			null_ls.builtins.formatting.shfmt,
 			null_ls.builtins.formatting.isort,
 			null_ls.builtins.formatting.black,
+			null_ls.builtins.formatting.gofumpt,
+			null_ls.builtins.formatting.goimports_reviser,
+			null_ls.builtins.formatting.golines,
 		},
 	})
 
@@ -79,6 +86,7 @@ end
 
 local lsp_config = function()
 	local lspconfig = require("lspconfig")
+	local util = require("lspconfig/util")
 	local cmp_nvim_lsp = require("cmp_nvim_lsp")
 	local capabilities = cmp_nvim_lsp.default_capabilities()
 
@@ -149,6 +157,23 @@ local lsp_config = function()
 			Lua = {
 				diagnostics = {
 					globals = { "vim" },
+				},
+			},
+		},
+	})
+
+	lspconfig["gopls"].setup({
+		capabilities = capabilities,
+		on_attach = lsp_on_attach,
+		cmd = { "gopls" },
+		filetypes = { "go", "gomod", "gowork", "gotmpl" },
+		root_dir = util.root_pattern("go.work", "go.mod", ".git"),
+		settings = {
+			gopls = {
+				completeUnimported = true,
+				usePlaceholders = true,
+				analyses = {
+					unusedparams = true,
 				},
 			},
 		},
