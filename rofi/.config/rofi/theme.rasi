@@ -1,6 +1,6 @@
 * {
-  bg: #1a1a20ff;
-  bg-alt: #373b41aa;
+  bg: #0a0a10ff;
+  bg-alt: #2c2c3fff;
   bg-selected: #31324466;
 
   fg: #ede6f4;
@@ -13,8 +13,10 @@
 }
 
 window {
-  width: 35%;
+  width: 600px;
+  height: 600px;
   background-color: @bg;
+  border-radius: 4px;
 }
 
 element {
@@ -35,7 +37,7 @@ element-text {
 }
 
 element-icon {
-  size: 30;
+  size: 24;
   padding: 0 10 0 0;
   background-color: transparent;
 }
