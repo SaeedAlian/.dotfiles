@@ -8,7 +8,7 @@ g.netrw_banner = 0
 g.netrw_winsize = 25
 
 -- removes .. and . in the top of netrw buffer
-g.netrw_list_hide = "^\\.\\.\\?/$,\\(^\\|\\s\\s\\)\\zs\\.\\S\\+"
+g.netrw_list_hide = "^\\.\\.\\/$"
 
 function toggle_netrw()
 	if vim.bo.filetype == "netrw" then
@@ -35,6 +35,8 @@ vim.api.nvim_create_autocmd("FileType", {
 		vim.api.nvim_command("setlocal buftype=nofile")
 		vim.api.nvim_command("setlocal bufhidden=wipe")
 		vim.keymap.set("n", "<esc>", "<CMD>ToggleNetRW<CR>", { noremap = true, silent = true, buffer = true })
+		vim.keymap.set("n", "s", "<Nop>", { noremap = true, silent = true, buffer = true })
+		vim.keymap.set("n", "r", "<Nop>", { noremap = true, silent = true, buffer = true })
 		vim.keymap.set(
 			"n",
 			"P",
