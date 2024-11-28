@@ -10,6 +10,7 @@ Read further for more instructions
 - [Yazi](https://yazi-rs.github.io/docs/installation)
 - [yad-calendar](https://yad-guide.ingk.se/calendar/yad-calendar.html)
 - [Neovim](https://neovim.io/)
+- [RedShift](https://github.com/jonls/redshift)
 - [Tmux](https://github.com/tmux/tmux/wiki/Installing)
 - [Polybar](https://github.com/polybar/polybar)
 - [Picom](https://github.com/yshui/picom)
