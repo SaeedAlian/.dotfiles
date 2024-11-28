@@ -1,5 +1,7 @@
 #!/usr/bin/sh
 
+GITHUB_USERNAME="SaeedAlian"
+
 read -e -p "Enter the project name: " -i "" project_name
 cd $HOME/projects
 
@@ -9,7 +11,7 @@ if [ -d $project_name ]; then
 fi
 
 question="What is the project type ??"
-options=("react" "react-ts" "nextjs" "rust-bin" "c" "cpp" "python" "empty" "cancel")
+options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
 
 select project_type in "${options[@]}"
 do
@@ -22,6 +24,16 @@ do
 
   "react-ts")
     yarn create vite $project_name --template react-ts
+    break
+    ;;
+
+  "go")
+    mkdir $project_name
+    cd $project_name
+    go mod init github.com/$GITHUB_USERNAME/$project_name
+    touch .gitignore
+    touch main.go
+    git init
     break
     ;;
 
