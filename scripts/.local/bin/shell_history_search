@@ -4,12 +4,37 @@ HISTORY_FILE="$HOME/.zsh_history"
 
 count=$1
 
+hist=""
+
 if [[ $count == "max" ]]; then
-	selection=$(cat $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
-elif [[ $count =~ ^[0-9]+$ ]]; then
-	selection=$(tail -$count $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
+	hist="$(cat $HISTORY_FILE | sed -z 's/\n//g' | sed -z 's/: [0-9]*:[0-9];/\n/g' | awk '
+    {
+      last[$0] = $0;
+    }
+    END {
+    for (line in last) {
+      print last[line];
+    }
+    }
+  ')"
 else
-	selection=$(tail -100 $HISTORY_FILE | sed 's/^[^;]*;//' | fzf -m)
+	c=1000
+	if [[ $count =~ ^[0-9]+$ ]]; then
+		c=$count
+	fi
+
+	hist="$(tail -$c $HISTORY_FILE | sed -z 's/\n//g' | sed -z 's/: [0-9]*:[0-9];/\n/g' | awk '
+    {
+      last[$0] = $0;
+    }
+    END {
+    for (line in last) {
+      print last[line];
+    }
+    }
+  ')"
 fi
 
-echo -n $selection | sed "s/\n//" | xclip -selection clipboard
+selection=$(echo "$hist" | fzf -x +s -e --tac)
+
+echo -n $selection | sed -z 's/\\/\n/g' | sed -z 's/\n\n/\\\n/g' | xclip -selection clipboard
