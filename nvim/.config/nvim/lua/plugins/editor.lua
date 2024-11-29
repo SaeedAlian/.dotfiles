@@ -118,15 +118,15 @@ local telescope_config = function()
 		},
 		pickers = {
 			find_files = {
-				previewer = true,
+				previewer = false,
 				hidden = true,
 			},
 			live_grep = {
-				previewer = true,
+				previewer = false,
 				hidden = true,
 			},
 			buffers = {
-				previewer = true,
+				previewer = false,
 				hidden = true,
 			},
 		},
