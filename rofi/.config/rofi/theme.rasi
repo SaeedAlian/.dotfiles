@@ -5,22 +5,14 @@
 
   fg: #ede6f4;
   fg-alt: #9fa4bc;
-  
-  border: 0;
-  margin: 0;
-  padding: 0;
-  spacing: 0;
 }
 
 window {
-  width: 600px;
-  height: 600px;
   background-color: @bg;
-  border-radius: 4px;
+  padding: 15px;
 }
 
 element {
-  padding: 8 12;
   background-color: transparent;
   text-color: @fg-alt;
 }
@@ -33,18 +25,15 @@ element selected {
 element-text {
   background-color: transparent;
   text-color: inherit;
-  vertical-align: 0.5;
 }
 
 element-icon {
-  size: 24;
-  padding: 0 10 0 0;
+  size: 18;
   background-color: transparent;
 }
 
 entry {
-  padding: 12;
-  background-color: @bg-alt;
+  background-color: @bg;
   text-color: @fg;
 }
 
@@ -55,18 +44,13 @@ inputbar {
 
 listview {
   background-color: @bg;
-  columns: 1;
-  lines: 12;
 }
 
 mainbox {
-  children: [inputbar, listview];
   background-color: @bg;
 }
 
 prompt {
-  enabled: true;
-  padding: 12 0 0 12;
-  background-color: @bg-alt;
+  background-color: @bg;
   text-color: @fg;
 }

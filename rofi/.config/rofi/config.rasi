@@ -1,9 +1,8 @@
 configuration {
   display-drun: "Apps: ";
-  display-window: "Windows: ";
   drun-display-format: "{icon} {name}";
-  font: "JetBrainsMono Nerd Font Medium 14";
-  modi: "window,run,drun";
+  font: "JetBrainsMono Nerd Font Medium 15";
+  modi: "drun";
   
   show-icons: true;
   icon-theme: "Papirus";
@@ -13,15 +12,6 @@ configuration {
   kb-remove-to-eol: "Control+Shift+k";
   kb-accept-custom: "Shift+Return";
   kb-accept-alt: "Return";
-
-  filebrowser {
-    directory: "/home/entropy";
-    sorting-method: "name";
-    directories-first: true;
-    show-hidden: true;
-    cancel-returns-1: true;
-    command: "xdg-open";
-   }
 }
 
 @theme "theme.rasi"
