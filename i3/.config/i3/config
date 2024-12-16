@@ -20,7 +20,7 @@ set $mod Mod4
 set $wallsdir "$HOME/pictures/wallpapers"
 
 # set background image name
-set $bgname "space_1"
+set $bgname "black_1"
 
 # set background image mode 
 set $bgmode "--bg-fill"
