@@ -37,10 +37,11 @@ Usage: dnote [options] [filename]
 
 
 Options:
-  -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -n, -c, or -d
-  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c or -n
+  -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n
+  -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -p, -n, -c
+  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c
   -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f
-  -n, --name <dirname>  Specify the directory name for the new note, the default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f or -c
+  -n, --name <dirname>  Specify the directory name for the new note, the default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f, -p or -c
 
 
 Arguments:
@@ -377,6 +378,7 @@ fi
 dirname=$(date +%Y-%m-%d-%A)
 filename=""
 
+prompt_flag=0
 no_file_flag=0
 dirname_flag=0
 fzf_flag=0
@@ -387,6 +389,9 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     -f|--fzf)
       fzf_flag=1
+      ;;
+    -p|--prompt)
+      prompt_flag=1
       ;;
     -d|--delete)
       delete_flag=1
@@ -413,6 +418,16 @@ while [[ $# -gt 0 ]]; do
   shift 1
 done
 
+if [ $prompt_flag == 1 ] && [ $fzf_flag == 1 ]; then
+  print_err "Error: Invalid option, you cannot use [prompt flag] with [fzf flag]"
+  exit 1
+fi
+
+if [ $prompt_flag == 1 ] && [ $dirname_flag == 1 ]; then
+  print_err "Error: Invalid option, you cannot use [prompt flag] with [directory name flag]"
+  exit 1
+fi
+
 if [ $fzf_flag == 1 ] && [ $current_window_flag == 1 ]; then
   print_err "Error: Invalid option, you cannot use [fzf flag] with [current window flag]"
   exit 1
@@ -433,8 +448,12 @@ if [ $current_window_flag == 1 ] && [ $delete_flag == 1 ]; then
   exit 1
 fi
 
-if [ $fzf_flag == 0 ] && [ -z $filename ]; then
+if [ $prompt_flag == 0 ] && [ $fzf_flag == 0 ] && [ -z $filename ]; then
   no_file_flag=1
+fi
+
+if [ $current_window_flag == 1 ]; then
+  dirname=$(pwd | sed 's/.*\///g')
 fi
 
 if [ $fzf_flag == 1 ]; then
@@ -453,6 +472,21 @@ if [ $fzf_flag == 1 ]; then
     fi
     filename=$(fzf_notes "$dirname")
   done
+fi
+
+if [ $prompt_flag == 1 ]; then
+  d=""
+  f=""
+
+  if [ $current_window_flag != 1 ]; then
+    read -e -p "Enter Directory Name: (if empty it will use the current date) " -i "" d
+    if [ ! -z $d ]; then
+      dirname=$d
+    fi
+  fi
+
+  read -e -p "Enter Filename: " -i "" f
+  filename="$f.md"
 fi
 
 if [ $delete_flag == 1 ]; then
