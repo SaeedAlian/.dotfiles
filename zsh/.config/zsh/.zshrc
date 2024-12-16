@@ -65,11 +65,19 @@ function y() {
 
 #### User configuration ####
 
+# set the vi mode in shell
+set -o vi
+
 # run tmux session fuzzy finder
 bindkey -s ^f "tmux_fzf_session\n"
 
 # run history fuzzy finder
 bindkey -s ^h "shell_history_search 3000\n"
+
+# run dnote fzf
+bindkey -s ^n "dnote -f\n"
+# run dnote prompt
+bindkey -s ^p "dnote -p\n"
 
 ### aliases ###
 
@@ -86,23 +94,16 @@ alias pbarc="$EDITOR $XDG_CONFIG_HOME/polybar --cmd 'cd $XDG_CONFIG_HOME/polybar
 alias dot="$EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
 
 alias v="nvim"
-alias la="ls -a"
-alias lla="ll -a"
-alias fo="file_organizer"
-alias btop="sudo btop"
-alias htop="sudo htop"
 alias wlp="wallpaper"
 alias orgtel="file_organizer $HOME/downloads/telegram"
 alias orgdown="file_organizer $HOME/downloads"
 alias upmu="update_music"
 alias mkpj="mkproject"
-alias clrtm="tmux_clear_saves"
-alias clrtmall="tmux_cleanup"
-alias clrtmlst="tmux_clear_last_save"
 alias zh="shell_history_search"
 alias zhm="shell_history_search max"
-alias node='unalias node ; unalias npm ; nvm use default ; node $@'
-alias npm='unalias node ; unalias npm ; nvm use default ; npm $@'
+alias node='unalias yarn ; unalias node ; unalias npm ; nvm use default ; node $@'
+alias npm='unalias yarn ; unalias node ; unalias npm ; nvm use default ; npm $@'
+alias yarn='unalias yarn ; unalias node ; unalias npm ; nvm use default ; yarn $@'
 
 # alias for running hiddify as sudo
 alias rh="sudo bash -c 'hiddify &'"
