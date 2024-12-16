@@ -1,8 +1,0 @@
-#!/bin/sh
-
-RESURRECT_DIR=$HOME/.local/share/tmux/resurrect
-
-rm -rf "$RESURRECT_DIR/last"
-echo "Done"
-
-exit 0

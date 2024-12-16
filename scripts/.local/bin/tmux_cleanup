@@ -1,4 +1,0 @@
-#!/usr/bin/sh
-
-tmux kill-server
-tmux_clear_saves 10000

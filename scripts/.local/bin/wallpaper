@@ -5,13 +5,75 @@ LOCKSCREENS_DIR="$HOME/pictures/wallpapers/lockscreens"
 I3CONFIG_PATH="$XDG_CONFIG_HOME/i3"
 LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin"
 
+function print_help() {
+  help="wallpaper: A command-line tool for managing wallpapers and lockscreens in i3 using feh.
+
+Usage: wallpaper [command] [arguments]
+
+Commands:
+
+ --add-wall [-a] /path/to/image         Add an image to the wallpapers directory and create a corresponding lockscreen image. The image will be copied into the wallpapers directory. Prompts whether to set it as the current wallpaper.
+
+ --create-lockscreen [-cl] <imagename>  Create a lockscreen image from an existing image in the wallpapers directory. The image name should match the name of an image inside your wallpapers directory
+
+ --set-lockscreens [-sl]                Create lockscreen images from all images currently in your wallpapers directory. Use this command to refresh lockscreens or reset the lockscreen images directory.
+
+ --set-wall [-sw]                       imagename Set the specified image as your i3 wallpaper. The image must exist in the wallpapers directory.
+
+ --set-mode [-sm] <mode>                Set the scaling mode for your wallpaper. Options are: "tile", "center", "max", "fill".
+
+
+Arguments:
+
+ imagename   The name of the image file (without extension for --create-lockscreen and --set-wall; the extension is added automatically if missing for --add-wall).
+
+
+Examples:
+
+ Add an image and set it as wallpaper:
+  wallpaper --add-wall my_image.jpg
+
+ Create a lockscreen image:
+  wallpaper --create-lockscreen my_image
+
+ Set all lockscreen images:
+  wallpaper --set-lockscreens
+
+ Set a specific wallpaper:
+  wallpaper --set-wall my_image
+
+ Set wallpaper scaling mode to "fill":
+  wallpaper --set-mode fill
+
+
+Notes:
+• The wallpapers directory is assumed to be in the current working directory unless specified otherwise. The lockscreen images are created in a subdirectory.
+• Make sure you have the necessary dependencies (i3, feh, etc.) installed. Error messages are shown if there is an issue with the dependencies
+• Make sure to set the lockscreen script path in the wallpaper script file
+
+"
+  
+  if type "less" > /dev/null; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+function print_err() {
+  err=$1
+  echo "$1" >&2
+  echo "Enter [wallpaper --help] for help"
+  exit 1
+}
+
 # converts an image to jpg and moves it into WALLPAPERS directory
 add_wall_image() {
   image_path=$1
   new_image_name=$2
 
   if [ ! -f "$image_path" ]; then
-    echo "Error: File doesn't exists."
+    print_err "Error: File doesn't exists."
     exit 1
   fi
 
@@ -19,7 +81,7 @@ add_wall_image() {
   mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
 
   if [ "$mimetype" != "image" ]; then
-    echo "Error: Selected file is not an image."
+    print_err "Error: Selected file is not an image."
     exit 1
   fi
 
@@ -41,7 +103,7 @@ create_lockscreen_image() {
   image_path=$WALLPAPERS_DIR/$image_name
 
   if [ ! -f "$image_path" ]; then
-    echo "Error: Wallpaper with name: $image_name doesn't exists inside wallpapers directory."
+    print_err "Error: Wallpaper with name: $image_name doesn't exists inside wallpapers directory."
     exit 1
   fi
 
@@ -49,7 +111,7 @@ create_lockscreen_image() {
   mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
-    echo "Error: Selected file $image_name is not an image or is not jpg."
+    print_err "Error: Selected file $image_name is not an image or is not jpg."
     exit 1
   fi
 
@@ -88,7 +150,7 @@ set_i3_background() {
   image_path=$WALLPAPERS_DIR/$image_name.jpg
 
   if [ ! -f "$image_path" ]; then
-    echo "Error: Wallpaper with name: $image_name.jpg doesn't exists inside wallpapers directory."
+    print_err "Error: Wallpaper with name: $image_name.jpg doesn't exists inside wallpapers directory."
     exit 1
   fi
 
@@ -96,7 +158,7 @@ set_i3_background() {
   mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
-    echo "Error: Selected file $image_name is not an image or is not jpg."
+    print_err "Error: Selected file $image_name is not an image or is not jpg."
     exit 1
   fi
 
@@ -120,7 +182,7 @@ set_i3_background_mode() {
   image_bg_mode=$1
 
   if [ "$image_bg_mode" != "center" ] && [ $image_bg_mode != "max" ] && [ $image_bg_mode != "tile" ] && [ $image_bg_mode != "fill" ]; then
-    echo "Error: Wrong option"
+    print_err "Error: Wrong option"
     exit 1
   fi
 
@@ -139,6 +201,10 @@ set_i3_background_mode() {
 first_arg=$1
 
 case $first_arg in
+"--help" | "-h")
+  print_help
+  exit 0
+  ;;
 "--add-wall" | "-a")
   file_name=$2
   file_path=$PWD/$file_name
@@ -192,58 +258,4 @@ case $first_arg in
   ;;
 esac
 
-echo "Error: Invalid argument"
-echo "
-Valid commands:
-  1.
-    --add-wall /path/to/image
-    -a /path/to/image
-  
-    For adding an image to wallpapers directory,
-    and create a lockscreen image from it.
-  2.
-    --create-lockscreen imagename
-    -cl imagename
-
-    For creating a lockscreen image from an image
-    inside your wallpapers directory.
-
-    Note that the image must be inside your
-    lockscreen directory.
-
-    For adding an image outside
-    the wallpapers dir, simply use --add-wall
-
-  3.
-    --set-lockscreens
-    -sl
-
-    This command will create lockscreen images
-    from all of your wallpapers.
-
-    Use this command to reset your
-    lockscreen images directory.
-
-  4.
-    --set-wall imagename
-    -sw imagename
-
-    For setting a wallpaper for your i3
-
-    Note that the image must be inside your
-    lockscreen directory.
-
-    For adding an image outside
-    the wallpapers dir, simply use --add-wall
-
-  5.
-    --set-mode mode
-    -sm mode 
-
-    For setting a scaling mode for wallpaper.
-    Options are:
-      tile
-      center
-      max
-      fill
-"
+print_err "Error: Invalid argument"

@@ -38,13 +38,18 @@ Usage: dnote [options] [filename]
 
 Options:
   -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n
+
   -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -p, -n, -c
+
   -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c
+
   -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f
+
   -n, --name <dirname>  Specify the directory name for the new note, the default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f, -p or -c
 
 
 Arguments:
+
   filename              The name of the note file (default extension is .md)
 
 
@@ -70,8 +75,9 @@ Examples:
   dnote -c my_note
 
 
- Note(1): This script uses fzf (fuzzy finder) and tmux. Make sure these are installed before using the script.
- Note(2): Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim)
+Notes:
+ • This script uses fzf (fuzzy finder) and tmux. Make sure these are installed before using the script.
+ • Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim)
 
 "
   

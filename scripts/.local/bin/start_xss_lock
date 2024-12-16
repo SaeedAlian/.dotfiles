@@ -1,6 +1,6 @@
 #!/bin/sh
 
 LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
-BGNAME="space_1"
+BGNAME="black_1"
 
 xss-lock --transfer-sleep-lock -- i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"

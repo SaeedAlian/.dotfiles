@@ -1,9 +1,10 @@
 #!/usr/bin/sh
 
 GITHUB_USERNAME="SaeedAlian"
+PROJECTS_DIR=projects
 
 read -e -p "Enter the project name: " -i "" project_name
-cd $HOME/projects
+cd $HOME/$PROJECTS_DIR
 
 if [ -d $project_name ]; then
   echo "Another directory with this name already exists!"
@@ -33,6 +34,30 @@ do
     go mod init github.com/$GITHUB_USERNAME/$project_name
     touch .gitignore
     touch main.go
+    touch Makefile
+
+    echo "package main
+
+import (
+	\"fmt\"
+)
+
+func main() {
+  fmt.Println(\"Hello world\")
+}" > main.go
+
+    echo "build:
+	@go build -o bin/$project_name main.go
+
+test:
+	@go test -v ./...
+	
+run: build
+	@./bin/$project_name" > Makefile
+
+    echo ".env
+bin/" > .gitignore
+
     git init
     break
     ;;
@@ -50,8 +75,33 @@ do
   "c")
     mkdir $project_name
     cd $project_name
-    touch main.c
+    mkdir src
+    touch src/main.c
     touch .gitignore
+    touch Makefile
+
+    echo "#include <stdio.h>
+
+int main() {
+  printf(\"Hello world\");
+  return 0;
+}" > src/main.c
+
+    echo "build:
+	@g++ -o main.out src/main.c
+
+debug:
+	@g++ -g -o main.out src/main.c && gdb ./main.out
+
+run:
+	@./main.out
+
+valgrind: build
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
+" > Makefile
+
+    echo "main.out" > .gitignore
+
     git init
     break
     ;;
@@ -59,8 +109,33 @@ do
   "cpp")
     mkdir $project_name
     cd $project_name
-    touch main.cpp
+    mkdir src
+    touch src/main.cpp
     touch .gitignore
+    touch Makefile
+
+    echo "#include <iostream>
+
+int main() {
+  std::cout << \"Hello world\" << std::endl;
+  return 0;
+}" > src/main.cpp
+
+    echo "build:
+	@g++ -o main.out src/main.cpp
+
+debug:
+	@g++ -g -o main.out src/main.cpp && gdb ./main.out
+
+run:
+	@./main.out
+
+valgrind: build
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
+" > Makefile
+
+    echo "main.out" > .gitignore
+
     git init
     break
     ;;
@@ -70,7 +145,10 @@ do
     cd $project_name
     touch main.py
     touch .gitignore
-    echo ".venv\n/**/**/__pycache__" >.gitignore
+
+    echo ".venv
+/**/**/__pycache__" >.gitignore
+
     python3 -m venv .venv
     git init
     break
@@ -97,7 +175,7 @@ done
 cd $HOME
 
 if ! tmux has-session -t="$project_name" 2>/dev/null; then
-	tmux new-session -ds "$project_name" -c "$HOME/projects/$project_name"
+	tmux new-session -ds "$project_name" -c "$HOME/$PROJECTS_DIR/$project_name"
 fi
 
 if [ -z "$TMUX" ]; then
