@@ -81,21 +81,28 @@ Examples:
   fi
 }
 
+function print_err() {
+  err=$1
+  echo "$1" >&2
+  echo "Enter [dnote --help] for help"
+  exit 1
+}
+
 function check_filename() {
   filename="$1"
 
   if [[ -z "$filename" ]]; then
-    echo "Error: Filename cannot be empty" >&2
+    print_err "Error: Filename cannot be empty"
     exit 1
   fi
 
   if grep -q '[\\\/\:\*\?\"\<\>\|]' <<< "$filename"; then
-    echo "Error: Filename contains disallowed characters" >&2
+    print_err "Error: Filename contains disallowed characters"
     exit 1
   fi
 
   if [[ "$filename" =~ ^[-_.] ]]; then
-    echo "Error: Filename must not start with '.' or '-' or '_'" >&2
+    print_err "Error: Filename must not start with '.' or '-' or '_'"
     exit 1
   fi
 
@@ -103,12 +110,12 @@ function check_filename() {
   filename="${filename## }"
 
   if [[ "$filename" == *"$'\0'"* ]]; then
-      echo "Error: Filename contains null bytes" >&2
+      print_err "Error: Filename contains null bytes"
       exit 1
   fi
 
   if [[ ${#filename} -gt 255 ]]; then
-      echo "Error: Filename exceeds 255 characters" >&2
+      print_err "Error: Filename exceeds 255 characters"
       exit 1
   fi
 }
@@ -117,27 +124,27 @@ function check_dirname() {
   dirname="$1"
 
   if [ -z $dirname ]; then
-    echo "Error: Directory name is empty" >&2
+    print_err "Error: Directory name is empty"
     exit 1
   fi
 
   if grep -q '[\\\/\:\*\?\"\<\>\|\;]' <<< "$dirname"; then
-    echo "Error: Invalid directory name, directory name must not contain illegal characters" >&2
+    print_err "Error: Invalid directory name, directory name must not contain illegal characters"
     exit 1
   fi
 
   if [[ "$dirname" =~ ^[-_] ]]; then
-    echo "Error: Invalid directory name, directory name must not start with '-' or '_'" >&2
+    print_err "Error: Invalid directory name, directory name must not start with '-' or '_'"
     exit 1
   fi
 
   if [[ "$dirname" == "." ]]; then
-    echo "Error: Invalid directory name, directory name must not equal to '.'" >&2
+    print_err "Error: Invalid directory name, directory name must not equal to '.'"
     exit 1
   fi
 
   if [[ "$dirname" == ".." ]]; then
-    echo "Error: Invalid directory name, directory name must not equal to '..'" >&2
+    print_err "Error: Invalid directory name, directory name must not equal to '..'"
     exit 1
   fi
 
@@ -145,12 +152,12 @@ function check_dirname() {
   dirname="${dirname## }"
 
   if [[ "$dirname" == *"$'\0'"* ]]; then
-      echo "Error: Directory name contains null bytes" >&2
+      print_err "Error: Directory name contains null bytes"
       exit 1
   fi
 
   if [[ ${#dirname} -gt 255 ]]; then
-      echo "Error: Directory name exceeds 255 characters" >&2
+      print_err "Error: Directory name exceeds 255 characters"
       exit 1
   fi
 }
@@ -164,7 +171,7 @@ function fzf_notes() {
   dir=$1
 
   if ! [ -d "$NOTES_DIR/$dir" ]; then
-    echo "Error: directory doesn't exist" >&2
+    print_err "Error: directory doesn't exist"
     exit 1
   fi
 
@@ -197,7 +204,7 @@ function delete_note() {
   if [ -f $fullpath ]; then
     rm $fullpath
   else
-    echo "Error: file doesn't exist" >&2
+    print_err "Error: file doesn't exist"
     exit 1
   fi
 }
@@ -212,7 +219,7 @@ function attach_tmux() {
   no_filename=0
 
   if [ -z $dir ]; then
-    echo "Error: Directory must be specified" >&2
+    print_err "Error: Directory must be specified"
     exit 1
   fi
 
@@ -239,7 +246,7 @@ function attach_tmux() {
   if [[ $use_current_window =~ ^[0-9]+$ ]] && [ $use_current_window == 1 ]; then
     # check for tmux to be attached
     if [ -z "$TMUX" ]; then
-      echo "Error: Invalid --current option, you must be in a notes session" >&2
+      print_err "Error: Invalid --current option, you must be in a notes session"
       exit 1
     fi
 
@@ -247,7 +254,7 @@ function attach_tmux() {
 
     # and check for the current working directory to be a notes directory
     if [ "$NOTES_DIR/$dir" != "$wd" ]; then
-      echo "Error: Invalid --current option, you must be in a notes directory" >&2
+      print_err "Error: Invalid --current option, you must be in a notes directory"
       exit 1
     fi
 
@@ -255,7 +262,7 @@ function attach_tmux() {
 
     # also match the tmux session name with the current directory name
     if [ "$TMUX_SESSION_NAME-$wd_note_dirname" != "$session_name" ]; then
-      echo "Error: Invalid --current option, you must be in a notes session" >&2
+      print_err "Error: Invalid --current option, you must be in a notes session"
       exit 1
     fi
 
@@ -271,7 +278,7 @@ function attach_tmux() {
   windows_str=$(tmux list-windows -F '#W' -t "$session_name" 2>/dev/null)
 
   if [ $? != 0 ]; then
-    echo "Error: Cannot get the number of windows" >&2
+    print_err "Error: Cannot get the number of windows"
     exit 1
   fi
 
@@ -280,7 +287,7 @@ function attach_tmux() {
   windows_len=${#windows[@]}
   
   if [ $? != 0 ]; then
-    echo "Error: Cannot get the window names" >&2
+    print_err "Error: Cannot get the window names"
     exit 1
   fi
 
@@ -359,7 +366,7 @@ function attach_tmux() {
 # check for help option
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   if [[ $# -gt 1 ]]; then
-    echo "Error: [help flag] cannot be combined with other options" >&2
+    print_err "Error: [help flag] cannot be combined with other options"
     exit 1
   fi
 
@@ -398,7 +405,7 @@ while [[ $# -gt 0 ]]; do
         filename="$1.md"
         check_filename "$filename"
       else
-        echo "Error: Invalid option $1" >&2
+        print_err "Error: Invalid option $1"
         exit 1
       fi
       ;;
@@ -407,22 +414,22 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ $fzf_flag == 1 ] && [ $current_window_flag == 1 ]; then
-  echo "Error: Invalid option, you cannot use [fzf flag] with [current window flag]" >&2
+  print_err "Error: Invalid option, you cannot use [fzf flag] with [current window flag]"
   exit 1
 fi
 
 if [ $fzf_flag == 1 ] && [ $dirname_flag == 1 ]; then
-  echo "Error: Invalid option, you cannot use [fzf flag] with [directory name flag]" >&2
+  print_err "Error: Invalid option, you cannot use [fzf flag] with [directory name flag]"
   exit 1
 fi
 
 if [ $current_window_flag == 1 ] && [ $dirname_flag == 1 ]; then
-  echo "Error: Invalid option, you cannot use [current window flag] with [directory name flag]" >&2
+  print_err "Error: Invalid option, you cannot use [current window flag] with [directory name flag]"
   exit 1
 fi
 
 if [ $current_window_flag == 1 ] && [ $delete_flag == 1 ]; then
-  echo "Error: Invalid option, you cannot use [current window flag] with [delete flag]" >&2
+  print_err "Error: Invalid option, you cannot use [current window flag] with [delete flag]"
   exit 1
 fi
 
