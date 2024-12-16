@@ -1,0 +1,479 @@
+#!/bin/sh
+# ▗▄▄▄ ▗▖  ▗▖ ▗▄▖▗▄▄▄▖▗▄▄▄▖
+# ▐▌  █▐▛▚▖▐▌▐▌ ▐▌ █  ▐▌   
+# ▐▌  █▐▌ ▝▜▌▐▌ ▐▌ █  ▐▛▀▀▘
+# ▐▙▄▄▀▐▌  ▐▌▝▚▄▞▘ █  ▐▙▄▄▖
+#
+# Author: Saeed Alian (https://github.com/SaeedAlian)
+#
+# A script for managing notes with tmux and fzf
+#
+# Depends on:
+#   tmux, fzf
+
+NOTES_DIR=$HOME/documents/notes
+TMUX_SESSION_NAME=notes
+MAX_WINDOW_NUMBER=5
+ED="$EDITOR"
+
+if ! type "tmux" > /dev/null; then
+  echo "Error: tmux is not installed"
+  exit 1
+fi
+
+if ! type "fzf" > /dev/null; then
+  echo "Error: fzf is not installed"
+  exit 1
+fi
+
+if [ -z $ED ]; then
+  ED="vim"
+fi
+
+function print_help() {
+  help="dnote: A command-line tool for creating and managing notes.
+
+Usage: dnote [options] [filename]
+
+
+Options:
+  -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -n, -c, or -d
+  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c or -n
+  -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f
+  -n, --name <dirname>  Specify the directory name for the new note, the default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f or -c
+
+
+Arguments:
+  filename              The name of the note file (default extension is .md)
+
+
+Examples:
+
+
+• Create a new note named "my_note.md" in the default directory:
+  dnote my_note
+
+• Create a new note named "my_note.md" in the directory "my_project":
+  dnote -n my_project my_note
+
+• Delete a note "important_notes.md" from the default directory:
+  dnote -d important_notes
+
+• Delete a note "important_notes.md" from the directory "my_project":
+  dnote -n my_project -d important_notes
+
+• Interactively select a directory and file using fzf:
+  dnote -f
+
+• Create a note named "my_note" in current tmux window:
+  dnote -c my_note
+
+
+ Note(1): This script uses fzf (fuzzy finder) and tmux. Make sure these are installed before using the script.
+ Note(2): Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim)
+
+"
+  
+  if type "less" > /dev/null; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+function check_filename() {
+  filename="$1"
+
+  if [[ -z "$filename" ]]; then
+    echo "Error: Filename cannot be empty" >&2
+    exit 1
+  fi
+
+  if grep -q '[\\\/\:\*\?\"\<\>\|]' <<< "$filename"; then
+    echo "Error: Filename contains disallowed characters" >&2
+    exit 1
+  fi
+
+  if [[ "$filename" =~ ^[-_.] ]]; then
+    echo "Error: Filename must not start with '.' or '-' or '_'" >&2
+    exit 1
+  fi
+
+  filename="${filename%% }"
+  filename="${filename## }"
+
+  if [[ "$filename" == *"$'\0'"* ]]; then
+      echo "Error: Filename contains null bytes" >&2
+      exit 1
+  fi
+
+  if [[ ${#filename} -gt 255 ]]; then
+      echo "Error: Filename exceeds 255 characters" >&2
+      exit 1
+  fi
+}
+
+function check_dirname() {
+  dirname="$1"
+
+  if [ -z $dirname ]; then
+    echo "Error: Directory name is empty" >&2
+    exit 1
+  fi
+
+  if grep -q '[\\\/\:\*\?\"\<\>\|\;]' <<< "$dirname"; then
+    echo "Error: Invalid directory name, directory name must not contain illegal characters" >&2
+    exit 1
+  fi
+
+  if [[ "$dirname" =~ ^[-_] ]]; then
+    echo "Error: Invalid directory name, directory name must not start with '-' or '_'" >&2
+    exit 1
+  fi
+
+  if [[ "$dirname" == "." ]]; then
+    echo "Error: Invalid directory name, directory name must not equal to '.'" >&2
+    exit 1
+  fi
+
+  if [[ "$dirname" == ".." ]]; then
+    echo "Error: Invalid directory name, directory name must not equal to '..'" >&2
+    exit 1
+  fi
+
+  dirname="${dirname%% }"
+  dirname="${dirname## }"
+
+  if [[ "$dirname" == *"$'\0'"* ]]; then
+      echo "Error: Directory name contains null bytes" >&2
+      exit 1
+  fi
+
+  if [[ ${#dirname} -gt 255 ]]; then
+      echo "Error: Directory name exceeds 255 characters" >&2
+      exit 1
+  fi
+}
+
+function fzf_note_dirs() {
+	retval=$(find "$NOTES_DIR" -mindepth 1 -maxdepth 1 -type d | sed 's/.*\///g' | fzf -e -i)
+  echo $retval
+}
+
+function fzf_notes() {
+  dir=$1
+
+  if ! [ -d "$NOTES_DIR/$dir" ]; then
+    echo "Error: directory doesn't exist" >&2
+    exit 1
+  fi
+
+	retval=$(find "$NOTES_DIR/$dir" -mindepth 1 -maxdepth 1 -iname "*.md" -type f | sed 's/.*\///g' | fzf -e -i)
+  echo $retval
+}
+
+function create_note_dir() {
+  dir=$1
+  mkdir -p "$NOTES_DIR/$dir"
+}
+
+function create_note() {
+  dir=$1
+  filename=$2
+
+  fullpath="$NOTES_DIR/$dir/$filename"
+
+  if [ ! -f $fullpath ]; then
+    touch $fullpath
+  fi
+}
+
+function delete_note() {
+  dir=$1
+  filename=$2
+
+  fullpath="$NOTES_DIR/$dir/$filename"
+
+  if [ -f $fullpath ]; then
+    rm $fullpath
+  else
+    echo "Error: file doesn't exist" >&2
+    exit 1
+  fi
+}
+
+
+function attach_tmux() {
+  dir=$1
+  orig_filename=$2
+  filename=$(echo "${orig_filename%.*}" | sed 's/\.//g')
+  use_current_window=$3
+
+  no_filename=0
+
+  if [ -z $dir ]; then
+    echo "Error: Directory must be specified" >&2
+    exit 1
+  fi
+
+  # define tmux env vars
+  session_name="$TMUX_SESSION_NAME-$dir"
+  window="$session_name:$filename"
+  pane=${window}.0
+
+  # if filename is empty set the tmux env to the note directory
+  if [ -z $filename ]; then
+    filename="nofile"
+    window="$session_name:notedir"
+    no_filename=1
+  fi
+
+  # create session if doesn't exist
+  if ! tmux has-session -t="$session_name" 2>/dev/null; then
+    tmux new-session -ds "$session_name" -c "$NOTES_DIR/$dir" -n "$filename"
+  fi
+
+  current_session=$(tmux display-message -p '#S' 2>/dev/null)
+
+  # if use_current_window is true
+  if [[ $use_current_window =~ ^[0-9]+$ ]] && [ $use_current_window == 1 ]; then
+    # check for tmux to be attached
+    if [ -z "$TMUX" ]; then
+      echo "Error: Invalid --current option, you must be in a notes session" >&2
+      exit 1
+    fi
+
+    wd=$(pwd)
+
+    # and check for the current working directory to be a notes directory
+    if [ "$NOTES_DIR/$dir" != "$wd" ]; then
+      echo "Error: Invalid --current option, you must be in a notes directory" >&2
+      exit 1
+    fi
+
+    wd_note_dirname=$(echo "$wd" | sed 's/.*\///g')
+
+    # also match the tmux session name with the current directory name
+    if [ "$TMUX_SESSION_NAME-$wd_note_dirname" != "$session_name" ]; then
+      echo "Error: Invalid --current option, you must be in a notes session" >&2
+      exit 1
+    fi
+
+    # if all the checks were ok, then rename the current tmux
+    # window and also send keys to it to launch the editor
+    tmux rename-window "$filename"
+    tmux select-window -t "$session_name:$filename"
+    tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
+    exit 0
+  fi
+
+  # get the window names of tmux session
+  windows_str=$(tmux list-windows -F '#W' -t "$session_name" 2>/dev/null)
+
+  if [ $? != 0 ]; then
+    echo "Error: Cannot get the number of windows" >&2
+    exit 1
+  fi
+
+  # split the windows_str into an array
+  readarray -t windows < <(printf '%s\n' "$windows_str" | tr ' ' '\n')
+  windows_len=${#windows[@]}
+  
+  if [ $? != 0 ]; then
+    echo "Error: Cannot get the window names" >&2
+    exit 1
+  fi
+
+  # if we reached the maximum window number, we use the first window
+  # to launch the editor for the file
+  if [ $windows_len -ge $MAX_WINDOW_NUMBER ]; then
+    # also we have to check for the filename window to not exist in 
+    # the current windows
+    if [ "$(echo "${windows[@]}" | grep "$filename")" == "" ]; then
+      tmux rename-window -t "$session_name:1" "$filename"
+      tmux select-window -t "$session_name:1"
+    else
+      # if the filename window exist in the windows, then we just switch to that window
+      # but be aware the -S option in the new-window command will switch to the window
+      # if it already exists
+      tmux new-window -S -n "$filename" -t "$session_name:" -c "$NOTES_DIR/$dir"
+    fi
+  else
+    # otherwise we launch a new window
+    tmux new-window -S -n "$filename" -t "$session_name:" -c "$NOTES_DIR/$dir"
+  fi
+
+  tmux select-pane -t "$pane"
+
+  # if we selected a file we must run the editor as well
+  if [ "$filename" != "nofile" ] && [ $no_filename != 1 ]; then
+    # get the window titles and names
+    window_titles_str=$(tmux list-panes -s -F "#T\n\n\n\n\n" -t "$session_name")
+    window_names_str=$(tmux list-panes -s -F "#W\n\n\n\n\n" -t "$session_name")
+    window_titles=()
+    window_names=()
+
+    # split window titles string into array
+    IFS=$'\n\n\n\n\n'
+    while read -r line; do
+        window_titles+=("${line:0:-10}")
+    done <<< "$window_titles_str"
+
+    # split window names string into array
+    IFS=$'\n\n\n\n\n'
+    while read -r line; do
+        window_names+=("${line:0:-10}")
+    done <<< "$window_names_str"
+
+    # loop through the window names to find a match for the current window
+    # and if it exists then check for the title
+    # if the title is matched with the "{USERNAME}@{HOSTNAME}:{DIRECTORY}
+    # or it is equal to the $HOSTNAME (which means the window is generated currently)
+    # it means we can run commands in the terminal
+    # so we send keys to run the editor
+    for n in "${!window_names[@]}"; do
+      name=${window_names[$n]}
+      if [ "$name" == "$filename" ]; then
+        title=${window_titles[$n]}
+
+        if [[ "$title" == "$HOSTNAME" ]] || [[ $(echo "$title" | grep -E "^[a-zA-Z0-9_]+@[a-zA-Z0-9._-]+:~/.+$" ) ]]; then
+          tmux send-keys -t "$pane" C-z 
+          tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
+          break
+        fi
+      fi
+    done
+  fi
+
+  # finally if the tmux is already running we just switch-client
+  if [ ! -z "$TMUX" ]; then
+    tmux switch-client -t "$session_name"
+  else
+    # otherwise we attach-session
+    tmux attach-session -t "$session_name" 
+  fi
+
+  exit 0
+}
+
+# check for help option
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  if [[ $# -gt 1 ]]; then
+    echo "Error: [help flag] cannot be combined with other options" >&2
+    exit 1
+  fi
+
+  print_help
+  exit 0
+fi
+
+dirname=$(date +%Y-%m-%d-%A)
+filename=""
+
+no_file_flag=0
+dirname_flag=0
+fzf_flag=0
+delete_flag=0
+current_window_flag=0
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -f|--fzf)
+      fzf_flag=1
+      ;;
+    -d|--delete)
+      delete_flag=1
+      ;;
+    -c|--current-window)
+      current_window_flag=1
+      ;;
+    -n|--name)
+      dirname_flag=1
+      dirname="$2"
+      check_dirname "$dirname"
+      shift 1
+      ;;
+    *)
+      if [ $# == 1 ] && [ $fzf_flag == 0 ] && [ -z $filename ]; then
+        filename="$1.md"
+        check_filename "$filename"
+      else
+        echo "Error: Invalid option $1" >&2
+        exit 1
+      fi
+      ;;
+  esac
+  shift 1
+done
+
+if [ $fzf_flag == 1 ] && [ $current_window_flag == 1 ]; then
+  echo "Error: Invalid option, you cannot use [fzf flag] with [current window flag]" >&2
+  exit 1
+fi
+
+if [ $fzf_flag == 1 ] && [ $dirname_flag == 1 ]; then
+  echo "Error: Invalid option, you cannot use [fzf flag] with [directory name flag]" >&2
+  exit 1
+fi
+
+if [ $current_window_flag == 1 ] && [ $dirname_flag == 1 ]; then
+  echo "Error: Invalid option, you cannot use [current window flag] with [directory name flag]" >&2
+  exit 1
+fi
+
+if [ $current_window_flag == 1 ] && [ $delete_flag == 1 ]; then
+  echo "Error: Invalid option, you cannot use [current window flag] with [delete flag]" >&2
+  exit 1
+fi
+
+if [ $fzf_flag == 0 ] && [ -z $filename ]; then
+  no_file_flag=1
+fi
+
+if [ $fzf_flag == 1 ]; then
+  dirname=$(fzf_note_dirs)
+  if [ -z $dirname ]; then
+    echo "Operation cancelled"
+    exit 0
+  fi
+  filename=$(fzf_notes "$dirname")
+
+  while [ -z $filename ]; do
+    dirname=$(fzf_note_dirs)
+    if [ -z $dirname ]; then
+      echo "Operation cancelled"
+      exit 0
+    fi
+    filename=$(fzf_notes "$dirname")
+  done
+fi
+
+if [ $delete_flag == 1 ]; then
+  check_dirname "$dirname"
+  check_filename "$filename"
+
+  ans="N"
+  read -e -p "Do you really want to delete note $filename at $dirname? [y/N] " -i "" ans
+
+  if [ "$ans" == "y" ] || [ "$ans" == "Y" ]; then
+    delete_note "$dirname" "$filename"
+    echo "File $filename deleted successfully"
+  else
+    echo "Delete operation cancelled"
+  fi
+
+  exit 0
+fi
+
+create_note_dir "$dirname"
+check_dirname "$dirname"
+
+if [ $no_file_flag == 1 ]; then
+  attach_tmux "$dirname" "" $current_window_flag
+else
+  check_filename "$filename"
+  create_note "$dirname" "$filename"
+  attach_tmux "$dirname" "$filename" $current_window_flag
+fi
+
+exit 0
