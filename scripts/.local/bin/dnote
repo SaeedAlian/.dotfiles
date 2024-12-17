@@ -41,6 +41,10 @@ Options:
 
   -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -p, -n, -c
 
+  -a, --all             Use fzf to interactively search for a file in all the note directories.  Can only be used with -f
+
+  -fa, -af, --fzf-all   Using -f and -a at the same time
+
   -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c
 
   -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f
@@ -183,6 +187,16 @@ function fzf_notes() {
   fi
 
 	retval=$(find "$NOTES_DIR/$dir" -mindepth 1 -maxdepth 1 -iname "*.md" -type f | sed 's/.*\///g' | fzf -e -i)
+  echo $retval
+}
+
+function fzf_all_notes() {
+  if ! [ -d "$NOTES_DIR" ]; then
+    print_err "Error: directory doesn't exist"
+    exit 1
+  fi
+
+	retval=$(find "$NOTES_DIR" -mindepth 2 -maxdepth 2 -iname "*.md" -type f | sed 's/.*\/\(.*\)\//\1\//g' | fzf -e -i)
   echo $retval
 }
 
@@ -388,6 +402,7 @@ prompt_flag=0
 no_file_flag=0
 dirname_flag=0
 fzf_flag=0
+fzf_all_notes_flag=0
 delete_flag=0
 current_window_flag=0
 
@@ -395,6 +410,13 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     -f|--fzf)
       fzf_flag=1
+      ;;
+    -fa|-af|--fzf-all)
+      fzf_flag=1
+      fzf_all_notes_flag=1
+      ;;
+    -a|--all)
+      fzf_all_notes_flag=1
       ;;
     -p|--prompt)
       prompt_flag=1
@@ -423,6 +445,11 @@ while [[ $# -gt 0 ]]; do
   esac
   shift 1
 done
+
+if [ $fzf_all_notes_flag == 1 ] && [ $fzf_flag != 1 ]; then
+  print_err "Error: Invalid option, if you want to use [fzf all notes flag] you must include [fzf flag] too"
+  exit 1
+fi
 
 if [ $prompt_flag == 1 ] && [ $fzf_flag == 1 ]; then
   print_err "Error: Invalid option, you cannot use [prompt flag] with [fzf flag]"
@@ -463,21 +490,38 @@ if [ $current_window_flag == 1 ]; then
 fi
 
 if [ $fzf_flag == 1 ]; then
-  dirname=$(fzf_note_dirs)
-  if [ -z $dirname ]; then
-    echo "Operation cancelled"
-    exit 0
-  fi
-  filename=$(fzf_notes "$dirname")
+  if [ $fzf_all_notes_flag == 1 ]; then
+    selected=$(fzf_all_notes)
 
-  while [ -z $filename ]; do
+    if [ -z $selected ]; then
+      echo "Operation cancelled"
+      exit 0
+    fi
+
+    dirname=$(echo "$selected" | sed 's/\(.*\)\/.*/\1/')
+    filename=$(echo "$selected" | sed 's/.*\///')
+
+    if [ -z $dirname ] || [ -z $filename ]; then
+      echo "Operation cancelled"
+      exit 0
+    fi
+  else
     dirname=$(fzf_note_dirs)
     if [ -z $dirname ]; then
       echo "Operation cancelled"
       exit 0
     fi
     filename=$(fzf_notes "$dirname")
-  done
+
+    while [ -z $filename ]; do
+      dirname=$(fzf_note_dirs)
+      if [ -z $dirname ]; then
+        echo "Operation cancelled"
+        exit 0
+      fi
+      filename=$(fzf_notes "$dirname")
+    done
+  fi
 fi
 
 if [ $prompt_flag == 1 ]; then
@@ -485,9 +529,18 @@ if [ $prompt_flag == 1 ]; then
   f=""
 
   if [ $current_window_flag != 1 ]; then
-    read -e -p "Enter Directory Name: (if empty it will use the current date) " -i "" d
+    read -e -p "Enter Directory Name: (if empty it will use the current date, type fzf for fuzzy find the directory) " -i "" d
+
     if [ ! -z $d ]; then
-      dirname=$d
+      if [ "$d" == "fzf" ]; then
+        dirname=$(fzf_note_dirs)
+        if [ -z $dirname ]; then
+          echo "Operation cancelled"
+          exit 0
+        fi
+      else
+        dirname=$d
+      fi
     fi
   fi
 
