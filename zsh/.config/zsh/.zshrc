@@ -75,7 +75,9 @@ bindkey -s ^f "tmux_fzf_session\n"
 bindkey -s ^h "shell_history_search 3000\n"
 
 # run dnote fzf
-bindkey -s ^n "dnote -f\n"
+bindkey -s ^n^n "dnote -f\n"
+# run dnote all fzf
+bindkey -s ^n^a "dnote -af\n"
 # run dnote prompt
 bindkey -s ^p "dnote -p\n"
 
