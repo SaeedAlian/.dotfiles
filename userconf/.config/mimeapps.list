@@ -6,6 +6,7 @@ audio/flac=org.clementine_player.Clementine.desktop
 audio/ogg=org.clementine_player.Clementine.desktop
 inode/directory=thunar.desktop
 text/plain=nvim.desktop
+application/pdf=org.pwmt.zathura.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
