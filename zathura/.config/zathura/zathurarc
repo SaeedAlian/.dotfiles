@@ -1,0 +1,77 @@
+# zathura configuration file
+
+# open document in fit-width mode by default
+set adjust-open "best-fit"
+
+# one page per row by default
+set pages-per-row 1
+
+# scroll settings
+set scroll-page-aware "true"
+set smooth-scroll "true"
+set scroll-full-overlap 0.01
+set scroll-step 100
+set render-loading "false"
+set scroll-step 100
+
+# zoom settings
+set zoom-min 10
+
+# gui
+set guioptions "sv"
+
+# colors and font
+set font "JetBrainsMono Nerd Font 14"
+set default-bg "#222222"
+set default-fg "#F7F7F6"
+
+set statusbar-fg "#B0B0B0"
+set statusbar-bg "#202020"
+
+set inputbar-bg "#151515"
+set inputbar-fg "#FFFFFF"
+
+set notification-error-bg "#AC4142"
+set notification-error-fg "#151515"
+
+set notification-warning-bg "#AC4142"
+set notification-warning-fg "#151515"
+
+set highlight-color "#F4BF75"
+set highlight-active-color "#6A9FB5"
+
+set completion-highlight-fg "#151515"
+set completion-highlight-bg "#90A959"
+
+set completion-bg "#303030"
+set completion-fg "#E0E0E0"
+
+set notification-bg "#90A959"
+set notification-fg "#151515"
+
+set recolor "true"
+set recolor-lightcolor "#222222" 
+set recolor-darkcolor "#E0E0E0" 
+set recolor-reverse-video "true"
+set recolor-keephue "true"
+
+# keybindings
+
+unmap f
+unmap =
+unmap +
+
+map f toggle_fullscreen
+map [fullscreen] f toggle_fullscreen
+map [presentation] f toggle_fullscreen
+map [index] f toggle_fullscreen
+
+map = zoom in
+map [fullscreen] = zoom in
+map [presentation] = zoom in
+map [index] = zoom in
+
+map + zoom best-fit
+map [fullscreen] + zoom best-fit
+map [presentation] + zoom best-fit
+map [index] + zoom best-fit
