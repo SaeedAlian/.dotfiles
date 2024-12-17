@@ -95,6 +95,7 @@ alias picomc="$EDITOR $XDG_CONFIG_HOME/picom --cmd 'cd $XDG_CONFIG_HOME/picom'"
 alias pbarc="$EDITOR $XDG_CONFIG_HOME/polybar --cmd 'cd $XDG_CONFIG_HOME/polybar'"
 alias dot="$EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
 
+alias z="zathura"
 alias v="nvim"
 alias wlp="wallpaper"
 alias orgtel="file_organizer $HOME/downloads/telegram"
