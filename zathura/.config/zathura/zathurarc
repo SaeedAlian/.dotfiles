@@ -8,7 +8,6 @@ set pages-per-row 1
 
 # scroll settings
 set scroll-page-aware "true"
-set smooth-scroll "true"
 set scroll-full-overlap 0.01
 set scroll-step 100
 set render-loading "false"
