@@ -20,6 +20,8 @@ Read further for more instructions
 - zathura
 - fastfetch
 - neofetch
+- qt5ct
+- lxappearance
 - ffmpeg
 - ffmpegthumbnailer
 - unar
