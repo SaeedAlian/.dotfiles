@@ -29,7 +29,6 @@ Read further for more instructions
 - rg
 - libnotify
 - fzf
-- zoxide
 - xclip
 - maim
 - feh
