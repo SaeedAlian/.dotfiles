@@ -6,6 +6,9 @@ set adjust-open "best-fit"
 # one page per row by default
 set pages-per-row 1
 
+# enable clipboard
+set selection-clipboard clipboard
+
 # scroll settings
 set scroll-page-aware "true"
 set scroll-full-overlap 0.01
