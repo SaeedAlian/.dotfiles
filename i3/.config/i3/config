@@ -29,7 +29,7 @@ set $bgmode "--bg-fill"
 set $terminal alacritty
 
 # set filemanager 
-set $filemanager thunar
+set $filemanager pcmanfm-qt
 
 # set calculator
 set $calculator qalculate-qt
