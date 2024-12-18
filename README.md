@@ -1,4 +1,4 @@
-# My Dotfiles (Ver. 2.0)
+# My Dotfiles
 
 Here is my updated dotfiles.
 Read further for more instructions
