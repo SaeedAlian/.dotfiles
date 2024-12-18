@@ -48,6 +48,7 @@ image_mimetypes=("image")
 audio_mimetypes=("audio")
 video_mimetypes=("video")
 document_mimetypes=(
+	"text/plain"
 	"application/x-pdf"
 	"application/pdf"
 	"application/msword"
