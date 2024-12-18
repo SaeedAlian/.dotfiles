@@ -4,7 +4,7 @@ audio/mp3=org.clementine_player.Clementine.desktop
 audio/mpeg=org.clementine_player.Clementine.desktop
 audio/flac=org.clementine_player.Clementine.desktop
 audio/ogg=org.clementine_player.Clementine.desktop
-inode/directory=thunar.desktop
+inode/directory=pcmanfm-qt.desktop
 text/plain=nvim.desktop
 application/pdf=or.pwmt.zathura.desktop
 
