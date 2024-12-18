@@ -17,6 +17,8 @@ Read further for more instructions
 - [rofi](https://github.com/davatorium/rofi)
 - [Überzug++](https://github.com/jstkdng/ueberzugpp)
 - [clementine](https://www.clementine-player.org/downloads)
+- [pcmanfm-qt](https://wiki.archlinux.org/title/PCManFM)
+- [qalculate](http://qalculate.github.io/)
 - zathura
 - fastfetch
 - neofetch
