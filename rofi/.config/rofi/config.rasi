@@ -8,10 +8,14 @@ configuration {
   icon-theme: "Papirus";
   kb-row-up: "Control+k";
   kb-row-down: "Control+j";
+  kb-page-next: "Control+d";
+  kb-page-prev: "Control+u";
   kb-accept-entry: "Control+Return,KP_Enter";
   kb-remove-to-eol: "Control+Shift+k";
   kb-accept-custom: "Shift+Return";
   kb-accept-alt: "Return";
+  kb-remove-to-sol: "";
+  kb-remove-char-forward: "Delete";
 }
 
 @theme "theme.rasi"
