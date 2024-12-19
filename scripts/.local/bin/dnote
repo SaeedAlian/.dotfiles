@@ -210,9 +210,11 @@ function create_note() {
   filename=$2
 
   fullpath="$NOTES_DIR/$dir/$filename"
+  d=$(date +%Y-%m-%d)
 
   if [ ! -f $fullpath ]; then
     touch $fullpath
+    echo "# ${filename%.*} ($d)" > $fullpath
   fi
 }
 
@@ -365,9 +367,11 @@ function attach_tmux() {
         title=${window_titles[$n]}
 
         if [[ "$title" == "$HOSTNAME" ]] || [[ $(echo "$title" | grep -E "^[a-zA-Z0-9_]+@[a-zA-Z0-9._-]+:~/.+$" ) ]]; then
-          tmux send-keys -t "$pane" C-z 
           tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
           break
+        else
+          tmux send-keys -t "$pane" C-z 
+          tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
         fi
       fi
     done
