@@ -1,6 +1,6 @@
 local map = require("util.keymapper").map
-local markdown_preview = require("util.markdown").markdown_preview
-local save_markdown_preview = require("util.markdown").save_markdown_preview
+local MarkdownPreview = require("util.markdown").MarkdownPreview
+local SaveMarkdownPreview = require("util.markdown").SaveMarkdownPreview
 
 -- remove some keymaps
 map("n", "Q", "<nop>", "Remove Q")
@@ -153,10 +153,10 @@ map("n", "<leader>md", ":RenderMarkdown toggle<CR>", "Toggle render markdown")
 
 -- preview markdown
 map("n", "<leader>mp", function()
-  markdown_preview()
+  MarkdownPreview()
 end, "Markdown previewer with zathura and pandoc")
 
 -- save markdown preview
 map("n", "<leader>mds", function()
-  save_markdown_preview()
+  SaveMarkdownPreview()
 end, "Save markdown preview with pandoc in pdf format")
