@@ -1,0 +1,6 @@
+#!/bin/sh
+
+xset -dpms
+if [ $? == 0 ]; then
+	DISPLAY=:0.0 notify-send --expire-time=5000 "DPMS turned off"
+fi
