@@ -22,7 +22,7 @@ Read further for more instructions
 - zathura
 - fastfetch
 - neofetch
-- qt5ct
+- qt6ct
 - lxappearance
 - ffmpeg
 - ffmpegthumbnailer
