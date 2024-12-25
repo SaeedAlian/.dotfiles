@@ -1,0 +1,136 @@
+#!/bin/sh
+
+if ! type "zathura" > /dev/null; then
+  echo "Error: zathura is not installed"
+  exit 1
+fi
+
+if ! type "pandoc" > /dev/null; then
+  echo "Error: pandoc is not installed"
+  exit 1
+fi
+
+function print_help() {
+  help="markdown_preview: preview markdown file with pandoc and zathura
+
+Usage: markdown_preview [options] [filename]
+
+
+Options:
+  -o, --open            Opens markdown preview in zathura
+
+  -s, --save            Saves the markdown preview in the current directory instead of /tmp
+
+
+Arguments:
+
+  filename              The name of the markdown file 
+
+"
+  
+  if type "less" > /dev/null; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+function print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [markdown_preview --help] for help"
+}
+
+# check for help option
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  if [[ $# -gt 1 ]]; then
+    print_err "[help flag] cannot be combined with other options"
+    exit 1
+  fi
+
+  print_help
+  exit 0
+fi
+
+filename=""
+open_in_zathura=0
+save_in_temp=1
+
+if [[ $# == 0 ]]; then
+	print_err "No argument provided"
+	exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -s|--save)
+      save_in_temp=0
+      ;;
+    -o|--open)
+      open_in_zathura=1
+      ;;
+    *)
+      if [ $# == 1 ] && [ -z $filename ]; then
+        filename=$1
+      else
+        print_err "Invalid option $1"
+        exit 1
+      fi
+      ;;
+  esac
+
+  shift 1
+done
+
+base=$(basename $filename)
+ext=${base##*.}
+name=${base%.*}
+
+if [ ! -f $filename ]; then
+	print_err "File not exists"
+	exit 1
+fi
+
+if [ $ext != "md" ]; then
+	print_err "File is not markdown"
+	exit 1
+fi
+
+save_path="/tmp/$name.pdf"
+
+if [ $save_in_temp != 1 ]; then
+	dir=$(dirname $filename)
+	save_path="$dir/$name.pdf"
+fi
+
+pandoc $filename -o $save_path 2>&1 >/dev/null 2>&1
+
+if [ $? != 0 ]; then
+	print_err "Error on converting to pdf"
+	exit 1
+fi
+
+if [ $open_in_zathura == 1 ]; then
+  IFS=" "
+  zathura_pids=()
+  zpids=$(pgrep -a zathura)
+
+  while read -r line; do
+    zathura_pids+=("$(echo $line | sed 's/.*zathura//')")
+  done <<< "$zpids"
+
+  for n in "${!zathura_pids[@]}"; do
+    name=${zathura_pids[$n]}
+    if [[ $(echo "$name" | grep -E "$save_path" ) ]]; then
+      echo "Preview is running"
+      exit 0
+    fi
+  done
+
+  zathura $save_path 2>&1 >/dev/null 2>&1 &
+
+  if [ $? != 0 ]; then
+    print_err "Error on opening pdf"
+    exit 1
+  fi
+fi

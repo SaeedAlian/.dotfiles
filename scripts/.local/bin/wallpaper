@@ -163,7 +163,7 @@ set_i3_background() {
   fi
 
   i3_config_file_path=$I3CONFIG_PATH/config
-  lockscreen_script=$LOCKSCREEN_SCRIPT_PATH/start_xss_lock
+  lockscreen_script=$LOCKSCREEN_SCRIPT_PATH/start_i3lock
   image_bg_mode=$(cat $i3_config_file_path | grep "bgmode" | sed 's/.*\(\".*\"\)/\1/' | sed 's/\"//g')
 
   grep bgname "$i3_config_file_path" | sed -i "/set \$bgname/s/\"[^\"]*\"/\"$image_name\"/" "$i3_config_file_path"
@@ -171,9 +171,8 @@ set_i3_background() {
 
   echo "I3 config updated."
   feh --no-fehbg $image_bg_mode "$image_path"
-  i3 reload &> /dev/null
   pkill xss-lock
-  start_xss_lock &
+  i3 reload &> /dev/null
   echo "Wallpaper updated successfully."
 }
 
@@ -194,6 +193,7 @@ set_i3_background_mode() {
 
   echo "I3 config updated."
   feh --no-fehbg --bg-$image_bg_mode "$image_path"
+  pkill xss-lock
   i3 reload &> /dev/null
   echo "Wallpaper updated successfully."
 }

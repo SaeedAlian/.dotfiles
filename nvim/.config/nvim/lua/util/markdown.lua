@@ -16,75 +16,20 @@ local check_md_file = function(current_filename)
   return current_filename:match("%.md$") ~= nil
 end
 
-local get_zathura_processes = function()
-  local command = string.format("ps aux | grep \"$(pgrep zathura)\" | sed 's/.*zathura//'")
-  local result = vim.fn.systemlist(command)
-  local running_processes = ""
+local run_command = function(cmd)
+  local result = vim.fn.systemlist(cmd)
+  local out = ""
 
   if #result > 0 then
     for _, line in ipairs(result) do
-      running_processes = string.format("%s %s", running_processes, line:gsub("%s+$", ""))
+      out = string.format("%s %s", out, line:gsub("%s+$", ""))
     end
 
-    return running_processes
-  else
-    return nil
+    if string.match(out, "Error:") then
+      return false
+    end
   end
-end
-
-local check_zathura_file_is_open = function(running_processes, pdf_filename)
-  local matched = string.match(running_processes, pdf_filename)
-
-  return matched
-end
-
-local function run_command(cmd)
-  local result = io.popen(cmd)
-
-  if not result then
-    return false
-  end
-
-  local ok = result:close()
-  io.close()
-
-  return ok
-end
-
-function UpdateMarkdownPreview()
-  local current_abs_path = get_current_file()
-  if current_abs_path == nil then
-    print("No file is open")
-    return
-  end
-
-  local filename = get_filename(current_abs_path)
-
-  local is_md = check_md_file(current_abs_path)
-  if is_md == false then
-    print("File is not markdown")
-    return
-  end
-
-  local running_processes = get_zathura_processes()
-  if running_processes == nil then
-    return
-  end
-
-  local pdf_filename = string.gsub(filename, ".md$", ".pdf")
-
-  if check_zathura_file_is_open(running_processes, pdf_filename) == nil then
-    return
-  end
-
-  local command = string.format("pandoc %s -o /tmp/%s 2>&1 > /dev/null 2>&1", current_abs_path, pdf_filename)
-  local ok = run_command(command)
-
-  if not ok then
-    print("Error executing markdown preview")
-  else
-    print("Preview is updated for " .. filename)
-  end
+  return true
 end
 
 function MarkdownPreview()
@@ -102,42 +47,8 @@ function MarkdownPreview()
     return
   end
 
-  local pdf_filename = string.gsub(filename, ".md$", ".pdf")
-
-  local open_command = string.format(
-    "pandoc %s -o /tmp/%s 2>&1 > /dev/null 2>&1 && zathura /tmp/%s &",
-    current_abs_path,
-    pdf_filename,
-    pdf_filename
-  )
-  local update_command = string.format("pandoc %s -o /tmp/%s 2>&1 > /dev/null 2>&1", current_abs_path, pdf_filename)
-
-  local running_processes = get_zathura_processes()
-  if running_processes == nil then
-    local ok = run_command(open_command)
-
-    if not ok then
-      print("Error executing markdown preview")
-    else
-      print("Preview is on for " .. filename)
-    end
-
-    return
-  end
-
-  if check_zathura_file_is_open(running_processes, pdf_filename) == nil then
-    local ok = run_command(open_command)
-
-    if not ok then
-      print("Error executing markdown preview")
-    else
-      print("Preview is on for " .. filename)
-    end
-
-    return
-  end
-
-  local ok = run_command(update_command)
+  local command = string.format("$HOME/.local/bin/markdown_preview --open %s 2>&1 > /dev/null 2>&1", current_abs_path)
+  local ok = run_command(command)
 
   if not ok then
     print("Error executing markdown preview")
@@ -161,9 +72,7 @@ function SaveMarkdownPreview()
     return
   end
 
-  local pdf_filename = string.gsub(filename, ".md$", ".pdf")
-
-  local command = string.format("pandoc %s -o %s 2>&1 > /dev/null 2>&1", current_abs_path, pdf_filename)
+  local command = string.format("$HOME/.local/bin/markdown_preview --save %s 2>&1 >/dev/null 2>&1", current_abs_path)
 
   local ok = run_command(command)
 
@@ -178,6 +87,5 @@ local M = {}
 
 M.MarkdownPreview = MarkdownPreview
 M.SaveMarkdownPreview = SaveMarkdownPreview
-M.UpdateMarkdownPreview = UpdateMarkdownPreview
 
 return M

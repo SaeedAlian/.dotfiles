@@ -1,25 +1,25 @@
 #!/bin/sh
 
-DIRECTORIES="$HOME/projects $HOME/p-projects"
+DIRECTORIES="$HOME/projects"
 
 if [ $# -eq 1 ]; then
-  selected_dir=$1
+	selected_dir=$1
 else
-  selected_dir=$(find $DIRECTORIES -mindepth 1 -maxdepth 1 -type d | fzf)
+	selected_dir=$(find $DIRECTORIES -mindepth 1 -maxdepth 1 -type d | fzf)
 fi
 
 selected_dir_basename=$(basename "$selected_dir")
 
 if [ -n "$selected_dir" ]; then
-  if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
-    tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
-  fi
+	if ! tmux has-session -t="$selected_dir_basename" 2>/dev/null; then
+		tmux new-session -ds "$selected_dir_basename" -c "$selected_dir"
+	fi
 
-  if [ -z "$TMUX" ]; then
-    tmux attach -t "$selected_dir_basename"
-  else
-    tmux switch-client -t "$selected_dir_basename"
-  fi
+	if [ -z "$TMUX" ]; then
+		tmux attach -t "$selected_dir_basename"
+	else
+		tmux switch-client -t "$selected_dir_basename"
+	fi
 else
-  exit 0
+	exit 0
 fi

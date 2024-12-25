@@ -66,7 +66,7 @@ render_timer = false
 TERM = "xterm-256color"
 
 [font]
-size = 17.0
+size = 10.0
 
 [font.bold]
 family = "JetBrainsMono Nerd Font"
