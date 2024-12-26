@@ -22,11 +22,11 @@ white = "#e5e8e6"
 yellow = "#e5c07b"
 
 [colors.hints.end]
-background = "#A6ADC8"
+background = "#000000"
 foreground = "#1E1E2E"
 
 [colors.hints.start]
-background = "#e5c07b"
+background = "#000000"
 foreground = "#1E1E2E"
 
 [colors.normal]
@@ -40,7 +40,7 @@ white = "#f5f8d6"
 yellow = "#e5c07b"
 
 [colors.primary]
-background = "#0a0a10"
+background = "#000000"
 bright_foreground = "#F8F8F2"
 dim_foreground = "#F8F8F2"
 foreground = "#F8F8F2"
@@ -66,7 +66,7 @@ render_timer = false
 TERM = "xterm-256color"
 
 [font]
-size = 10.0
+size = 9.0
 
 [font.bold]
 family = "JetBrainsMono Nerd Font"
@@ -188,8 +188,8 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>"
 program = "/bin/zsh"
 
 [window]
-dynamic_padding = true
-opacity = 0.99
+dynamic_padding = false
+opacity = 1
 title = "Alacritty"
 
 [window.class]
@@ -201,7 +201,7 @@ columns = 25
 lines = 75
 
 [window.padding]
-x = 2
-y = 3
+x = 1
+y = 2
 
 [terminal]

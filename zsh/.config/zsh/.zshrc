@@ -13,16 +13,11 @@ fi
 
 # default apps
 export EDITOR="nvim"
+export VPN="hiddify"
 export TERMINAL="alacritty"
 export BROWSER="librewolf"
 export FILEMANAGER="pcmanfm-qt"
 export CALCULATOR="qalculate-qt"
-
-# set qt6ct
-export QT_QPA_PLATFORMTHEME="qt6ct"
-
-# set gtk theme
-export GTK_THEME="Flat-Remix-GTK-Blue-Darkest-Solid"
 
 # init cargo env
 . "$HOME/.cargo/env"
@@ -107,22 +102,20 @@ alias dot="$EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
 
 alias z="zathura"
 alias mdp="markdown_preview"
-alias mdpo="markdown_preview --open"
-alias mdps="markdown_preview --save"
-alias mdpos="markdown_preview --open --save"
-alias dn="dnote"
-alias df="dnote -f"
-alias dfa="dnote -fa"
-alias pcfm="pcmanfm-qt"
+alias note="dnote"
+alias cdnote="cd $HOME/documents/notes"
+alias fm="pcmanfm-qt"
 alias v="nvim"
 alias wlp="wallpaper"
 alias orgtel="file_organizer $HOME/downloads/telegram"
 alias orgdown="file_organizer $HOME/downloads"
 alias upmu="update_music"
 alias mkpj="mkproject"
+alias neofetch="neofetch --ascii_distro Fedora_old"
+alias fastfetch="fastfetch -l fedora-old"
 alias ftch="fastfetch"
 alias zh="shell_history_search"
 alias zhm="shell_history_search max"
 
 # alias for running vpn as sudo
-alias rv="sudo bash -c 'nekobox &'"
+alias rv="sudo bash -c '$VPN &'"

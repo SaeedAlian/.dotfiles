@@ -1,15 +1,15 @@
 * {
-  bg: #0a0a10ff;
+  bg: #000000ff;
   bg-alt: #2c2c3fff;
   bg-selected: #31324466;
 
-  fg: #ede6f4;
-  fg-alt: #9fa4bc;
+  fg: #ffffff;
+  fg-alt: #ffffff;
 }
 
 window {
   background-color: @bg;
-  padding: 15px;
+  padding: 0px;
 }
 
 element {

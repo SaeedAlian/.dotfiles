@@ -6,7 +6,8 @@ audio/flac=org.clementine_player.Clementine.desktop
 audio/ogg=org.clementine_player.Clementine.desktop
 inode/directory=pcmanfm-qt.desktop
 text/plain=nvim.desktop
-application/pdf=or.pwmt.zathura.desktop
+application/pdf=org.pwmt.zathura.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
+application/pdf=org.pwmt.zathura.desktop;

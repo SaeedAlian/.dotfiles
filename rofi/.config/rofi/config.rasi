@@ -1,7 +1,7 @@
 configuration {
   display-drun: "Apps: ";
   drun-display-format: "{icon} {name}";
-  font: "JetBrainsMono Nerd Font Medium 15";
+  font: "JetBrainsMono Nerd Font Bold 12";
   modi: "drun";
   
   show-icons: true;
