@@ -2,11 +2,11 @@
 
 WALLPAPERS_DIR="$HOME/pictures/wallpapers/walls"
 LOCKSCREENS_DIR="$HOME/pictures/wallpapers/lockscreens"
-I3CONFIG_PATH="$XDG_CONFIG_HOME/i3"
-LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin"
+BACKGROUND_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/background"
+LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/start_lockscreen"
 
 function print_help() {
-  help="wallpaper: A command-line tool for managing wallpapers and lockscreens in i3 using feh.
+  help="wallpaper: A command-line tool for managing wallpapers and lockscreens using feh.
 
 Usage: wallpaper [command] [arguments]
 
@@ -18,7 +18,7 @@ Commands:
 
  --set-lockscreens [-sl]                Create lockscreen images from all images currently in your wallpapers directory. Use this command to refresh lockscreens or reset the lockscreen images directory.
 
- --set-wall [-sw]                       imagename Set the specified image as your i3 wallpaper. The image must exist in the wallpapers directory.
+ --set-wall [-sw]                       imagename Set the specified image as your wallpaper. The image must exist in the wallpapers directory.
 
  --set-mode [-sm] <mode>                Set the scaling mode for your wallpaper. Options are: "tile", "center", "max", "fill".
 
@@ -48,7 +48,7 @@ Examples:
 
 Notes:
 • The wallpapers directory is assumed to be in the current working directory unless specified otherwise. The lockscreen images are created in a subdirectory.
-• Make sure you have the necessary dependencies (i3, feh, etc.) installed. Error messages are shown if there is an issue with the dependencies
+• Make sure you have the necessary dependencies (feh, xss-lock) installed. Error messages are shown if there is an issue with the dependencies
 • Make sure to set the lockscreen script path in the wallpaper script file
 
 "
@@ -144,8 +144,8 @@ set_all_lockscreens() {
   echo "Lockscreen images have been created successfully."
 }
 
-# sets the i3 background variable name
-set_i3_background() {
+# sets the background variable name
+set_background() {
   image_name=$1
   image_path=$WALLPAPERS_DIR/$image_name.jpg
 
@@ -162,22 +162,18 @@ set_i3_background() {
     exit 1
   fi
 
-  i3_config_file_path=$I3CONFIG_PATH/config
-  lockscreen_script=$LOCKSCREEN_SCRIPT_PATH/start_i3lock
-  image_bg_mode=$(cat $i3_config_file_path | grep "bgmode" | sed 's/.*\(\".*\"\)/\1/' | sed 's/\"//g')
+  sed -i "s/BGNAME=.*/\BGNAME=\"$image_name\"/" "$BACKGROUND_SCRIPT_PATH"
+  sed -i "s/BGNAME=.*/\BGNAME=\"$image_name\"/" "$LOCKSCREEN_SCRIPT_PATH"
 
-  grep bgname "$i3_config_file_path" | sed -i "/set \$bgname/s/\"[^\"]*\"/\"$image_name\"/" "$i3_config_file_path"
-  sed -i "s/BGNAME=.*/\BGNAME=\"$image_name\"/" "$lockscreen_script"
-
-  echo "I3 config updated."
-  feh --no-fehbg $image_bg_mode "$image_path"
+  echo "Scripts updated."
+  $BACKGROUND_SCRIPT_PATH &
   pkill xss-lock
-  i3 reload &> /dev/null
+  xss-lock -l -- "$LOCKSCREEN_SCRIPT_PATH" &
   echo "Wallpaper updated successfully."
 }
 
-# sets the i3 background mode
-set_i3_background_mode() {
+# sets the background mode
+set_background_mode() {
   image_bg_mode=$1
 
   if [ "$image_bg_mode" != "center" ] && [ $image_bg_mode != "max" ] && [ $image_bg_mode != "tile" ] && [ $image_bg_mode != "fill" ]; then
@@ -185,16 +181,10 @@ set_i3_background_mode() {
     exit 1
   fi
 
-  i3_config_file_path=$I3CONFIG_PATH/config
-  image_bg_name=$(cat $i3_config_file_path | grep "bgname" | sed 's/.*\(\".*\"\)/\1/' | sed 's/\"//g')
-  image_path=$WALLPAPERS_DIR/$image_bg_name.jpg
+  sed -i "s/BGMODE=.*/\BGMODE=\"--bg-$image_bg_mode\"/" "$BACKGROUND_SCRIPT_PATH"
 
-  grep bgmode "$i3_config_file_path" | sed -i "/set \$bgmode/s/\"[^\"]*\"/\"--bg-$image_bg_mode\"/" "$i3_config_file_path"
-
-  echo "I3 config updated."
-  feh --no-fehbg --bg-$image_bg_mode "$image_path"
-  pkill xss-lock
-  i3 reload &> /dev/null
+  echo "Scripts updated."
+  $BACKGROUND_SCRIPT_PATH
   echo "Wallpaper updated successfully."
 }
 
@@ -218,7 +208,7 @@ case $first_arg in
   read -r ans
 
   if [ "$ans" = "y" ]; then
-    set_i3_background "$wall_name"
+    set_background "$wall_name"
   else
     echo "Wallpaper has been added, now you can set it by running: "
     echo "wallpaper --set-wall $wall_name"
@@ -245,14 +235,14 @@ case $first_arg in
 "--set-wall" | "-sw")
   wall_name=$2
 
-  set_i3_background "$wall_name"
+  set_background "$wall_name"
 
   exit 0
   ;;
 "--set-mode" | "-sm")
   wall_mode=$2
 
-  set_i3_background_mode "$wall_mode"
+  set_background_mode "$wall_mode"
 
   exit 0
   ;;

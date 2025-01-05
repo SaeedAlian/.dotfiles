@@ -1,22 +1,35 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# Author: (https://github.com/ericmurphyxyz)
-# Repo: (https://github.com/ericmurphyxyz/rofi-wifi-menu)
-
-notify-send "Getting list of available Wi-Fi networks..."
-# Get a list of available wifi connections and morph it into a nice-looking list
+notify-send "Getting list of available Wi-Fi networks..." -t 2000
 wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list | sed 1d | sed 's/  */ /g' | sed -E "s/WPA*.?\S/ /g" | sed "s/^--/ /g" | sed "s/  //g" | sed "/--/d")
+
+has_simcard_module=true
+simcard_module_name="cdc-wdm0"
+simcard_module_status=$(nmcli device status | grep $simcard_module_name | awk '{print $3}')
 
 connected=$(nmcli -fields WIFI g)
 if [[ "$connected" =~ "enabled" ]]; then
-	toggle="󰖪  Disable Wi-Fi"
+	toggle_wifi="󰖪  Disable Wi-Fi"
 elif [[ "$connected" =~ "disabled" ]]; then
-	toggle="󰖩  Enable Wi-Fi"
+	toggle_wifi="󰖩  Enable Wi-Fi"
 fi
 
-# Use rofi to select wifi network
-chosen_network=$(echo -e "$toggle\n$wifi_list" | uniq -u | rofi -dmenu -i -selected-row 1 -p "Wi-Fi SSID: ")
-# Get name of connection
+if [ -z "$simcard_module_status" ]; then
+  has_simcard_module=false
+fi
+
+if $has_simcard_module; then
+  if [[ "$simcard_module_status" == "connected" ]]; then
+    toggle_simcard="󰱟  Disable Mobile Network"
+  elif [[ "$simcard_module_status" == "disconnected" ]]; then
+    toggle_simcard="󰱔  Enable Mobile Network"
+  fi
+
+  chosen_network=$(echo -e "$toggle_simcard\n$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
+else
+  chosen_network=$(echo -e "$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
+fi
+
 read -r chosen_id <<<"${chosen_network:3}"
 
 if [ "$chosen_network" = "" ]; then
@@ -25,11 +38,14 @@ elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
 	nmcli radio wifi on
 elif [ "$chosen_network" = "󰖪  Disable Wi-Fi" ]; then
 	nmcli radio wifi off
+elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱔  Enable Mobile Network" ]; then
+  nmcli device up $simcard_module_name
+elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱟  Disable Mobile Network" ]; then
+  nmcli device down $simcard_module_name
 else
-	# Message to show when connection is activated successfully
 	success_message="You are now connected to the Wi-Fi network \"$chosen_id\"."
-	# Get saved connections
 	saved_connections=$(nmcli -g NAME connection)
+
 	if [[ $(echo "$saved_connections" | grep -w "$chosen_id") = "$chosen_id" ]]; then
 		nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
 	else

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+SCREENSHOT_PATH="$HOME/pictures/screenshots"
+
+if ! [ -d "$SCREENSHOT_PATH" ]; then
+  mkdir -p "$SCREENSHOT_PATH"
+fi
+
+use_select=0
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -s | --select)
+      use_select=1
+      ;;
+    *)
+      echo "Invalid option" >&2
+      exit 1
+      ;;
+  esac
+
+  shift 1
+done
+
+if [ $use_select == 1 ]; then
+  maim --select "$HOME/pictures/screenshots/screenshot-$(date +%s%3N)-$(date +%F).jpg"
+  exit 0
+fi
+
+maim "$HOME/pictures/screenshots/screenshot-$(date +%s%3N)-$(date +%F).jpg"
+exit 0

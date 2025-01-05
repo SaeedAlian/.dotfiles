@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ $(pgrep -f "yad --calendar") ]; then
+	pkill yad
+	exit 0
+fi
+
+yad --calendar --fixed --no-buttons \
+	--title="yad-calendar" --borders=0 >/dev/null &
