@@ -38,7 +38,7 @@ export HISTFILE="$HOME/.zsh_history"
 export HISTDUP=erase
 
 # path variable
-export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin"
+export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin"
 
 # path to oh-my-zsh installation.
 export ZSH="$HOME/.config/oh-my-zsh"
@@ -57,6 +57,9 @@ plugins=(git)
 
 # source oh-my-zsh
 source $ZSH/oh-my-zsh.sh
+
+# source profile
+source $HOME/.profile
 
 # Ability to change the current working directory when exiting Yazi
 function y() {
@@ -77,7 +80,7 @@ set -o vi
 bindkey -s ^f "tmux_fzf_session\n"
 
 # run history fuzzy finder
-bindkey -s ^h "shell_history_search 3000\n"
+bindkey -s ^h "zsh_hsearch 3000\n"
 
 # run dnote fzf
 bindkey -s ^n^n "dnote -f\n"
@@ -114,8 +117,15 @@ alias mkpj="mkproject"
 alias neofetch="neofetch --ascii_distro Fedora_old"
 alias fastfetch="fastfetch -l fedora-old"
 alias ftch="fastfetch"
-alias zh="shell_history_search"
-alias zhm="shell_history_search max"
+alias zh="zsh_hsearch"
+alias zhm="zsh_hsearch max"
+
+alias suck="cd ~/.suckless && v ."
+alias dwmc="cd ~/.suckless/dwm && v ."
+alias dmenuc="cd ~/.suckless/dmenu && v ."
+alias stc="cd ~/.suckless/st && v ."
+alias bsc="cd ~/.config/bspwm && v ."
+alias hkdc="cd ~/.config/sxhkd && v ."
 
 # alias for running vpn as sudo
 alias rv="sudo bash -c '$VPN &'"
