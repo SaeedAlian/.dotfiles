@@ -1,0 +1,40 @@
+#!/usr/bin/sh
+bspc rule -r "*"
+
+# autostarts
+$HOME/.local/bin/background &
+killall -q &
+$HOME/.config/polybar/launch.sh &
+sxhkd &
+pgrep -x nm-applet > /dev/null || nm-applet &
+xset +dpms dpms 0 600 600 &
+pgrep -x xss-lock > /dev/null || xss-lock -l -- $HOME/.local/bin/start_lockscreen &
+pgrep -x light > /dev/null || light -I &
+pgrep -x picom > /dev/null || picom -b --config $HOME/.config/picom/picom.conf &
+pgrep -x clementine > /dev/null || clementine &
+setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
+
+# setup workspaces
+bspc monitor -d 1 2 3 4 5 6 0
+
+# ui
+bspc config border_width            1
+bspc config window_gap              0
+bspc config split_ratio             0.50
+bspc config borderless_monocle      true
+bspc config gapless_monocle         true
+bspc config normal_border_color     "#444444"
+bspc config focused_border_color    "#4080b0"
+bspc config single_monocle          true
+bspc config focus_follows_pointer   true
+
+# workspace rules
+bspc rule -a Brave-browser desktop='^2'
+bspc rule -a LibreWolf desktop='^2'
+bspc rule -a Chromium-browser desktop='^2'
+bspc rule -a firefox desktop='^2'
+bspc rule -a discord desktop='^4'
+bspc rule -a nekoray desktop='^5' state=tiled
+bspc rule -a Hiddify desktop='^5' state=tiled
+bspc rule -a Clementine desktop='^7'
+bspc rule -a TelegramDesktop desktop='^7'
