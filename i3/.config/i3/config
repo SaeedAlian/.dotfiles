@@ -16,15 +16,6 @@
 # set mod key
 set $mod Mod4
 
-# set wallpapers directory
-set $wallsdir "$HOME/pictures/wallpapers"
-
-# set background image name
-set $bgname "space_39"
-
-# set background image mode 
-set $bgmode "--bg-fill"
-
 # set vpn
 set $vpn hiddify
 
