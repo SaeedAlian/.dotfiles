@@ -1,0 +1,113 @@
+#!/bin/bash
+
+POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
+
+print_help() {
+	echo "BSPWM Polybar Visibility Script"
+	echo ""
+	echo "Usage: $(basename $0) [option]"
+	echo ""
+	echo "Options:"
+	echo "  -d, --desktop       Monitor desktop focus changes and update Polybar visibility accordingly."
+	echo "  -ns, --node-state   Monitor node state changes (e.g., fullscreen) and update Polybar visibility."
+	echo "  -nf, --node-focus   Monitor node focus changes and update Polybar visibility."
+	echo "  -h, --help          Display this help message."
+	echo ""
+	echo "Description:"
+	echo "  This script dynamically adjusts the visibility of Polybar based on the current BSPWM layout, node state, "
+	echo "  and focus changes. It works by subscribing to BSPWM events and using the specified Polybar visibility script."
+	echo ""
+	echo "Examples:"
+	echo "  $(basename $0) --desktop        # Start monitoring desktop focus changes."
+	echo "  $(basename $0) --node-state     # Start monitoring node state changes."
+	echo "  $(basename $0) --node-focus     # Start monitoring node focus changes."
+	echo ""
+	echo "Dependencies:"
+	echo "  - BSPWM: A tiling window manager."
+	echo "  - jq: JSON processor for parsing BSPWM output."
+	echo "  - $(basename $POLYBAR_SCRIPT): The script used to toggle Polybar visibility (ensure it exists and is executable)."
+}
+
+update_state() {
+	current_state=$(bspc query -T -n | jq -r '.client.state')
+
+	if [ "$current_state" == "fullscreen" ]; then
+		$POLYBAR_SCRIPT -h
+		return 0
+	else
+		$POLYBAR_SCRIPT -s
+		return 1
+	fi
+}
+
+update_layout() {
+	msg=$1
+
+	if update_state; then
+		return
+	fi
+
+	current_layout=$(bspc query -T -d | jq -r '.layout')
+
+	n=$(bspc query -N -d "${msg[2]}")
+	readarray -t nodes < <(printf '%s\n' "$n" | tr ' ' '\n')
+	nodes_len=${#nodes[@]}
+
+	if [ "$current_layout" == "tiled" ]; then
+		$POLYBAR_SCRIPT -s
+	elif [ "$current_layout" == "monocle" ]; then
+		if [ $nodes_len == 1 ]; then
+			$POLYBAR_SCRIPT -s
+		else
+			$POLYBAR_SCRIPT -h
+		fi
+	else
+		$POLYBAR_SCRIPT -s
+	fi
+}
+
+watch_desktop() {
+	bspc subscribe desktop_focus | while read -a msg; do
+		update_layout $msg
+	done
+}
+
+watch_node_state() {
+	bspc subscribe node_state | while read -a msg; do
+		update_state $msg
+	done
+}
+
+watch_node_focus() {
+	bspc subscribe node_focus | while read -a msg; do
+		update_state $msg
+	done
+}
+
+if [ $# == 0 ]; then
+	echo "Argument required" >&2
+	exit 1
+fi
+
+case $1 in
+-d | --desktop)
+	watch_desktop
+	exit 0
+	;;
+-ns | --node-state)
+	watch_node_state
+	exit 0
+	;;
+-nf | --node-focus)
+	watch_node_focus
+	exit 0
+	;;
+-h | --help)
+	print_help
+	exit 0
+	;;
+*)
+	echo "Invalid option $1" >&2
+	exit 1
+	;;
+esac

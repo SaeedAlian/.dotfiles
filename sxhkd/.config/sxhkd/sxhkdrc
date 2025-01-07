@@ -39,8 +39,8 @@ super + w
 	/bin/bash -c $HOME/.local/bin/network_menu
 
 # bluetooth menu
-super + b
-	/bin/bash -c $HOME/.local/bin/bluetooth_menu
+super + p
+	/bin/bash -c $HOME/.local/bin/bluetooth -m
 
 # power menu
 super + x
@@ -57,17 +57,21 @@ super + comma
 super + period
   $HOME/.local/bin/toggle_touchscreen
 
-# clementine play/pause
+# toggle polybar
+super + b
+  $HOME/.local/bin/polybar_visibility -t
+
+# music play/pause
 F11
-  clementine -t
+  $HOME/.local/bin/music -t
 
-# clementine play next
+# music play next
 F12
-  clementine -f
+  $HOME/.local/bin/music -n
 
-# clementine play previous
+# music play previous
 F10
-  clementine -r
+  $HOME/.local/bin/music -p
 
 # light up
 XF86MonBrightnessUp
@@ -121,7 +125,11 @@ super + shift + n
 
 # restart bspwm
 super + shift + r
-	bspc wm -r
+	bspc wm -r; notify-send 'bspwm' 'Reloaded config'
+
+# reload sxhkdrc
+super + shift + control + r
+    pkill -usr1 -x sxhkd; notify-send 'sxhkd' 'Reloaded config'
 
 # close
 super + c
@@ -129,7 +137,11 @@ super + c
 
 # alternate between the tiled and monocle layout
 super + f
-	bspc desktop -l next
+	$HOME/.config/bspwm/bspfullscreen 
+
+# fullscreen the focused node
+super + shift + f
+	$HOME/.config/bspwm/bspfullscreen -f
 
 # send the newest marked node to the newest preselected node
 super + y
@@ -164,8 +176,8 @@ super + Tab
 	bspc desktop -f last
 
 # focus or send to the given desktop
-super + {_,shift + }{1-6,grave}
-	bspc {desktop -f,node -d} '^{1-9,7}'
+super + {_,shift + }{1-7,grave}
+	bspc {desktop -f,node -d} '^{1-7,8}'
 
 # preselect the direction south
 super + v
