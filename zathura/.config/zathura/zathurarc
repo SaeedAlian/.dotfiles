@@ -6,6 +6,9 @@ set adjust-open "best-fit"
 # one page per row by default
 set pages-per-row 1
 
+# disable selection notification on the bottom of screen
+set selection-notification false
+
 # enable clipboard
 set selection-clipboard clipboard
 
@@ -39,7 +42,6 @@ set notification-error-fg "#151515"
 set notification-warning-bg "#AC4142"
 set notification-warning-fg "#151515"
 
-set highlight-color "#F4BF75"
 set highlight-active-color "#6A9FB5"
 
 set completion-highlight-fg "#151515"
