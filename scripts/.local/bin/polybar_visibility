@@ -1,0 +1,68 @@
+#!/bin/sh
+
+help() {
+  echo "Usage: $0 [option]"
+  echo ""
+  echo "Options:"
+  echo "  -t, --toggle            Toggle the visibility of Polybar."
+  echo "  -h, --hide              Hide the Polybar and set bottom padding to 0."
+  echo "  -s, --show              Show the Polybar and set bottom padding to 16."
+  echo "  -v, --visibility-state  Display the current visibility state of the Polybar (Hidden or Visible)."
+  echo "  --help                  Display this help message."
+  echo ""
+  exit 0
+}
+
+show() {
+  polybar-msg cmd show >/dev/null
+  bspc config bottom_padding 16
+  touch /tmp/polybarshow 2>/dev/null
+}
+
+hide() {
+  polybar-msg cmd hide >/dev/null
+  bspc config bottom_padding 0
+  rm /tmp/polybarshow 2>/dev/null
+}
+
+if [ $# == 0 ]; then
+  echo "Argument required" >&2
+  echo "[polybar_visibility --help] for help" >&2
+  exit 1
+fi
+
+case $1 in
+-t | --toggle)
+  if [ -f /tmp/polybarshow ]; then
+    hide
+  else
+    show
+  fi
+  ;;
+-h | --hide)
+  if [ -f /tmp/polybarshow ]; then
+    hide
+  fi
+  ;;
+-s | --show)
+  if [ -n /tmp/polybarshow ]; then
+    show
+  fi
+  ;;
+-v | --visibility-state)
+  if [ -f /tmp/polybarhidden ]; then
+    echo "Hidden"
+  else
+    echo "Visible"
+  fi
+  ;;
+-h | --help)
+  help
+  ;;
+*)
+  echo "Invalid option $1" >&2
+  help
+  ;;
+esac
+
+exit 0

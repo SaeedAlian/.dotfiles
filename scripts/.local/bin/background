@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export WALLS_DIR="$HOME/pictures/wallpapers/walls"
-export BGNAME="space_39"
+export BGNAME="space_1"
 export BGMODE="--bg-fill"
 
 feh --no-fehbg $BGMODE "$WALLS_DIR/$BGNAME.jpg"

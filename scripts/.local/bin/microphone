@@ -4,18 +4,26 @@ arg=$1
 togglemute=0
 
 case $arg in
-  -m | --mute)
-    togglemute=1
-    ;;
-  *)
-    echo "Invalid option" >&2
-    exit 1
-    ;;
+-m | --mute)
+	togglemute=1
+	;;
+-s | --status)
+	s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')
+	if [ "$s" == "yes" ]; then
+		echo "OFF"
+	else
+		echo "ON"
+	fi
+	;;
+*)
+	echo "Invalid option" >&2
+	exit 1
+	;;
 esac
 
 if [ $togglemute == 1 ]; then
-  pactl set-source-mute @DEFAULT_SOURCE@ toggle
-  exit 0
+	pactl set-source-mute @DEFAULT_SOURCE@ toggle
+	exit 0
 fi
 
 echo "Invalid option" >&2

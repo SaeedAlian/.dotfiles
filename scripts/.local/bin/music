@@ -1,0 +1,69 @@
+#!/bin/bash
+
+print_help() {
+	echo "Clementine Music Player Control Script"
+	echo ""
+	echo "Usage: $(basename $0) [option]"
+	echo ""
+	echo "Options:"
+	echo "  -s, --status        Display the current track title playing in Clementine."
+	echo "  -n, --next          Skip to the next track."
+	echo "  -p, --prev          Go back to the previous track."
+	echo "  -t, --toggle-play   Toggle play/pause for the current track."
+	echo ""
+	echo "This script provides simple command-line control for the Clementine music player."
+	echo ""
+	echo "Examples:"
+	echo "  $(basename $0) --status        # Display the current track title."
+	echo "  $(basename $0) --next          # Skip to the next track."
+	echo "  $(basename $0) --prev          # Go to the previous track."
+	echo "  $(basename $0) --toggle-play   # Toggle play/pause."
+}
+
+current() {
+	IFS="\n"
+	window_ids=()
+	window_ids_str=$(xdotool search --classname "clementine")
+	while read -r line; do
+		window_ids+=($line)
+	done <<<"$window_ids_str"
+
+	for window_id in "${window_ids[@]}"; do
+		window_title=$(xprop -id "$window_id" | grep "WM_NAME(STRING)" | sed 's/.*=//' | sed 's/\"//g')
+
+		if ! [ -z "$window_title" ]; then
+			if [[ "$window_title" =~ [.*-.*] ]]; then
+				echo "$window_title"
+			fi
+		fi
+	done
+
+	echo ""
+}
+
+case $1 in
+-s | --status)
+	current
+	exit 0
+	;;
+-n | --next)
+	clementine -f
+	exit 0
+	;;
+-p | --prev)
+	clementine -r
+	exit 0
+	;;
+-t | --toggle-play)
+	clementine -t
+	exit 0
+	;;
+-h | --help)
+	print_help
+	exit 0
+	;;
+*)
+	echo "Invalid option $1" >&2
+	exit 1
+	;;
+esac

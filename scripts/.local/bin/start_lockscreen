@@ -1,6 +1,6 @@
 #!/bin/sh
 
 export LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
-export BGNAME="space_39"
+export BGNAME="space_1"
 
 i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"

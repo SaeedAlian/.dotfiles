@@ -1,5 +1,28 @@
 #!/bin/bash
 
+print_help() {
+	echo "Bluetooth Manager Script"
+	echo ""
+	echo "Usage: $(basename $0) [option]"
+	echo ""
+	echo "Options:"
+	echo "  -s, --status      Display the current Bluetooth status (ON/OFF)."
+	echo "  -m, --menu        Launch the Bluetooth management menu using Rofi."
+	echo "  -h, --help        Show this help message."
+	echo ""
+	echo "This script allows you to manage Bluetooth devices and settings, including:"
+	echo "  - Power: Toggle Bluetooth power ON/OFF."
+	echo "  - Scan: Enable or disable device discovery scanning."
+	echo "  - Pairable: Make the device pairable or not."
+	echo "  - Discoverable: Make the device discoverable or not."
+	echo "  - Device Management: Pair, connect, trust, or remove devices."
+	echo ""
+	echo "Examples:"
+	echo "  $(basename $0) --status    # Display Bluetooth status."
+	echo "  $(basename $0) --menu      # Open the interactive menu."
+	echo "  $(basename $0) --help      # Display this help message."
+}
+
 power_on() {
 	if bluetoothctl show | grep -q "Powered: yes"; then
 		return 0
@@ -78,7 +101,7 @@ toggle_discoverable() {
 		show_menu
 	else
 		bluetoothctl discoverable on
-    notify-send -u normal -t 2000 "Bluetooth is now discoverable"
+		notify-send -u normal -t 2000 "Bluetooth is now discoverable"
 		show_menu
 	fi
 }
@@ -94,11 +117,11 @@ device_connected() {
 
 toggle_connection() {
 	if device_connected "$1"; then
-    notify-send -u normal -t 2000 "Disconnecting $device..."
+		notify-send -u normal -t 2000 "Disconnecting $device..."
 		bluetoothctl disconnect "$1"
 		device_menu "$device"
 	else
-    notify-send -u normal -t 2000 "Connecting to $device..."
+		notify-send -u normal -t 2000 "Connecting to $device..."
 		bluetoothctl connect "$1"
 		device_menu "$device"
 	fi
@@ -115,11 +138,11 @@ device_paired() {
 
 toggle_paired() {
 	if device_paired "$1"; then
-    notify-send -u normal -t 2000 "Removing pair $device..."
+		notify-send -u normal -t 2000 "Removing pair $device..."
 		bluetoothctl remove "$1"
 		device_menu "$device"
 	else
-    notify-send -u normal -t 2000 "Pairing to $device..."
+		notify-send -u normal -t 2000 "Pairing to $device..."
 		bluetoothctl pair "$1"
 		device_menu "$device"
 	fi
@@ -136,11 +159,11 @@ device_trusted() {
 
 toggle_trust() {
 	if device_trusted "$1"; then
-    notify-send -u normal -t 2000 "Untrusting $device..."
+		notify-send -u normal -t 2000 "Untrusting $device..."
 		bluetoothctl untrust "$1"
 		device_menu "$device"
 	else
-    notify-send -u normal -t 2000 "Trusting $device..."
+		notify-send -u normal -t 2000 "Trusting $device..."
 		bluetoothctl trust "$1"
 		device_menu "$device"
 	fi
@@ -160,18 +183,18 @@ device_menu() {
 	paired=$(device_paired "$mac")
 	trusted=$(device_trusted "$mac")
 
-  divider="---------"
+	divider="---------"
 	options="$connected\n$paired\n$trusted\n$divider\nBack\nExit"
 
-  chosen="$(echo -e "$options" | rofi -dmenu -p "Device $device_name")"
+	chosen="$(echo -e "$options" | rofi -dmenu -p "Device $device_name")"
 
 	case "$chosen" in
 	"" | "$divider")
-    exit 0
+		exit 0
 		;;
 	"Exit")
-    exit 0
-    ;;
+		exit 0
+		;;
 	"$connected")
 		toggle_connection "$mac"
 		;;
@@ -196,21 +219,21 @@ show_menu() {
 		pairable=$(pairable_on)
 		discoverable=$(discoverable_on)
 
-    divider="---------"
+		divider="---------"
 		options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\nExit"
 	else
 		power="Power: off"
 		options="$power\nExit"
 	fi
 
-  chosen="$(echo -e "$options" | rofi -dmenu -p "Bluetooth")"
+	chosen="$(echo -e "$options" | rofi -dmenu -p "Bluetooth")"
 
 	case "$chosen" in
 	"" | "$divider")
-    exit 0
+		exit 0
 		;;
 	"Exit")
-    exit 0
+		exit 0
 		;;
 	"$power")
 		toggle_power
@@ -231,4 +254,37 @@ show_menu() {
 	esac
 }
 
-show_menu
+get_status() {
+	if [ "$(bluetoothctl show | grep "Powered: yes" | wc -c)" -eq 0 ]; then
+		echo "OFF"
+	else
+		if [ "$(echo info | bluetoothctl | grep 'Device' | wc -c)" -eq 0 ]; then
+			echo "ON"
+		fi
+		echo "ON"
+	fi
+}
+
+if [ $# == 0 ]; then
+	show_menu
+	exit 0
+fi
+
+case $1 in
+-s | --status)
+	get_status
+	exit 0
+	;;
+-m | --menu)
+	show_menu
+	exit 0
+	;;
+-h | --help)
+	print_help
+	exit 0
+	;;
+*)
+	echo "Invalid option $1" >&2
+	exit 1
+	;;
+esac
