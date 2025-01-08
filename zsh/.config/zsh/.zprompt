@@ -1,0 +1,53 @@
+parse_git_dirty() {
+  STATUS="$(git status 2>/dev/null)"
+
+  if [[ $? -ne 0 ]]; then
+    printf ""
+    return
+  else
+    printf " ("
+  fi
+
+  if echo ${STATUS} | grep -c "renamed:" &>/dev/null; then printf " r"; else printf ""; fi
+  if echo ${STATUS} | grep -c "branch is ahead:" &>/dev/null; then printf " !"; else printf ""; fi
+  if echo ${STATUS} | grep -c "new file::" &>/dev/null; then printf " n"; else printf ""; fi
+  if echo ${STATUS} | grep -c "Untracked files:" &>/dev/null; then printf " u"; else printf ""; fi
+  if echo ${STATUS} | grep -c "modified:" &>/dev/null; then printf " m"; else printf ""; fi
+  if echo ${STATUS} | grep -c "deleted:" &>/dev/null; then printf " d"; else printf ""; fi
+  printf " )"
+}
+
+parse_git_branch() {
+  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
+  
+  if [[ -z $BRANCH ]]; then
+    printf ""
+    return
+  else
+    printf "($BRANCH)"
+  fi
+}
+
+parse_logo() {
+  OS="$(cat /etc/os-release | grep "NAME=" | head -n 1 | sed 's/.*=//' | sed 's/\"//g')"
+
+  case "$OS" in 
+  *Fedora*)
+      echo "󰣛"
+    ;;
+  *Artix*)
+      echo ""
+    ;;
+  *Arch*)
+      echo "󰣇"
+    ;;
+  *Void*)
+      echo ""
+    ;;
+  *)
+      echo "󰌽"
+    ;;
+  esac
+}
+
+PROMPT='%F{cyan} $(parse_logo)  %F{white}%2~ %F{green}$(parse_git_branch)%F{red}$(parse_git_dirty)%F{cyan}%f '

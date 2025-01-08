@@ -12,6 +12,7 @@
 #   tmux, fzf
 
 NOTES_DIR=$HOME/documents/notes
+PRIMARY_NOTE_FILENAME="primary"
 TMUX_SESSION_NAME=notes
 MAX_WINDOW_NUMBER=5
 ED="$EDITOR"
@@ -38,6 +39,8 @@ Usage: dnote [options] [filename]
 
 Options:
   -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n
+
+  -r, --primary         Toggle open primary note file. Don't provide a filename with this flag. cannot be used with -p, -f, -a, -fa, -d, -c, -n
 
   -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -p, -n, -c
 
@@ -208,13 +211,79 @@ function create_note_dir() {
 function create_note() {
   dir=$1
   filename=$2
+  is_primary=$3
 
-  fullpath="$NOTES_DIR/$dir/$filename"
-  d=$(date +%Y-%m-%d)
+  if [ -z "$is_primary" ] || [ $is_primary == 0 ]; then
+    fullpath="$NOTES_DIR/$dir/$filename"
+    d=$(date +%Y-%m-%d)
 
-  if [ ! -f $fullpath ]; then
-    touch $fullpath
-    echo "# ${filename%.*} ($d)" > $fullpath
+    if [ ! -f $fullpath ]; then
+      touch $fullpath
+      if [ "$dir" == "$d" ]; then
+        title=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+        echo "# $title
+
+  **Date:** $d" > $fullpath
+      else 
+        title=$(echo "$dir" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+        subtitle=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+
+        echo "# $title
+
+  ## $subtitle 
+
+  **Date:** $d
+
+  ---" > $fullpath
+      fi
+    fi
+  else
+    fullpath="$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+    echo $fullpath
+
+    if [ ! -f "$fullpath" ]; then
+      touch $fullpath
+      echo "# Personal Notes
+
+## Work
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Study
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Personal
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---" > $fullpath
+    fi
   fi
 }
 
@@ -399,6 +468,8 @@ if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   exit 0
 fi
 
+mkdir -p "$NOTES_DIR"
+
 dirname=$(date +%Y-%m-%d-%A)
 filename=""
 
@@ -409,11 +480,15 @@ fzf_flag=0
 fzf_all_notes_flag=0
 delete_flag=0
 current_window_flag=0
+primary_flag=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -f|--fzf)
       fzf_flag=1
+      ;;
+    -r|--primary)
+      primary_flag=1
       ;;
     -fa|-af|--fzf-all)
       fzf_flag=1
@@ -449,6 +524,30 @@ while [[ $# -gt 0 ]]; do
   esac
   shift 1
 done
+
+if [ $primary_flag == 1 ]; then
+  list_str=$(pgrep alacritty --list-full | grep -E "$TERMINAL --class "Alacritty-float" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"" | awk '{print $1}')
+  pids=()
+
+  IFS=$'\n'
+  while read -r line; do
+    pids+=("$line")
+  done <<< "$list_str"
+  
+  pids_len=${#pids[@]}
+
+  if [ -n "$list_str" ] && [ $pids_len -gt 0 ]; then
+    for pid in ${pids[@]}; do
+      kill "$pid"
+    done
+
+    exit 0
+  fi
+
+  create_note "" "" 1
+  $TERMINAL --class "Alacritty-float" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+  exit 0
+fi
 
 if [ $fzf_all_notes_flag == 1 ] && [ $fzf_flag != 1 ]; then
   print_err "Error: Invalid option, if you want to use [fzf all notes flag] you must include [fzf flag] too"

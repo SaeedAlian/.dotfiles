@@ -1,0 +1,63 @@
+#!/bin/bash
+
+declare -a opts=(
+	"Alacritty"
+	"Bash"
+	"BSPWM"
+	"Dunst"
+	"FastFetch"
+	"I3"
+	"NeoFetch"
+	"Neovim"
+	"Picom"
+	"Polybar"
+	"Redshift"
+	"Rofi"
+	"Scripts"
+	"Sxhkd"
+	"Tmux"
+	"Yazi"
+	"Zathura"
+	"Zsh"
+)
+
+declare -a dirs=(
+	"$HOME/.dotfiles/alacritty/.config/alacritty"
+	"$HOME/.dotfiles/bash/.config/bash"
+	"$HOME/.dotfiles/bspwm/.config/bspwm"
+	"$HOME/.dotfiles/dunst/.config/dunst"
+	"$HOME/.dotfiles/fastfetch/.config/fastfetch"
+	"$HOME/.dotfiles/i3/.config/i3"
+	"$HOME/.dotfiles/neofetch/.config/neofetch"
+	"$HOME/.dotfiles/nvim/.config/nvim"
+	"$HOME/.dotfiles/picom/.config/picom"
+	"$HOME/.dotfiles/polybar/.config/polybar"
+	"$HOME/.dotfiles/redshift/.config/redshift"
+	"$HOME/.dotfiles/rofi/.config/rofi"
+	"$HOME/.dotfiles/scripts/.local/bin"
+	"$HOME/.dotfiles/sxhkd/.config/sxhkd"
+	"$HOME/.dotfiles/tmux/.config/tmux"
+	"$HOME/.dotfiles/yazi/.config/yazi"
+	"$HOME/.dotfiles/zathura/.config/zathura"
+	"$HOME/.dotfiles/zsh/.config/zsh"
+)
+
+c=$(echo "$(printf '%s\n' "${opts[@]}")" | rofi -dmenu -i -p "Configs: ")
+
+if [ -z "$c" ]; then
+	exit 0
+fi
+
+for i in ${!opts[@]}; do
+	name=${opts[$i]}
+	if [ "$name" == "$c" ]; then
+		dir=${dirs[$i]}
+		if [ -d "$dir" ]; then
+			alacritty --working-directory "$dir"
+			exit 0
+		fi
+	fi
+done
+
+notify-send -u critical "Config path not found"
+exit 1

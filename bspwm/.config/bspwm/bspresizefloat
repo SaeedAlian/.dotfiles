@@ -1,0 +1,44 @@
+#!/bin/bash
+
+floatrules_str=$(bspc rule -l | grep "state=floating" | sed "s/\(.*:\).*/\1/" | sed 's/://')
+floatrules=()
+
+IFS=$'\n'
+while read -r line; do
+  floatrules+=("$line")
+done <<<"$floatrules_str"
+
+bspc subscribe node_state | while read -a msg; do
+  current_state=$(bspc query -T -n | jq -r '.client.state')
+  winclasses_str=$(xprop -id ${msg[3]} WM_CLASS 2>/dev/null | sed 's/.*= //' | sed 's/\"//g')
+  winclasses=()
+
+  IFS=$', '
+  while read -r line; do
+    winclasses+=("$line")
+  done <<<"$winclasses_str"
+
+  found=false
+
+  for f in ${floatrules[@]}; do
+    if $found; then
+      break
+    fi
+
+    for c in ${winclasses[@]}; do
+      if [ "$f" == "$c" ]; then
+        found=true
+        break
+      fi
+    done
+  done
+
+  if $found; then
+    continue
+  fi
+
+  if [[ "$current_state" == "floating" ]]; then
+    xdotool windowsize "${msg[3]}" 60% 70%
+    xdotool windowmove "${msg[3]}" 5% 5%
+  fi
+done

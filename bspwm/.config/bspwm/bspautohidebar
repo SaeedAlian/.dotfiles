@@ -79,7 +79,7 @@ watch_node_state() {
 }
 
 watch_node_focus() {
-	bspc subscribe node_focus | while read -a msg; do
+	bspc subscribe node_activate | while read -a msg; do
 		update_state $msg
 	done
 }

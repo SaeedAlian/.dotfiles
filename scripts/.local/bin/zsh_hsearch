@@ -1,6 +1,6 @@
 #!/bin/sh
 
-HISTORY_FILE="$HOME/.zsh_history"
+HISTORY_FILE="$HOME/.cache/.zsh_history"
 
 count=$1
 
