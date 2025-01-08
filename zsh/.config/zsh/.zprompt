@@ -4,6 +4,9 @@ parse_git_dirty() {
   if [[ $? -ne 0 ]]; then
     printf ""
     return
+  elif echo ${STATUS} | grep -c "tree clean" &>/dev/null; then
+    printf ""
+    return
   else
     printf " ("
   fi
