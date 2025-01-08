@@ -53,4 +53,4 @@ parse_logo() {
   esac
 }
 
-PROMPT='%F{cyan} $(parse_logo)  %F{white}%2~ %F{green}$(parse_git_branch)%F{red}$(parse_git_dirty)%F{cyan}%f '
+PROMPT='%F{cyan} $(parse_logo)  %F{white}%2~ %F{green}$(parse_git_branch)%F{red}$(parse_git_dirty)%F{cyan} %f '

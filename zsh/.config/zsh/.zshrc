@@ -99,6 +99,9 @@ bindkey -s ^n^a "dnote -af\n"
 # run dnote prompt
 bindkey -s ^p "dnote -p\n"
 
+# reverse move in completion menu
+bindkey '^[[Z' reverse-menu-complete
+
 ### aliases ###
 
 alias zshsrc="source $XDG_CONFIG_HOME/zsh/.zshrc"
@@ -124,3 +127,9 @@ alias neofetch="neofetch --ascii_distro Fedora_old"
 alias fastfetch="fastfetch -l fedora-old"
 
 alias rv="sudo bash -c '$VPN &'"
+
+# autoload colors for completion
+autoload compinit && compinit
+zstyle ':completion:*' menu select
+zstyle ':completion:*' matcher-list 'm:{a-z}={a-za-z}'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
