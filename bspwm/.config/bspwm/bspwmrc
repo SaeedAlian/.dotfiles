@@ -60,20 +60,8 @@ bspc rule -a ffplay state=floating rectangle=200x100+20+20 follow=on focus=off s
 
 ###### scripts ######
 
-if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar -d") ]; then
-	$HOME/.config/bspwm/bspautohidebar -d &
-fi
-
-if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar -ns") ]; then
-	$HOME/.config/bspwm/bspautohidebar -ns &
-fi
-
-if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar -na") ]; then
-	$HOME/.config/bspwm/bspautohidebar -na &
-fi
-
-if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar -nf") ]; then
-	$HOME/.config/bspwm/bspautohidebar -nf &
+if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar") ]; then
+	$HOME/.config/bspwm/bspautohidebar &
 fi
 
 if [ -z $(pgrep bspresizefloat --list-full | grep -E "bspresizefloat") ]; then

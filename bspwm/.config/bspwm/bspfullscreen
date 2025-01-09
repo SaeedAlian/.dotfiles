@@ -2,62 +2,27 @@
 
 POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
 
-print_help() {
-  echo "BSPWM Polybar Visibility and Layout Script"
-  echo ""
-  echo "Usage: $(basename $0) [option]"
-  echo ""
-  echo "Options:"
-  echo "  -f, --fullscreen    Toggle the focused window between fullscreen and tiled states."
-  echo "                      Adjusts Polybar visibility accordingly."
-  echo "  -h, --help          Display this help message."
-  echo ""
-  echo "Description:"
-  echo "  This script manages BSPWM desktop layouts and node states while dynamically updating"
-  echo "  the visibility of Polybar using a specified visibility script."
-  echo ""
-  echo "Behavior:"
-  echo "  - Without arguments: Toggles the desktop layout between 'tiled' and 'monocle'."
-  echo "                       Adjusts Polybar visibility: hidden for 'monocle', shown for 'tiled'."
-  echo "  - With the -f or --fullscreen option: Toggles the focused window between fullscreen"
-  echo "    and tiled states, hiding or showing Polybar as appropriate."
-  echo ""
-  echo "Examples:"
-  echo "  $(basename $0) --fullscreen     # Toggle the current window's fullscreen state."
-  echo "  $(basename $0)                  # Toggle the desktop layout between tiled and monocle."
-  echo ""
-  echo "Dependencies:"
-  echo "  - BSPWM: A tiling window manager."
-  echo "  - jq: JSON processor for parsing BSPWM output."
-  echo "  - $(basename $POLYBAR_SCRIPT): The script used to toggle Polybar visibility (ensure it exists and is executable)."
-}
-
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-  print_help
-  exit 0
-fi
-
 if [ "$1" == "-f" ] || [ "$1" == "--fullscreen" ]; then
-  current_node_state=$(bspc query -T -n | jq -r '.client.state')
-  if [ "$current_node_state" != "fullscreen" ]; then
-    bspc node -t fullscreen
-    $POLYBAR_SCRIPT -h
-  else
-    bspc node -t tiled
-    $POLYBAR_SCRIPT -s
-  fi
+	current_node_state=$(bspc query -T -n | jq -r '.client.state')
+	if [ "$current_node_state" != "fullscreen" ]; then
+		bspc node -t fullscreen
+		$POLYBAR_SCRIPT -h
+	else
+		bspc node -t tiled
+		$POLYBAR_SCRIPT -s
+	fi
 
-  exit 0
+	exit 0
 fi
 
 current_layout=$(bspc query -T -d | jq -r '.layout')
 
 if [ "$current_layout" == "tiled" ]; then
-  bspc desktop -l monocle
-  $POLYBAR_SCRIPT -h
+	bspc desktop -l monocle
+	$POLYBAR_SCRIPT -h
 elif [ "$current_layout" == "monocle" ]; then
-  bspc desktop -l tiled
-  $POLYBAR_SCRIPT -s
+	bspc desktop -l tiled
+	$POLYBAR_SCRIPT -s
 else
-  exit 0
+	exit 0
 fi
