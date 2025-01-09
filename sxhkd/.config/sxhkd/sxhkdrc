@@ -35,6 +35,9 @@ super + t
 super + shift + v
   $TERMINAL --class "Alacritty-float" -e sudo bash -c "$VPN &"
 
+# webcam
+super + shift + control + w
+  $HOME/.local/bin/webcam
 
 ######### menus #########
 
@@ -167,6 +170,14 @@ super + space + {_,shift}
 # focus the node in the given direction
 super + {_,shift + }{h,j,k,l}
 	bspc node -{f,s} {west,south,north,east}
+
+# change the layer of the node
+super + bracket{left,right}
+	bspc node -l {below,above}
+
+# toggle sticky flag
+super + shift + s
+	$HOME/.config/bspwm/bspstickytoggle
 
 # focus the next node in the current desktop
 super + apostrophe
