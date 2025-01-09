@@ -1,5 +1,5 @@
 -- auto-format on save
-vim.cmd([[autocmd BufWritePre * lua vim.lsp.buf.format({ timeout_ms = 6000 })]])
+vim.cmd([[autocmd BufWritePre * lua if vim.g.autoformat then vim.lsp.buf.format({ timeout_ms = 6000 }) end]])
 
 -- set textwidth to 80 for Markdown files
 vim.api.nvim_create_autocmd("FileType", {
