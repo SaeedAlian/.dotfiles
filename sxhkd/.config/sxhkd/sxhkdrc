@@ -43,7 +43,7 @@ super + shift + control + w
 
 # program launcher
 super + d
-  dmenu_run -hp $(cat "$HOME/.dotfiles/dmenu/hp.csv")
+  dmenu_run -p "Apps: " -hp $(cat "$HOME/.dotfiles/dmenu/hp.csv")
 
 # network menu
 super + w
