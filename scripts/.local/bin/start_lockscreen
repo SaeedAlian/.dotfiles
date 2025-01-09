@@ -3,4 +3,4 @@
 export LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
 export BGNAME="space_39"
 
-i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png" && sleep 5 && xset dpms force off
+i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png" && xset dpms force off

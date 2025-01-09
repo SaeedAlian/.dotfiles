@@ -7,7 +7,7 @@ print_help() {
 	echo ""
 	echo "Options:"
 	echo "  -s, --status      Display the current Bluetooth status (ON/OFF)."
-	echo "  -m, --menu        Launch the Bluetooth management menu using Rofi."
+	echo "  -m, --menu        Launch the Bluetooth management menu using $MENU."
 	echo "  -h, --help        Show this help message."
 	echo ""
 	echo "This script allows you to manage Bluetooth devices and settings, including:"
@@ -186,7 +186,7 @@ device_menu() {
 	divider="---------"
 	options="$connected\n$paired\n$trusted\n$divider\nBack\nExit"
 
-	chosen="$(echo -e "$options" | rofi -dmenu -p "Device $device_name")"
+	chosen="$(echo -e "$options" | $MENU -p "Device $device_name")"
 
 	case "$chosen" in
 	"" | "$divider")
@@ -226,7 +226,7 @@ show_menu() {
 		options="$power\nExit"
 	fi
 
-	chosen="$(echo -e "$options" | rofi -dmenu -p "Bluetooth")"
+	chosen="$(echo -e "$options" | $MENU -p "Bluetooth")"
 
 	case "$chosen" in
 	"" | "$divider")

@@ -15,19 +15,19 @@ elif [[ "$connected" =~ "disabled" ]]; then
 fi
 
 if [ -z "$simcard_module_status" ]; then
-  has_simcard_module=false
+	has_simcard_module=false
 fi
 
 if $has_simcard_module; then
-  if [[ "$simcard_module_status" == "connected" ]]; then
-    toggle_simcard="󰱟  Disable Mobile Network"
-  elif [[ "$simcard_module_status" == "disconnected" ]]; then
-    toggle_simcard="󰱔  Enable Mobile Network"
-  fi
+	if [[ "$simcard_module_status" == "connected" ]]; then
+		toggle_simcard="󰱟  Disable Mobile Network"
+	elif [[ "$simcard_module_status" == "disconnected" ]]; then
+		toggle_simcard="󰱔  Enable Mobile Network"
+	fi
 
-  chosen_network=$(echo -e "$toggle_simcard\n$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
+	chosen_network=$(echo -e "$toggle_simcard\n$toggle_wifi\n$wifi_list" | uniq -u | $MENU -i -p "Network: ")
 else
-  chosen_network=$(echo -e "$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
+	chosen_network=$(echo -e "$toggle_wifi\n$wifi_list" | uniq -u | $MENU -i -p "Network: ")
 fi
 
 read -r chosen_id <<<"${chosen_network:3}"
@@ -39,9 +39,9 @@ elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
 elif [ "$chosen_network" = "󰖪  Disable Wi-Fi" ]; then
 	nmcli radio wifi off
 elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱔  Enable Mobile Network" ]; then
-  nmcli device up $simcard_module_name
+	nmcli device up $simcard_module_name
 elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱟  Disable Mobile Network" ]; then
-  nmcli device down $simcard_module_name
+	nmcli device down $simcard_module_name
 else
 	success_message="You are now connected to the Wi-Fi network \"$chosen_id\"."
 	saved_connections=$(nmcli -g NAME connection)
@@ -50,7 +50,7 @@ else
 		nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
 	else
 		if [[ "$chosen_network" =~ "" ]]; then
-			wifi_password=$(rofi -dmenu -p "Password: ")
+			wifi_password=$($MENU -p "Password: ")
 		fi
 		nmcli device wifi connect "$chosen_id" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
 	fi

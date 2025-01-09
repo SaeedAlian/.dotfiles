@@ -1,30 +1,32 @@
 #!/bin/bash
 
 declare -a opts=(
-	"Alacritty"
-	"Bash"
-	"BSPWM"
-	"Dunst"
-	"FastFetch"
-	"I3"
-	"NeoFetch"
-	"Neovim"
-	"Picom"
-	"Polybar"
-	"Redshift"
-	"Rofi"
-	"Scripts"
-	"Sxhkd"
-	"Tmux"
-	"Yazi"
-	"Zathura"
-	"Zsh"
+	"alacritty"
+	"bash"
+	"bspwm"
+	"dmenu"
+	"dunst"
+	"fastfetch"
+	"i3"
+	"neofetch"
+	"neovim"
+	"picom"
+	"polybar"
+	"redshift"
+	"rofi"
+	"scripts"
+	"sxhkd"
+	"tmux"
+	"yazi"
+	"zathura"
+	"zsh"
 )
 
 declare -a dirs=(
 	"$HOME/.dotfiles/alacritty/.config/alacritty"
 	"$HOME/.dotfiles/bash/.config/bash"
 	"$HOME/.dotfiles/bspwm/.config/bspwm"
+	"$HOME/.dotfiles/dmenu"
 	"$HOME/.dotfiles/dunst/.config/dunst"
 	"$HOME/.dotfiles/fastfetch/.config/fastfetch"
 	"$HOME/.dotfiles/i3/.config/i3"
@@ -42,7 +44,7 @@ declare -a dirs=(
 	"$HOME/.dotfiles/zsh/.config/zsh"
 )
 
-c=$(echo "$(printf '%s\n' "${opts[@]}")" | rofi -dmenu -i -p "Configs: ")
+c=$(echo "$(printf '%s\n' "${opts[@]}")" | $MENU -i -p "Configs: ")
 
 if [ -z "$c" ]; then
 	exit 0

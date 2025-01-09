@@ -20,61 +20,59 @@ actions[shutdown]="systemctl poweroff"
 confirmations=(reboot shutdown logout)
 
 ask_for_confirmation() {
-  ans="$(echo -e "No\nYes" | rofi -dmenu -i -p "Are you sure??")"
+	ans="$(echo -e "No\nYes" | $MENU -i -p "Are you sure??")"
 
-  if [ "$ans" == "Yes" ]; then
-    return 1
-  else
-    return 0
-  fi
+	if [ "$ans" == "Yes" ]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
-
 show_menu() {
-  options=""
+	options=""
 
-  for entry in "${all[@]}"; do
-    text=${texts[$entry]}
-    if [ -z "$options" ]; then
-      options="$text"
-    else
-      options="$options\n$text"
-    fi
-  done
-  options="$options\nExit"
+	for entry in "${all[@]}"; do
+		text=${texts[$entry]}
+		if [ -z "$options" ]; then
+			options="$text"
+		else
+			options="$options\n$text"
+		fi
+	done
+	options="$options\nExit"
 
+	chosen="$(echo -e "$options" | $MENU -i -p "Power Menu")"
 
-	chosen="$(echo -e "$options" | rofi -dmenu -i -p "Power Menu")"
+	if [ "$chosen" == "Exit" ] || [ -z "$chosen" ]; then
+		exit 0
+	fi
 
-  if [ "$chosen" == "Exit" ] || [ -z "$chosen" ]; then
-    exit 0
-  fi
+	chosen_entry=""
 
-  chosen_entry=""
+	for entry in "${all[@]}"; do
+		text=${texts[$entry]}
+		if [ "$text" == "$chosen" ]; then
+			chosen_entry=$entry
+		fi
+	done
 
-  for entry in "${all[@]}"; do
-    text=${texts[$entry]}
-    if [ "$text" == "$chosen" ]; then
-      chosen_entry=$entry
-    fi
-  done
+	if [ -z "$chosen_entry" ]; then
+		exit 1
+	fi
 
-  if [ -z "$chosen_entry" ]; then
-    exit 1
-  fi
+	action=${actions[$chosen_entry]}
 
-  action=${actions[$chosen_entry]}
+	for c in "${confirmations[@]}"; do
+		text=${texts[$c]}
+		if [ "$text" == "$chosen" ]; then
+			if ask_for_confirmation; then
+				exit 0
+			fi
+		fi
+	done
 
-  for c in "${confirmations[@]}"; do
-    text=${texts[$c]}
-    if [ "$text" == "$chosen" ]; then
-      if ask_for_confirmation; then
-        exit 0
-      fi
-    fi
-  done
-
-  $action
+	$action
 }
 
 show_menu
