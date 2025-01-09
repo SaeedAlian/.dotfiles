@@ -1,3 +1,11 @@
+### cache ###
+
+ZSH_CACHE="$HOME/.cache/zsh/"
+if [[ ! -d $ZSH_CACHE ]]; then
+  mkdir -p $ZSH_CACHE 
+fi
+ZSH_COMPDUMP="$ZSH_CACHE/.zcompdump-${ZSH_VERSION}"
+
 ### options ###
 setopt prompt_subst # set prompt subset for parsing functions in prompt
 setopt append_history # append rather then overwrite
@@ -14,13 +22,6 @@ source $XDG_CONFIG_HOME/zsh/.zprompt
 if [[ "$(tty)" = "/dev/tty1" ]]; then
 	startx "$XDG_CONFIG_HOME/X11/xinitrc"
 fi
-
-# set cache
-ZSH_CACHE="$HOME/.cache/zsh/"
-if [[ ! -d $ZSH_CACHE ]]; then
-  mkdir -p $ZSH_CACHE 
-fi
-ZSH_COMPDUMP="$ZSH_CACHE/.zcompdump-${SHORT_HOST}-${ZSH_VERSION}"
 
 # history file
 export SAVEHIST=10000
@@ -123,13 +124,13 @@ alias upmu="update_music"
 alias h="zsh_hsearch"
 alias hm="zsh_hsearch max"
 
-alias neofetch="neofetch --ascii_distro Fedora_old"
-alias fastfetch="fastfetch -l fedora-old"
+alias neofetch="neofetch --ascii_distro Fedora_small"
+alias fastfetch="fastfetch -l Fedora_small"
 
 alias rv="sudo bash -c '$VPN &'"
 
 # autoload colors for completion
-autoload compinit && compinit
+autoload compinit && compinit -d "$ZSH_COMPDUMP"
 zstyle ':completion:*' menu select
 zstyle ':completion:*' matcher-list 'm:{a-z}={a-za-z}'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
