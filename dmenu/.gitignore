@@ -1,7 +1,5 @@
 dmenu
-dmenu.o
+*.o
+*.orig
 config.h
-drw.o
 stest
-util.o
-stest.o
