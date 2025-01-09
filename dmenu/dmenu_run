@@ -1,2 +1,5 @@
 #!/bin/sh
+
+source $HOME/.config/env/env_vars
+
 dmenu_path | dmenu "$@" | ${SHELL:-"/bin/sh"} &
