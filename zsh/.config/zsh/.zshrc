@@ -28,9 +28,6 @@ export SAVEHIST=10000
 export HISTFILE="$HOME/.cache/.zsh_history"
 export HISTDUP=erase
 
-# path variable
-export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin"
-
 # set the manpager to nvim
 export MANPAGER="nvim +Man!"
 
