@@ -1,7 +1,5 @@
 #!/usr/bin/sh
 
-source $HOME/.config/env/env_vars
-
 ###### remove all rules ######
 bspc rule -r "*"
 
@@ -11,7 +9,7 @@ $HOME/.config/polybar/launch.sh &
 
 xset +dpms dpms 0 600 600 &
 
-# pkill sxhkd &
+pkill sxhkd &
 sxhkd &
 pgrep -x nm-applet >/dev/null || nm-applet &
 pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/start_lockscreen &
