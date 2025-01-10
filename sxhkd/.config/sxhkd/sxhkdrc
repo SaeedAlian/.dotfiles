@@ -6,8 +6,6 @@
 ###################################
 ###################################
 
-source $HOME/.config/env/env_vars
-
 
 ######### launchs #########
 
@@ -39,11 +37,15 @@ super + shift + v
 super + shift + control + w
   $HOME/.local/bin/webcam
 
+# sxiv in wallpapers
+super + shift + z
+  sxiv $HOME/pictures/wallpapers/walls
+
 ######### menus #########
 
 # program launcher
 super + d
-  dmenu_run -p "Apps: " -hp $(cat "$HOME/.dotfiles/dmenu/hp.csv")
+	rofi -show drun
 
 # network menu
 super + w
