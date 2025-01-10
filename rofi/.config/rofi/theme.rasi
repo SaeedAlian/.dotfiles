@@ -1,28 +1,31 @@
 * {
-  bg: #000407ca;
-  bg-alt: #2c2c3fff;
-  bg-selected: #31324466;
+  bg-norm: #000407;
+  bg-sel: #4080b0;
+  bg-label: #4080b0;
   border-color: #4080b0;
-
-  fg: #ffffff;
-  fg-alt: #ffffff;
+  fg-norm: #bbbbbb;
+  fg-sel: #eeeeee;
+  fg-label: #eeeeee;
 }
 
 window {
-  background-color: @bg;
+  background-color: @bg-norm;
   padding: 4px;
   border: 3;
   border-color: @border-color;
+  width: 100%;
+  location: north;
+  anchor: north;
 }
 
 element {
   background-color: transparent;
-  text-color: @fg-alt;
+  text-color: @fg-norm;
 }
 
 element selected {
-  text-color: @fg;
-  background-color: @bg-selected;
+  text-color: @fg-sel;
+  background-color: @bg-sel;
 }
 
 element-text {
@@ -36,24 +39,25 @@ element-icon {
 }
 
 entry {
-  background-color: @bg;
-  text-color: @fg;
+  background-color: @bg-norm;
+  text-color: @fg-norm;
 }
 
 inputbar {
   children: [prompt, entry];
-  background-color: @bg;
+  background-color: @bg-norm;
+  text-color: @fg-norm;
 }
 
 listview {
-  background-color: @bg;
+  background-color: @bg-norm;
 }
 
 mainbox {
-  background-color: @bg;
+  background-color: @bg-norm;
 }
 
 prompt {
-  background-color: @bg;
-  text-color: @fg;
+  background-color: @bg-label;
+  text-color: @fg-label;
 }
