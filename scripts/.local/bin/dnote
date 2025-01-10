@@ -16,6 +16,7 @@ PRIMARY_NOTE_FILENAME="primary"
 TMUX_SESSION_NAME=notes
 MAX_WINDOW_NUMBER=5
 ED="$EDITOR"
+TERMINAL_FLOAT_CLASS="Alacritty-float"
 
 if ! type "tmux" > /dev/null; then
   echo "Error: tmux is not installed"
@@ -526,7 +527,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ $primary_flag == 1 ]; then
-  list_str=$(pgrep alacritty --list-full | grep -E "$TERMINAL --class "Alacritty-float" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"" | awk '{print $1}')
+  list_str=$(pgrep alacritty --list-full | grep -E "$TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"" | awk '{print $1}')
   pids=()
 
   IFS=$'\n'
@@ -545,7 +546,7 @@ if [ $primary_flag == 1 ]; then
   fi
 
   create_note "" "" 1
-  $TERMINAL --class "Alacritty-float" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+  $TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
   exit 0
 fi
 
