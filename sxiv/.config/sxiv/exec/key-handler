@@ -1,0 +1,10 @@
+#!/bin/sh
+
+while read file; do
+	case "$1" in
+	"C-s")
+		b=$(basename $file)
+		wallpaper -sw "${b%.*}"
+		;;
+	esac
+done
