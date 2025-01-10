@@ -17,6 +17,4 @@ export BROWSER="librewolf"
 export FILEMANAGER="pcmanfm-qt"
 export CALCULATOR="qalculate-qt"
 
-export MENU="dmenu"
-
-export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin"
+export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin:$HOME/.local/share/applications"

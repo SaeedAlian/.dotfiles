@@ -1,64 +1,62 @@
 #!/bin/bash
 
 declare -a opts=(
-	"alacritty"
-	"bash"
-	"bspwm"
-	"dmenu"
-	"dunst"
-	"fastfetch"
-	"i3"
-	"neofetch"
-	"neovim"
-	"picom"
-	"polybar"
-	"redshift"
-	"rofi"
-	"scripts"
-	"sxhkd"
-	"tmux"
-	"yazi"
-	"zathura"
-	"zsh"
+  "alacritty"
+  "bspwm"
+  "dunst"
+  "fastfetch"
+  "i3"
+  "neofetch"
+  "neovim"
+  "picom"
+  "polybar"
+  "redshift"
+  "rofi"
+  "scripts"
+  "sxhkd"
+  "tmux"
+  "userconf"
+  "yazi"
+  "zathura"
+  "zsh"
 )
 
 declare -a dirs=(
-	"$HOME/.dotfiles/alacritty/.config/alacritty"
-	"$HOME/.dotfiles/bash/.config/bash"
-	"$HOME/.dotfiles/bspwm/.config/bspwm"
-	"$HOME/.dotfiles/dmenu"
-	"$HOME/.dotfiles/dunst/.config/dunst"
-	"$HOME/.dotfiles/fastfetch/.config/fastfetch"
-	"$HOME/.dotfiles/i3/.config/i3"
-	"$HOME/.dotfiles/neofetch/.config/neofetch"
-	"$HOME/.dotfiles/nvim/.config/nvim"
-	"$HOME/.dotfiles/picom/.config/picom"
-	"$HOME/.dotfiles/polybar/.config/polybar"
-	"$HOME/.dotfiles/redshift/.config/redshift"
-	"$HOME/.dotfiles/rofi/.config/rofi"
-	"$HOME/.dotfiles/scripts/.local/bin"
-	"$HOME/.dotfiles/sxhkd/.config/sxhkd"
-	"$HOME/.dotfiles/tmux/.config/tmux"
-	"$HOME/.dotfiles/yazi/.config/yazi"
-	"$HOME/.dotfiles/zathura/.config/zathura"
-	"$HOME/.dotfiles/zsh/.config/zsh"
+  "$HOME/.dotfiles/alacritty/.config/alacritty"
+  "$HOME/.dotfiles/bspwm/.config/bspwm"
+  "$HOME/.dotfiles/dunst/.config/dunst"
+  "$HOME/.dotfiles/fastfetch/.config/fastfetch"
+  "$HOME/.dotfiles/i3/.config/i3"
+  "$HOME/.dotfiles/neofetch/.config/neofetch"
+  "$HOME/.dotfiles/nvim/.config/nvim"
+  "$HOME/.dotfiles/picom/.config/picom"
+  "$HOME/.dotfiles/polybar/.config/polybar"
+  "$HOME/.dotfiles/redshift/.config/redshift"
+  "$HOME/.dotfiles/rofi/.config/rofi"
+  "$HOME/.dotfiles/scripts/.local/bin"
+  "$HOME/.dotfiles/sxhkd/.config/sxhkd"
+  "$HOME/.dotfiles/tmux/.config/tmux"
+  "$HOME/.dotfiles/userconf"
+  "$HOME/.dotfiles/yazi/.config/yazi"
+  "$HOME/.dotfiles/zathura/.config/zathura"
+  "$HOME/.dotfiles/zsh/.config/zsh"
 )
 
-c=$(echo "$(printf '%s\n' "${opts[@]}")" | $MENU -i -p "Configs: ")
+c=$(echo "$(printf '%s\n' "${opts[@]}")" | rofi -dmenu -i -p "Configs: ")
 
 if [ -z "$c" ]; then
-	exit 0
+  exit 0
 fi
 
 for i in ${!opts[@]}; do
-	name=${opts[$i]}
-	if [ "$name" == "$c" ]; then
-		dir=${dirs[$i]}
-		if [ -d "$dir" ]; then
-			alacritty --working-directory "$dir"
-			exit 0
-		fi
-	fi
+  name=${opts[$i]}
+  if [ "$name" == "$c" ]; then
+    dir=${dirs[$i]}
+    if [ -d "$dir" ]; then
+      alacritty --working-directory "$dir"
+      exit 0
+    fi
+  fi
 done
 
 notify-send -u critical "Config path not found"
