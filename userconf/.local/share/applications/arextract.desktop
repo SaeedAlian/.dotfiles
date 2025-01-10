@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=ArExtract
+Comment=Extract files based on their extension
+Exec=arextract %f
+Terminal=true
+Type=Application
+MimeType=application/x-compressed;application/x-bzip;application/x-bzip2;application/x-gzip;application/x-rar;application/x-tar;application/zip;application/x-7z-compressed;application/x-xz;
+Categories=Utility;
