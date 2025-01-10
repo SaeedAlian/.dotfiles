@@ -94,7 +94,7 @@ y = 0
 
 [[keyboard.bindings]]
 action = "ToggleViMode"
-key = "]"
+key = "["
 mods = "Control"
 
 [[keyboard.bindings]]
