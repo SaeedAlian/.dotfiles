@@ -26,6 +26,7 @@ application/zip=arextract.desktop
 application/x-7z-compressed=arextract.desktop
 application/x-xz=arextract.desktop
 application/vnd.rar=arextract.desktop
+inode/x-empty=nvim.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
@@ -50,3 +51,4 @@ image/fif=sxiv.desktop;
 image/pjpeg=sxiv.desktop;
 image/webp=sxiv.desktop;
 image/gif=feh.desktop;
+inode/x-empty=nvim.desktop;

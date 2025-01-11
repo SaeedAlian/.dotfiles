@@ -14,7 +14,7 @@ export EDITOR="nvim"
 export VPN="hiddify"
 export TERMINAL="alacritty"
 export BROWSER="librewolf"
-export FILEMANAGER="pcmanfm-qt"
+export FILEMANAGER="pcmanfm"
 export CALCULATOR="qalculate-qt"
 
 export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin:$HOME/.local/share/applications"
