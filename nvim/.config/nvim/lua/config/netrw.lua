@@ -10,14 +10,19 @@ g.netrw_winsize = 25
 -- removes .. and . in the top of netrw buffer
 g.netrw_list_hide = "^\\.\\.\\/$"
 
+vim.g.NetRWCursorLine = 1
+
 function ToggleNetRWWindow()
   if vim.bo.filetype == "netrw" then
+    vim.g.NetRWCursorLine = vim.fn.line(".")
     vim.api.nvim_command("Rex")
     if vim.bo.filetype == "netrw" then
       vim.api.nvim_command("bdel")
     end
   else
     vim.api.nvim_command("Ex")
+    local win_id = vim.api.nvim_get_current_win()
+    vim.api.nvim_win_set_cursor(win_id, { vim.g.NetRWCursorLine, 1 })
   end
 end
 
@@ -32,6 +37,19 @@ vim.api.nvim_create_autocmd("FileType", {
   group = "netrw",
   pattern = "netrw",
   callback = function()
+    vim.api.nvim_create_autocmd("BufLeave", {
+      group = "netrw",
+      pattern = "*",
+      once = true,
+      callback = function()
+        if vim.bo.filetype == "netrw" then
+          if vim.fn.line(".") ~= vim.g.NetRWCursorLine then
+            vim.g.NetRWCursorLine = vim.fn.line(".")
+          end
+        end
+      end,
+    })
+
     vim.api.nvim_command("setlocal buftype=nofile")
     vim.api.nvim_command("setlocal bufhidden=wipe")
     vim.keymap.set("n", "<esc>", "<CMD>ToggleNetRW<CR>", { noremap = true, silent = true, buffer = true })
