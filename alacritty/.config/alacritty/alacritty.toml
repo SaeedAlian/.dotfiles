@@ -183,7 +183,8 @@ action = "Copy"
 mouse = "Left"
 
 [scrolling]
-history = 8000
+history = 10000
+multiplier = 2
 
 [selection]
 save_to_clipboard = false
