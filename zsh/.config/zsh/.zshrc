@@ -75,6 +75,9 @@ bindkey -s ^p "dnote -p\n"
 # reverse move in completion menu
 bindkey '^[[Z' reverse-menu-complete
 
+# run fastfetch
+bindkey -s ^o "fastfetch\n"
+
 ### aliases ###
 
 alias zshsrc="source $XDG_CONFIG_HOME/zsh/.zshrc"
@@ -84,7 +87,7 @@ alias cnote="cd $HOME/documents/notes"
 
 alias v="nvim"
 alias z="zathura"
-alias fm="pcmanfm-qt"
+alias fm="pcmanfm"
 
 alias ex="arextract"
 alias bcd="bettercd"
