@@ -23,7 +23,7 @@ set $vpn hiddify
 set $terminal alacritty
 
 # set filemanager 
-set $filemanager pcmanfm-qt
+set $filemanager pcmanfm
 
 # set calculator
 set $calculator qalculate-qt
