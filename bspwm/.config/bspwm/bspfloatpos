@@ -1,7 +1,7 @@
 #!/bin/sh
 
-SCREEN_W=1920
-SCREEN_H=1080
+source $HOME/.config/bspwm/bsp_vars
+
 RESTRICTED_NODES=("Yad" "ffplay" "Alacritty-float")
 
 floatrules_str=$(bspc rule -l | grep "state=floating")
