@@ -194,8 +194,8 @@ super + Tab
 	bspc desktop -f last
 
 # focus or send to the given desktop
-super + {_,shift + }{1-7,grave}
-	bspc {desktop -f,node -d} '^{1-7,8}'
+super + {_,shift + }{1-9,0,grave}
+	bspc {desktop -f,node -d} '^{1-9,10,11}'
 
 # preselect the direction south
 super + u
