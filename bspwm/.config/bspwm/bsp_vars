@@ -1,0 +1,3 @@
+#!/bin/sh
+
+BSPWM_WINDOW_GAPS=14
