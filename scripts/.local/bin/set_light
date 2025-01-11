@@ -1,30 +1,30 @@
-#!/bin/bash
+#!/bin/sh
 
 arg=$1
 lightup=0
 lightdown=0
 
 case $arg in
-  -u | --up)
-    lightup=1
-    ;;
-  -d | --down)
-    lightdown=1
-    ;;
-  *)
-    echo "Invalid option" >&2
-    exit 1
-    ;;
+-u | --up)
+	lightup=1
+	;;
+-d | --down)
+	lightdown=1
+	;;
+*)
+	echo "Invalid option" >&2
+	exit 1
+	;;
 esac
 
 if [ $lightup == 1 ]; then
-  light -A 12 && light -O && brightness &
-  exit 0
+	light -A 12 && light -O && brightness &
+	exit 0
 fi
 
 if [ $lightdown == 1 ]; then
-  light -U 12 && light -O && brightness &
-  exit 0
+	light -U 12 && light -O && brightness &
+	exit 0
 fi
 
 echo "Invalid option" >&2

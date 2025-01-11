@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 TIME="$(date +"%I:%M %p")"
 echo "$TIME"

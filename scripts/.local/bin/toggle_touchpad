@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 
 TOUCHPAD_ID=$(xinput list | grep -i Touchpad | sed 's/.*id=\(.*\) *\[.*/\1/')
 TOUCHPAD_ENABLED=$(xinput list-props $TOUCHPAD_ID | grep -i "Device Enabled" | sed 's/.*\(.\)$/\1/')
 
 if [ $TOUCHPAD_ENABLED -eq 1 ]; then
-  notify-send -u normal -t 1500 "Disabling touchpad"
+	notify-send -u normal -t 1500 "Disabling touchpad"
 	xinput disable $TOUCHPAD_ID
 else
-  notify-send -u normal -t 1500 "Enabling touchpad"
+	notify-send -u normal -t 1500 "Enabling touchpad"
 	xinput enable $TOUCHPAD_ID
 fi

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 function check_if_directory_exists() {
 	dir=$1

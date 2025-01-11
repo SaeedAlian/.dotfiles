@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 all=(shutdown reboot suspend logout lockscreen)
 show=("${all[@]}")

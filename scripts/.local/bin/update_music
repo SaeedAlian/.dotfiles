@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 declare -A musicExtensions=([mp3]=1 [flac]=1)
 

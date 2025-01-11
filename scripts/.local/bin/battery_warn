@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 PERCENT=$(acpi -b | grep Discharging | sed 's/.*Discharging, \([0-9]*\).*/\1/')
 
