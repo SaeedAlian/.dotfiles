@@ -66,6 +66,6 @@ if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar") ]; then
 	$HOME/.config/bspwm/bspautohidebar &
 fi
 
-if [ -z $(pgrep bspresizefloat --list-full | grep -E "bspresizefloat") ]; then
-	$HOME/.config/bspwm/bspresizefloat &
+if [ -z $(pgrep bspfloatpos --list-full | grep -E "bspfloatpos") ]; then
+	$HOME/.config/bspwm/bspfloatpos &
 fi
