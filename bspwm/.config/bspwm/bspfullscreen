@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+source $HOME/.config/bspwm/bsp_vars
 
 POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
 
@@ -19,7 +21,10 @@ current_layout=$(bspc query -T -d | jq -r '.layout')
 
 if [ "$current_layout" == "tiled" ]; then
 	bspc desktop -l monocle
-	$POLYBAR_SCRIPT -h
+
+	if [[ $BSPWM_WINDOW_GAPS -lt 8 ]]; then
+		$POLYBAR_SCRIPT -h
+	fi
 elif [ "$current_layout" == "monocle" ]; then
 	bspc desktop -l tiled
 	$POLYBAR_SCRIPT -s

@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/bin/sh
+
+source $HOME/.config/bspwm/bsp_vars
 
 POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
 
 while read a m d n _; do
 	hide=0
 	current_node_state=$(bspc query -T -n | jq -r '.client.state')
-	echo "$current_node_state"
 
 	case "$current_node_state" in
 	*fullscreen*)
@@ -15,28 +16,28 @@ while read a m d n _; do
 		hide=0
 		;;
 	*)
-		desktop_query=$(bspc query -T -d)
-		current_layout=$(echo "$desktop_query" | jq -r '.layout')
-		desktop_name=$(echo "$desktop_query" | jq -r '.name')
+		if [[ $BSPWM_WINDOW_GAPS -lt 8 ]]; then
+			desktop_query=$(bspc query -T -d)
+			current_layout=$(echo "$desktop_query" | jq -r '.layout')
+			desktop_name=$(echo "$desktop_query" | jq -r '.name')
 
-		nodes_query=$(bspc query -N -d "$desktop_name")
-		nodes_len=$(echo "$nodes_query" | tr " " "\n" | grep -c "0x")
+			nodes_query=$(bspc query -N -d "$desktop_name")
+			nodes_len=$(echo "$nodes_query" | tr " " "\n" | grep -c "0x")
 
-		if [ "$current_layout" == "tiled" ]; then
-			hide=0
-		elif [ "$current_layout" == "monocle" ]; then
-			if [ $nodes_len -le 1 ]; then
+			if [ "$current_layout" == "tiled" ]; then
 				hide=0
+			elif [ "$current_layout" == "monocle" ]; then
+				if [ $nodes_len -le 1 ]; then
+					hide=0
+				else
+					hide=1
+				fi
 			else
-				hide=1
+				hide=0
 			fi
-		else
-			hide=0
 		fi
 		;;
 	esac
-
-	echo $hide
 
 	if [ $hide == 1 ]; then
 		$POLYBAR_SCRIPT -h
@@ -44,4 +45,4 @@ while read a m d n _; do
 		$POLYBAR_SCRIPT -s
 	fi
 
-done <"$(bspc subscribe -f desktop_focus node_activate node_state node_focus)"
+done <"$(bspc subscribe -f desktop_focus node_activate node_focus node_state)"
