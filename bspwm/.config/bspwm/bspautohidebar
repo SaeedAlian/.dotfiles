@@ -21,8 +21,7 @@ while read a m d n _; do
 			current_layout=$(echo "$desktop_query" | jq -r '.layout')
 			desktop_name=$(echo "$desktop_query" | jq -r '.name')
 
-			nodes_query=$(bspc query -N -d "$desktop_name")
-			nodes_len=$(echo "$nodes_query" | tr " " "\n" | grep -c "0x")
+			nodes_len=$(bspc query -N -d "$desktop_name" | wc -l)
 
 			if [ "$current_layout" == "tiled" ]; then
 				hide=0
