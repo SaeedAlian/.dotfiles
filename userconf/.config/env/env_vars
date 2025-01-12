@@ -13,7 +13,7 @@ export VOLTA_HOME="$HOME/.volta"
 export EDITOR="nvim"
 export VPN="hiddify"
 export TERMINAL="alacritty"
-export BROWSER="librewolf"
+export BROWSER="brave-browser"
 export FILEMANAGER="pcmanfm"
 export CALCULATOR="qalculate-qt"
 
