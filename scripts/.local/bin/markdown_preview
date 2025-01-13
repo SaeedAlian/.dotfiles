@@ -21,6 +21,8 @@ Options:
 
   -s, --save            Saves the markdown preview in the current directory instead of /tmp
 
+  -e, --engine          Sets the pdf engine for pandoc
+
 
 Arguments:
 
@@ -55,6 +57,7 @@ fi
 filename=""
 open_in_zathura=0
 save_in_temp=1
+pdf_engine=""
 
 if [[ $# == 0 ]]; then
 	print_err "No argument provided"
@@ -65,6 +68,15 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     -s|--save)
       save_in_temp=0
+      ;;
+    -e|--engine)
+      shift 1
+      pdf_engine=$1
+
+      if [ -z "$pdf_engine" ]; then
+        print_err "PDF engine must be specified"
+        exit 1
+      fi
       ;;
     -o|--open)
       open_in_zathura=1
@@ -103,7 +115,11 @@ if [ $save_in_temp != 1 ]; then
 	save_path="$dir/$name.pdf"
 fi
 
-pandoc $filename -o $save_path 2>&1 >/dev/null 2>&1
+if [ -z "$pdf_engine" ]; then
+  pandoc $filename -o $save_path 2>&1 >/dev/null 2>&1
+else
+  pandoc $filename --pdf-engine=$pdf_engine -o $save_path 2>&1 >/dev/null 2>&1
+fi
 
 if [ $? != 0 ]; then
 	print_err "Error on converting to pdf"
