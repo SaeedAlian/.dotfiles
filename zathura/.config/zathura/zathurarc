@@ -48,7 +48,7 @@ set completion-fg "#E0E0E0"
 set notification-bg "#90A959"
 set notification-fg "#151515"
 
-set recolor "true"
+set recolor "false"
 set recolor-lightcolor "#222222" 
 set recolor-darkcolor "#E0E0E0" 
 set recolor-reverse-video "true"
