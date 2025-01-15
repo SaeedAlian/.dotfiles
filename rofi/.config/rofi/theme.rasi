@@ -34,7 +34,7 @@ element-text {
 }
 
 element-icon {
-  size: 18;
+  size: 0;
   background-color: transparent;
 }
 
