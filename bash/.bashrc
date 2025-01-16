@@ -104,8 +104,10 @@ alias upmu="update_music"
 alias h="bash_hsearch"
 alias hm="bash_hsearch max"
 
-alias fastfetch="fastfetch -l Fedora_small"
+alias fastfetch="fastfetch -l artixlinux_small"
 alias neofetch="fastfetch"
+
+alias pac="sudo pacman"
 
 alias rv="sudo bash -c '$VPN &'"
 

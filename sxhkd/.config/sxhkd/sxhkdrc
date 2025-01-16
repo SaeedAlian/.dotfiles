@@ -92,11 +92,11 @@ F10
 
 # light up
 XF86MonBrightnessUp
-  $HOME/.local/bin/light -u
+  $HOME/.local/bin/set_light -u
 
 # light down
 XF86MonBrightnessDown
-  $HOME/.local/bin/light -d
+  $HOME/.local/bin/set_light -d
 
 # lockscreen
 super + shift + x

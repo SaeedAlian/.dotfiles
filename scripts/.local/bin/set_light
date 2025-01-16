@@ -18,12 +18,12 @@ case $arg in
 esac
 
 if [ $lightup == 1 ]; then
-	light -A 12 && light -O && brightness &
+	light -A 12 && light -O 
 	exit 0
 fi
 
 if [ $lightdown == 1 ]; then
-	light -U 12 && light -O && brightness &
+	light -U 12 && light -O
 	exit 0
 fi
 

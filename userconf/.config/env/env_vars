@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export GTK_THEME="Flat-Remix-GTK-Blue-Darkest-Solid"
-export QT_STYLE_OVERRIDE="kvantum"
+export QT_QPA_PLATFORMTHEME="qt5ct"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"
@@ -13,8 +13,8 @@ export VOLTA_HOME="$HOME/.volta"
 export EDITOR="nvim"
 export VPN="hiddify"
 export TERMINAL="alacritty"
-export BROWSER="brave-browser"
-export FILEMANAGER="pcmanfm"
+export BROWSER="brave"
+export FILEMANAGER="pcmanfm-qt"
 export CALCULATOR="qalculate-qt"
 
 export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin:$HOME/.local/share/applications"

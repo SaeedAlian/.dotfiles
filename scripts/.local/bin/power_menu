@@ -11,11 +11,11 @@ texts[reboot]="󰜉 Reboot"
 texts[shutdown]="󰐥 Shutdown"
 
 declare -A actions
-actions[lockscreen]="loginctl lock-session ${XDG_SESSION_ID}"
-actions[logout]="loginctl terminate-session ${XDG_SESSION_ID}"
-actions[suspend]="systemctl suspend"
-actions[reboot]="systemctl reboot"
-actions[shutdown]="systemctl poweroff"
+actions[lockscreen]="start_lockscreen"
+actions[logout]="bspc quit"
+actions[suspend]="loginctl suspend"
+actions[reboot]="loginctl reboot"
+actions[shutdown]="loginctl poweroff"
 
 confirmations=(reboot shutdown logout)
 

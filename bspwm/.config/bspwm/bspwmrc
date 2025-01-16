@@ -16,11 +16,11 @@ sxhkd &
 pgrep -x nm-applet >/dev/null || nm-applet &
 pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/start_lockscreen &
 pgrep -x light >/dev/null || light -I &
+pgrep -x xfce-polkit >/dev/null || /usr/lib/xfce-polkit/xfce-polkit &
 pgrep -x picom >/dev/null || picom -b --config $HOME/.config/picom/picom.conf &
 pgrep -x clementine >/dev/null || clementine &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
-setxkbmap -option caps:escape &
 
 ###### desktops ######
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10 0
@@ -29,7 +29,7 @@ bspc monitor -d 1 2 3 4 5 6 7 8 9 10 0
 xsetroot -cursor_name left_ptr
 
 bspc config border_width 1
-bspc config bottom_padding 16
+bspc config bottom_padding 20
 bspc config top_padding 0
 bspc config window_gap $BSPWM_WINDOW_GAPS
 bspc config split_ratio 0.55

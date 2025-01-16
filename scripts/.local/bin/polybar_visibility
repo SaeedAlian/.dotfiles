@@ -15,7 +15,7 @@ help() {
 
 show() {
   polybar-msg cmd show >/dev/null
-  bspc config bottom_padding 16
+  bspc config bottom_padding 20
   touch /tmp/polybarshow 2>/dev/null
 }
 
