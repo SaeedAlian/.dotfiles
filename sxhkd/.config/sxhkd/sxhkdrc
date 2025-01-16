@@ -66,6 +66,18 @@ super + o
 
 ######### functions #########
 
+# toggle mobile broadband
+super + shift + w
+  $HOME/.local/bin/toggle_mobilebroadband
+
+# toggle bluetooth
+super + shift + p
+  $HOME/.local/bin/toggle_bluetooth
+
+# toggle wifi
+super + control + w
+  $HOME/.local/bin/toggle_wifi
+
 # toggle touchpad
 super + comma
   $HOME/.local/bin/toggle_touchpad

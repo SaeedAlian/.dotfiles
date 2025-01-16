@@ -1,0 +1,11 @@
+#!/bin/sh
+
+connected=$(nmcli -fields WIFI g)
+
+if [[ "$connected" =~ "enabled" ]]; then
+  nmcli radio wifi off
+  notify-send -t 2000 "WIFI disconnected"
+elif [[ "$connected" =~ "disabled" ]]; then
+  nmcli radio wifi on
+  notify-send -t 2000 "WIFI connected"
+fi

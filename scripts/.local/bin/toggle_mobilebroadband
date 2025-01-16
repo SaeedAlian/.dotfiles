@@ -1,0 +1,12 @@
+#!/bin/sh
+
+simcard_module_name="cdc-wdm0"
+simcard_module_status=$(nmcli device status | grep $simcard_module_name | awk '{print $3}')
+
+if [[ "$simcard_module_status" == "connected" ]]; then
+  nmcli device down $simcard_module_name
+  notify-send -t 2000 "Mobile broadband disconnected"
+elif [[ "$simcard_module_status" == "disconnected" ]]; then
+  nmcli device up $simcard_module_name
+  notify-send -t 2000 "Mobile broadband connected"
+fi
