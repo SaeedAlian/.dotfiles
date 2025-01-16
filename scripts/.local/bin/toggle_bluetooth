@@ -2,6 +2,8 @@
 
 if [ "$(bluetoothctl show | grep "Powered: yes" | wc -c)" -eq 0 ]; then
 	bluetoothctl power on
+	notify-send -t 2000 "Bluetooth connected"
 else
 	bluetoothctl power off
+	notify-send -t 2000 "Bluetooth disconnected"
 fi
