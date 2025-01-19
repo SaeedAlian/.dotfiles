@@ -6,51 +6,46 @@ BACKGROUND_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/background"
 LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/start_lockscreen"
 
 function print_help() {
-  help="wallpaper: A command-line tool for managing wallpapers and lockscreens using feh.
-
-Usage: wallpaper [command] [arguments]
+  help="Usage: wallpaper [COMMAND] [OPTIONS]
 
 Commands:
+  --help, -h                     Display this help message.
 
- --add-wall [-a] /path/to/image         Add an image to the wallpapers directory and create a corresponding lockscreen image. The image will be copied into the wallpapers directory. Prompts whether to set it as the current wallpaper.
+  add <file_path> <wall_name>    Add a new wallpaper image to the wallpapers directory. 
+                                 Converts the image to JPG if necessary, and creates 
+                                 a lockscreen image for it.
 
- --create-lockscreen [-cl] <imagename>  Create a lockscreen image from an existing image in the wallpapers directory. The image name should match the name of an image inside your wallpapers directory
+  create-lockscreen <file_name>  Create a lockscreen image based on an existing wallpaper
+                                 in the wallpapers directory.
 
- --set-lockscreens [-sl]                Create lockscreen images from all images currently in your wallpapers directory. Use this command to refresh lockscreens or reset the lockscreen images directory.
+  set-lockscreens                Generate lockscreen images for all wallpapers in the
+                                 wallpapers directory. Prompts for confirmation.
 
- --set-wall [-sw]                       imagename Set the specified image as your wallpaper. The image must exist in the wallpapers directory.
+  set <wall_name>                Set a wallpaper as the current background and update
+                                 the related scripts.
 
- --set-mode [-sm] <mode>                Set the scaling mode for your wallpaper. Options are: "tile", "center", "max", "fill".
+  mode <background_mode>         Set the background display mode. Options are:
+                                 - center
+                                 - max
+                                 - tile
+                                 - fill
 
-
-Arguments:
-
- imagename   The name of the image file (without extension for --create-lockscreen and --set-wall; the extension is added automatically if missing for --add-wall).
-
+Options:
+  <file_path>                    Path to the image file to be added as wallpaper.
+  <wall_name>                    Name for the wallpaper image (without extension).
+  <file_name>                    Name of the wallpaper file (including extension).
+  <background_mode>              Display mode for the wallpaper (e.g., center, max).
 
 Examples:
+  wallpaper add /path/to/image.png new_wallpaper
+  wallpaper create-lockscreen existing_wallpaper.jpg
+  wallpaper set-lockscreens
+  wallpaper set new_wallpaper
+  wallpaper mode fill
 
- Add an image and set it as wallpaper:
-  wallpaper --add-wall my_image.jpg
-
- Create a lockscreen image:
-  wallpaper --create-lockscreen my_image
-
- Set all lockscreen images:
-  wallpaper --set-lockscreens
-
- Set a specific wallpaper:
-  wallpaper --set-wall my_image
-
- Set wallpaper scaling mode to "fill":
-  wallpaper --set-mode fill
-
-
-Notes:
-• The wallpapers directory is assumed to be in the current working directory unless specified otherwise. The lockscreen images are created in a subdirectory.
-• Make sure you have the necessary dependencies (feh, xss-lock) installed. Error messages are shown if there is an issue with the dependencies
-• Make sure to set the lockscreen script path in the wallpaper script file
-
+Note:
+  - Ensure the required directories and scripts exist as specified in the script.
+  - This script depends on tools like 'ffmpeg', 'sed', and 'xss-lock'.
 "
   
   if type "less" > /dev/null; then
@@ -134,7 +129,6 @@ set_all_lockscreens() {
   echo "Creating lockscreen image for all wallpapers..."
 
   for file in "$WALLPAPERS_DIR"/*; do
-
     if [ -f "$file" ]; then
       file_name=${file##*/}
       create_lockscreen_image "$file_name" 1
@@ -188,41 +182,36 @@ set_background_mode() {
   echo "Wallpaper updated successfully."
 }
 
-first_arg=$1
+cmd=$1
 
-case $first_arg in
+case $cmd in
 "--help" | "-h")
   print_help
   exit 0
   ;;
-"--add-wall" | "-a")
-  file_name=$2
-  file_path=$PWD/$file_name
-  printf "Enter wallpaper name: "
-  read -r wall_name
+"add")
+  shift 1
+  file_path=$1
+  wall_name=$2
+
+  [ -z "$wall_name" ] && print_err "Wallpaper name not found"
+  [ -z "$file_path" ] && print_err "File path not found"
 
   add_wall_image "$file_path" "$wall_name"
   create_lockscreen_image "$wall_name.jpg" 0
 
-  printf "You want to set the wallpaper? [y/n] "
-  read -r ans
-
-  if [ "$ans" = "y" ]; then
-    set_background "$wall_name"
-  else
-    echo "Wallpaper has been added, now you can set it by running: "
-    echo "wallpaper --set-wall $wall_name"
-  fi
-
   exit 0
   ;;
-"--create-lockscreen" | "-cl")
-  file_name=$2
+"create-lockscreen")
+  shift 1
+  file_name=$1
+
+  [ -z "$file_name" ] && print_err "File name not specified"
 
   create_lockscreen_image "$file_name" 0
   exit 0
   ;;
-"--set-lockscreens" | "-sl")
+"set-lockscreens")
   printf "Are you sure that you want to set all the lockscreen images? [y/n] "
   read -r ans
 
@@ -232,15 +221,21 @@ case $first_arg in
 
   exit 1
   ;;
-"--set-wall" | "-sw")
-  wall_name=$2
+"set")
+  shift 1
+  wall_name=$1
+
+  [ -z "$wall_name" ] && print_err "Wallpaper name not specified"
 
   set_background "$wall_name"
 
   exit 0
   ;;
-"--set-mode" | "-sm")
-  wall_mode=$2
+"mode")
+  shift 1
+  wall_mode=$1
+
+  [ -z "$wall_mode" ] && print_err "Wallpaper mode not specified"
 
   set_background_mode "$wall_mode"
 
@@ -248,4 +243,4 @@ case $first_arg in
   ;;
 esac
 
-print_err "Error: Invalid argument"
+print_err "Error: Invalid command"
