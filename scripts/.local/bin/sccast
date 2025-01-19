@@ -3,6 +3,35 @@
 DEFAULT_DIR="$HOME/videos/casts"
 SCRIPT_NAME="sccast"
 
+print_help() {
+	cat <<EOF
+Usage: $SCRIPT_NAME [OPTIONS]
+
+Screen recording script using ffmpeg.
+
+Options:
+  --help                     Show this help message and exit.
+  --notify, -n               Send a desktop notification when starting or stopping screen recording.
+  --stop, --kill, -k         Stop all sccast processes and their associated ffmpeg child processes.
+  --full, --all, -f          Record the full screen, microphone, and system audio.
+  --video, -v                Record the screen (video only, no audio).
+  --mic, -m                  Record microphone audio only.
+  --audio, -a                Record system audio only.
+
+Notes:
+  - By default, the output files are saved in: $DEFAULT_DIR
+  - You must specify at least one recording option (--video, --mic, or --audio).
+  - The --stop option will only stop screen recording processes started by this script.
+
+Examples:
+  $SCRIPT_NAME --full -n          Record screen, system audio, and microphone, with a notification.
+  $SCRIPT_NAME --video            Record screen only (no audio).
+  $SCRIPT_NAME --audio --video    Record screen & system audio only.
+  $SCRIPT_NAME --stop             Stop all running screen recordings started by this script.
+
+EOF
+}
+
 mkdir -p $DEFAULT_DIR
 
 rec_vid=0
@@ -12,6 +41,10 @@ send_notification=0
 
 while [ $# -gt 0 ]; do
 	case $1 in
+	--help)
+		print_help
+		exit 0
+		;;
 	--notify | -n)
 		send_notification=1
 		;;
