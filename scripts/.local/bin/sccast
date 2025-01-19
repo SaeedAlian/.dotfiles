@@ -1,0 +1,94 @@
+#!/bin/sh
+
+DEFAULT_DIR="$HOME/videos/casts"
+SCRIPT_NAME="sccast"
+
+mkdir -p $DEFAULT_DIR
+
+rec_vid=0
+rec_mic=0
+rec_aud=0
+send_notification=0
+
+while [ $# -gt 0 ]; do
+	case $1 in
+	--notify | -n)
+		send_notification=1
+		;;
+	--stop | --kill | -k)
+		pids=$(ps -eo pgid,cmd | grep "$SCRIPT_NAME" | grep -v grep | awk '{print $1}')
+		for pid in $pids; do
+			pgrep -P $pid | xargs -r kill
+		done
+		echo "Stopped all sccast processes"
+		[ $send_notification == 1 ] && notify-send -t 2000 "Stopped all screen casts"
+		exit 0
+		;;
+	--full | --all | -f)
+		rec_vid=1
+		rec_mic=1
+		rec_aud=1
+		;;
+	--video | -v)
+		rec_vid=1
+		;;
+	--mic | -m)
+		rec_mic=1
+		;;
+	--audio | -a)
+		rec_aud=1
+		;;
+	*)
+		echo "Invalid option $1" >&2
+		exit 1
+		;;
+	esac
+	shift 1
+done
+
+filename="cast-$(date +%s%3N)-$(date +%F)"
+
+if [ $rec_aud == 0 ] && [ $rec_vid == 0 ] && [ $rec_mic == 0 ]; then
+	echo "No option specified" >&2
+	exit 1
+fi
+
+cmd="ffmpeg"
+
+# specify video format
+if [ $rec_vid == 1 ]; then
+	resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
+	cmd="$cmd -f x11grab -s $resolution -i :0.0"
+fi
+
+# specify output audio format
+if [ $rec_aud == 1 ]; then
+	output_audio_monitor="$(pacmd list-sources | grep -PB 1 "analog.*monitor>" | head -n 1 | perl -pe 's/.* //g')"
+	cmd="$cmd -f pulse -i "$output_audio_monitor""
+fi
+
+# specify microphone audio format
+if [ $rec_mic == 1 ]; then
+	cmd="$cmd -f alsa -i default"
+fi
+
+# specify merge when microphone & output audio are on
+if [ $rec_mic == 1 ] && [ $rec_aud == 1 ]; then
+	cmd="$cmd -filter_complex amerge -ac 2"
+fi
+
+# specify video codec
+if [ $rec_vid == 1 ]; then
+	cmd="$cmd -c:v libx264 -framerate 30"
+fi
+
+# specify audio codec
+if [ $rec_aud == 1 ] || [ $rec_mic == 1 ]; then
+	cmd="$cmd -c:a flac"
+fi
+
+# specify output file
+cmd="$cmd "$DEFAULT_DIR/$filename.mp4""
+
+[ $send_notification == 1 ] && notify-send -t 2000 "Starting screen cast..."
+$cmd
