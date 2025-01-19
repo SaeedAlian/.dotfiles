@@ -66,6 +66,10 @@ super + o
 
 ######### functions #########
 
+# screen cast
+super + shift + g : {f,v,o,m,k}
+  $HOME/.local/bin/sccast -n {-f,-v,-a -v,-m -v,-k}
+
 # toggle mobile broadband
 super + shift + w
   $HOME/.local/bin/toggle_mobilebroadband
@@ -182,28 +186,24 @@ super + shift + f
 	$HOME/.config/bspwm/bspfullscreen -f
 
 # set the window state
-super + space + {_,shift}
-	bspc node -t {tiled,floating}
+super + space
+  $HOME/.config/bspwm/bspfloattoggle
 
-# focus the node in the given direction
-super + {_,shift + }{h,j,k,l}
-	bspc node -{f,s} {west,south,north,east}
+# move the node in the given direction
+super + shift + {h,j,k,l}
+	bspc node -s {west,south,north,east}
 
 # change the layer of the node
-super + bracket{left,right}
-	bspc node -l {below,above}
+super + {bracketleft,bracketright,backslash}
+	bspc node -l {below,above,normal}
 
 # toggle sticky flag
 super + shift + s
 	$HOME/.config/bspwm/bspstickytoggle
 
-# focus the next node in the current desktop
-super + apostrophe
-	bspc node -f next.local
-
-# focus the previous node in the current desktop
-super + semicolon
-	bspc node -f prev.local
+# focus the next/previous node in the current desktop
+super + {j,k}
+    bspc node -f {next,prev}.local.!hidden.window
 
 # focus the last desktop
 super + Tab
@@ -214,11 +214,11 @@ super + {_,shift + }{1-9,0,grave}
 	bspc {desktop -f,node -d} '^{1-9,10,11}'
 
 # preselect the direction south
-super + u
+super + semicolon
 	bspc node -p south
 
 # preselect the direction east
-super + e
+super + apostrophe
 	bspc node -p east
 
 # cancel the preselection for the focused node
