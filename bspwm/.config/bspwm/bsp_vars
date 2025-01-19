@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCREEN_W=1920
-SCREEN_H=1080
+SCREEN_W=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/\(.*\)x.*/\1/')
+SCREEN_H=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/.*x\(.*\)/\1/')
 
-BSPWM_WINDOW_GAPS=12
+BSPWM_WINDOW_GAPS=0
