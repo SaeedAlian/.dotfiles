@@ -14,8 +14,16 @@ super + Return
   $TERMINAL
 
 # primary notes
-super + n 
+super + n
   $HOME/.local/bin/dnote -r
+
+# current day daily notes
+super + shift + d
+  $TERMINAL --class "Alacritty-float" -e $HOME/.local/bin/dnote -nt -m
+
+# search daily notes
+super + shift + Tab
+  $TERMINAL --class "Alacritty-float" -e $HOME/.local/bin/dnote -nt -m -f
 
 # gui fm
 super + shift + Return
