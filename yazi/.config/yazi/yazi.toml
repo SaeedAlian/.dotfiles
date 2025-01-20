@@ -79,6 +79,9 @@ image_bound      = [ 0, 0 ]
 suppress_preload = false
 
 [plugin]
+prepend_previewers = [
+    { mime = "audio/*",   run = "exifaudio"}
+]
 
 previewers = [
 	{ name = "*/", run = "folder", sync = true },
