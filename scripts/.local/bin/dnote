@@ -13,6 +13,7 @@
 
 NOTES_DIR=$HOME/documents/notes
 PRIMARY_NOTE_FILENAME="primary"
+DAILY_NOTE_FILENAME="daily"
 TMUX_SESSION_NAME=notes
 MAX_WINDOW_NUMBER=5
 ED="$EDITOR"
@@ -37,62 +38,180 @@ function print_help() {
 
 Usage: dnote [options] [filename]
 
-
 Options:
-  -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n
+  -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n.
 
-  -r, --primary         Toggle open primary note file. Don't provide a filename with this flag. cannot be used with -p, -f, -a, -fa, -d, -c, -n
+  -r, --primary         Toggle open primary note file. Don't provide a filename with this flag. Cannot be used with -p, -f, -a, -fa, -d, -c, -n.
 
-  -f, --fzf             Use fzf to interactively select a directory and file.  Cannot be used with -p, -n, -c
+  -m, --daily           Open or create the daily note file. Cannot be used with -p, -f, -a, -fa, -d, -c, -n.
 
-  -a, --all             Use fzf to interactively search for a file in all the note directories.  Can only be used with -f
+  -f, --fzf             Use fzf to interactively select a directory and file. Cannot be used with -p, -n, -c.
 
-  -fa, -af, --fzf-all   Using -f and -a at the same time
+  -a, --all             Use fzf to interactively search for a file in all the note directories. Can only be used with -f.
 
-  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c
+  -fa, -af, --fzf-all   Using -f and -a at the same time.
 
-  -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f
+  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c.
 
-  -n, --name <dirname>  Specify the directory name for the new note, the default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f, -p or -c
+  -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f.
 
+  -n, --name <dirname>  Specify the directory name for the new note. The default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f, -p or -c.
+
+  -nt, --no-tmux        Run without attaching or creating a tmux session. Cannot be used with -c.
 
 Arguments:
 
-  filename              The name of the note file (default extension is .md)
-
+  filename              The name of the note file (default extension is .md).
 
 Examples:
 
-
-• Create a new note named "my_note.md" in the default directory:
+• Create a new note named \"my_note.md\" in the default directory:
   dnote my_note
 
-• Create a new note named "my_note.md" in the directory "my_project":
+• Create a new note named \"my_note.md\" in the directory \"my_project\":
   dnote -n my_project my_note
 
-• Delete a note "important_notes.md" from the default directory:
+• Delete a note \"important_notes.md\" from the default directory:
   dnote -d important_notes
 
-• Delete a note "important_notes.md" from the directory "my_project":
+• Delete a note \"important_notes.md\" from the directory \"my_project\":
   dnote -n my_project -d important_notes
 
 • Interactively select a directory and file using fzf:
   dnote -f
 
-• Create a note named "my_note" in current tmux window:
+• Open or create the daily note file:
+  dnote -m
+
+• Open the primary note file:
+  dnote -r
+
+• Create a note named \"my_note\" in the current tmux window:
   dnote -c my_note
 
+• Run without tmux:
+  dnote -nt my_note
 
 Notes:
  • This script uses fzf (fuzzy finder) and tmux. Make sure these are installed before using the script.
- • Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim)
-
+ • Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim).
 "
-  
+
   if type "less" > /dev/null; then
     echo "$help" | less
   else
     echo "$help"
+  fi
+}
+
+primary_note_template() {
+  echo "# Personal Notes
+
+## Work
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Study
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Personal
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---"
+}
+
+daily_note_template() {
+  d=$1
+
+  echo "# Daily Notes ($d)
+
+## Work
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+---
+
+## Study
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+---
+
+## Personal
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+---
+
+## Notes
+
+---"
+}
+
+default_note_template() {
+  title=$1
+  d=$2
+  subtitle=$3
+
+  if [ -z "$subtitle" ]; then
+    echo "# $title
+
+**Date:** $d
+
+---"
+  else
+    echo "# $title
+
+## $subtitle 
+
+**Date:** $d
+
+---"
   fi
 }
 
@@ -212,9 +331,26 @@ function create_note_dir() {
 function create_note() {
   dir=$1
   filename=$2
-  is_primary=$3
 
-  if [ -z "$is_primary" ] || [ $is_primary == 0 ]; then
+  # 0 or empty is default, 1 is primary and 2 is daily
+  type=$3
+
+  if [ -n "$type" ] && [ $type == 2 ]; then
+    fullpath="$NOTES_DIR/$dir/$DAILY_NOTE_FILENAME.md"
+    d=$(date +%Y-%m-%d)
+
+    if [ ! -f $fullpath ]; then
+      touch $fullpath
+      daily_note_template $d > $fullpath
+    fi
+  elif [ -n "$type" ] && [ $type == 1 ]; then
+    fullpath="$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+
+    if [ ! -f "$fullpath" ]; then
+      touch $fullpath
+      primary_note_template > $fullpath
+    fi
+  else
     fullpath="$NOTES_DIR/$dir/$filename"
     d=$(date +%Y-%m-%d)
 
@@ -222,74 +358,13 @@ function create_note() {
       touch $fullpath
       if [ "$dir" == "$d" ]; then
         title=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
-        echo "# $title
-
-  **Date:** $d" > $fullpath
+         default_note_template $title $d "" > $fullpath
       else 
         title=$(echo "$dir" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
         subtitle=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
 
-        echo "# $title
-
-  ## $subtitle 
-
-  **Date:** $d
-
-  ---" > $fullpath
+         default_note_template $title $d $subtitle > $fullpath
       fi
-    fi
-  else
-    fullpath="$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
-    echo $fullpath
-
-    if [ ! -f "$fullpath" ]; then
-      touch $fullpath
-      echo "# Personal Notes
-
-## Work
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
-### Ideas
-
-- **Idea 1:**  
-  Description or sketch
-
----
-
-## Study
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
-### Ideas
-
-- **Idea 1:**  
-  Description or sketch
-
----
-
-## Personal
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
-### Ideas
-
-- **Idea 1:**  
-  Description or sketch
-
----" > $fullpath
     fi
   fi
 }
@@ -488,14 +563,22 @@ fzf_all_notes_flag=0
 delete_flag=0
 current_window_flag=0
 primary_flag=0
+daily_flag=0
+no_tmux=0
 
 while [[ $# -gt 0 ]]; do
   case $1 in
     -f|--fzf)
       fzf_flag=1
       ;;
+    -nt|--no-tmux)
+      no_tmux=1
+      ;;
     -r|--primary)
       primary_flag=1
+      ;;
+    -m|--daily)
+      daily_flag=1
       ;;
     -fa|-af|--fzf-all)
       fzf_flag=1
@@ -520,7 +603,7 @@ while [[ $# -gt 0 ]]; do
       shift 1
       ;;
     *)
-      if [ $# == 1 ] && [ $fzf_flag == 0 ] && [ -z $filename ]; then
+      if [ $# == 1 ] && [ $fzf_flag == 0 ] && [ $daily_flag == 0 ] && [ -z $filename ]; then
         filename="$1.md"
         check_filename "$filename"
       else
@@ -591,6 +674,16 @@ if [ $current_window_flag == 1 ] && [ $delete_flag == 1 ]; then
   exit 1
 fi
 
+if [ $current_window_flag == 1 ] && [ $no_tmux == 1 ]; then
+  print_err "Error: Invalid option, you cannot use [current window flag] with [no tmux flag]"
+  exit 1
+fi
+
+if [ $daily_flag == 1 ] && [ $delete_flag == 1 ]; then
+  print_err "Error: Invalid option, you cannot use [daily flag] with [delete flag]"
+  exit 1
+fi
+
 if [ $prompt_flag == 0 ] && [ $fzf_flag == 0 ] && [ -z $filename ]; then
   no_file_flag=1
 fi
@@ -621,16 +714,19 @@ if [ $fzf_flag == 1 ]; then
       echo "Operation cancelled"
       exit 0
     fi
-    filename=$(fzf_notes "$dirname")
 
-    while [ -z $filename ]; do
-      dirname=$(fzf_note_dirs)
-      if [ -z $dirname ]; then
-        echo "Operation cancelled"
-        exit 0
-      fi
+    if [ $daily_flag != 1 ]; then
       filename=$(fzf_notes "$dirname")
-    done
+
+      while [ -z $filename ]; do
+        dirname=$(fzf_note_dirs)
+        if [ -z $dirname ]; then
+          echo "Operation cancelled"
+          exit 0
+        fi
+        filename=$(fzf_notes "$dirname")
+      done
+    fi
   fi
 fi
 
@@ -654,8 +750,10 @@ if [ $prompt_flag == 1 ]; then
     fi
   fi
 
-  read -e -p "Enter Filename: " -i "" f
-  filename="$f.md"
+  if [ $daily_flag != 1 ]; then
+    read -e -p "Enter Filename: " -i "" f
+    filename="$f.md"
+  fi
 fi
 
 if [ $delete_flag == 1 ]; then
@@ -678,12 +776,39 @@ fi
 create_note_dir "$dirname"
 check_dirname "$dirname"
 
-if [ $no_file_flag == 1 ]; then
-  attach_tmux "$dirname" "" $current_window_flag
+if [ $daily_flag == 1 ]; then
+  create_note_dir "$dirname"
+  check_dirname "$dirname"
+
+  create_note "$dirname" "" 2
+
+  if [ $no_tmux == 1 ]; then
+    $ED "$NOTES_DIR/$dirname/$DAILY_NOTE_FILENAME.md"
+  else
+    attach_tmux "$dirname" "$DAILY_NOTE_FILENAME.md" $current_window_flag
+  fi
+
+  exit 0
+fi
+
+if [ $no_tmux == 1 ]; then
+  if [ $no_file_flag == 1 ]; then
+    cd "$NOTES_DIR/$dirname"
+    exec $SHELL
+  else
+    check_filename "$filename"
+    create_note "$dirname" "$filename"
+    echo "$dirname/$filename"
+    $ED "$NOTES_DIR/$dirname/$filename"
+  fi
 else
-  check_filename "$filename"
-  create_note "$dirname" "$filename"
-  attach_tmux "$dirname" "$filename" $current_window_flag
+  if [ $no_file_flag == 1 ]; then
+    attach_tmux "$dirname" "" $current_window_flag
+  else
+    check_filename "$filename"
+    create_note "$dirname" "$filename"
+    attach_tmux "$dirname" "$filename" $current_window_flag
+  fi
 fi
 
 exit 0
