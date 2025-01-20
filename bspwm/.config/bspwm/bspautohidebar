@@ -5,43 +5,55 @@ source $HOME/.config/bspwm/bsp_vars
 POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
 
 while read a m d n _; do
-	hide=0
-	current_node_state=$(bspc query -T -n | jq -r '.client.state')
+  hide=0
+  current_node_state=$(bspc query -T -n | jq -r '.client.state')
 
-	case "$current_node_state" in
-	*fullscreen*)
-		hide=1
-		;;
-	*floating*)
-		hide=0
-		;;
-	*)
-		if [[ $BSPWM_WINDOW_GAPS -lt 8 ]]; then
-			desktop_query=$(bspc query -T -d)
-			current_layout=$(echo "$desktop_query" | jq -r '.layout')
-			desktop_name=$(echo "$desktop_query" | jq -r '.name')
+  case "$current_node_state" in
+  *fullscreen*)
+    hide=1
+    ;;
+  *floating*)
+    hide=0
+    ;;
+  *)
+    if [[ $BSPWM_WINDOW_GAPS -lt 8 ]]; then
+      desktop_query=$(bspc query -T -d)
+      current_layout=$(echo "$desktop_query" | jq -r '.layout')
+      desktop_name=$(echo "$desktop_query" | jq -r '.name')
 
-			nodes_len=$(bspc query -N -d "$desktop_name" | wc -l)
+      nodes=$(bspc query -N -d "$desktop_name")
+      nodes_len=0
 
-			if [ "$current_layout" == "tiled" ]; then
-				hide=0
-			elif [ "$current_layout" == "monocle" ]; then
-				if [ $nodes_len -le 1 ]; then
-					hide=0
-				else
-					hide=1
-				fi
-			else
-				hide=0
-			fi
-		fi
-		;;
-	esac
+      for n in $nodes; do
+        state=$(bspc query -T -n "$n" | jq -r '.client.state')
+        case "$state" in
+        *floating*) ;;
+        *null*) ;;
+        *)
+          nodes_len=$(($nodes_len + 1))
+          ;;
+        esac
+      done
 
-	if [ $hide == 1 ]; then
-		$POLYBAR_SCRIPT -h
-	else
-		$POLYBAR_SCRIPT -s
-	fi
+      if [ "$current_layout" == "tiled" ]; then
+        hide=0
+      elif [ "$current_layout" == "monocle" ]; then
+        if [ $nodes_len -le 1 ]; then
+          hide=0
+        else
+          hide=1
+        fi
+      else
+        hide=0
+      fi
+    fi
+    ;;
+  esac
+
+  if [ $hide == 1 ]; then
+    $POLYBAR_SCRIPT -h
+  else
+    $POLYBAR_SCRIPT -s
+  fi
 
 done <"$(bspc subscribe -f desktop_focus node_activate node_focus node_state)"
