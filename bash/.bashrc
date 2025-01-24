@@ -27,29 +27,29 @@ export HISTFILE="$HOME/.cache/.bash_history"       # history file location
 
 ######## launch x server ########
 if [[ "$(tty)" = "/dev/tty1" ]]; then
-	startx "$XDG_CONFIG_HOME/X11/xinitrc"
+  startx "$XDG_CONFIG_HOME/X11/xinitrc"
 fi
 
 ######## functions ########
 
 # ability to change the current working directory when exiting Yazi
 function y() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
 }
 
 # better cd with fzf
 function bettercd() {
-	s="$(ls -a | fzf --height 50% --reverse)"
-	if [ -d "$s" ]; then
-		cd "$s"
-	elif [ -f "$s" ]; then
-		xdg-open "$s"
-	fi
+  s="$(ls -a | fzf --height 50% --reverse)"
+  if [ -d "$s" ]; then
+    cd "$s"
+  elif [ -f "$s" ]; then
+    xdg-open "$s"
+  fi
 }
 
 ######## binds ########
@@ -74,7 +74,7 @@ bind '"\t":menu-complete'
 bind '"\e[Z":menu-complete-backward'
 bind '"\C-r":"bettercd\n"'
 bind '"\C-f":"tmux_fzf_session\n"'
-bind '"\C-h":"bash_hsearch 3000\n"'
+bind '"\C-a":"bash_hsearch 3000\n"'
 bind '"\C-o":"fastfetch\n"'
 bind '"\C-n\C-n":"dnote -nt -f\n"'
 bind '"\C-n\C-a":"dnote -nt -af\n"'
@@ -115,58 +115,58 @@ alias rv="sudo bash -c '$VPN &'"
 ######## prompt ########
 
 parse_git_dirty() {
-	STATUS="$(git status 2>/dev/null)"
+  STATUS="$(git status 2>/dev/null)"
 
-	if [[ $? -ne 0 ]]; then
-		printf ""
-		return
-	elif echo ${STATUS} | grep -c "tree clean" &>/dev/null; then
-		printf ""
-		return
-	else
-		printf " ("
-	fi
+  if [[ $? -ne 0 ]]; then
+    printf ""
+    return
+  elif echo ${STATUS} | grep -c "tree clean" &>/dev/null; then
+    printf ""
+    return
+  else
+    printf " ("
+  fi
 
-	if echo ${STATUS} | grep -c "renamed:" &>/dev/null; then printf " r"; else printf ""; fi
-	if echo ${STATUS} | grep -c "branch is ahead:" &>/dev/null; then printf " !"; else printf ""; fi
-	if echo ${STATUS} | grep -c "new file::" &>/dev/null; then printf " n"; else printf ""; fi
-	if echo ${STATUS} | grep -c "Untracked files:" &>/dev/null; then printf " u"; else printf ""; fi
-	if echo ${STATUS} | grep -c "modified:" &>/dev/null; then printf " m"; else printf ""; fi
-	if echo ${STATUS} | grep -c "deleted:" &>/dev/null; then printf " d"; else printf ""; fi
-	printf " )"
+  if echo ${STATUS} | grep -c "renamed:" &>/dev/null; then printf " r"; else printf ""; fi
+  if echo ${STATUS} | grep -c "branch is ahead:" &>/dev/null; then printf " !"; else printf ""; fi
+  if echo ${STATUS} | grep -c "new file::" &>/dev/null; then printf " n"; else printf ""; fi
+  if echo ${STATUS} | grep -c "Untracked files:" &>/dev/null; then printf " u"; else printf ""; fi
+  if echo ${STATUS} | grep -c "modified:" &>/dev/null; then printf " m"; else printf ""; fi
+  if echo ${STATUS} | grep -c "deleted:" &>/dev/null; then printf " d"; else printf ""; fi
+  printf " )"
 }
 
 parse_git_branch() {
-	BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
+  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
 
-	if [[ -z $BRANCH ]]; then
-		printf ""
-		return
-	else
-		printf "($BRANCH)"
-	fi
+  if [[ -z $BRANCH ]]; then
+    printf ""
+    return
+  else
+    printf "($BRANCH)"
+  fi
 }
 
 parse_logo() {
-	OS="$(cat /etc/os-release | grep "NAME=" | head -n 1 | sed 's/.*=//' | sed 's/\"//g')"
+  OS="$(cat /etc/os-release | grep "NAME=" | head -n 1 | sed 's/.*=//' | sed 's/\"//g')"
 
-	case "$OS" in
-	*Fedora*)
-		echo "󰣛"
-		;;
-	*Artix*)
-		echo ""
-		;;
-	*Arch*)
-		echo "󰣇"
-		;;
-	*Void*)
-		echo ""
-		;;
-	*)
-		echo "󰌽"
-		;;
-	esac
+  case "$OS" in
+  *Fedora*)
+    echo "󰣛"
+    ;;
+  *Artix*)
+    echo ""
+    ;;
+  *Arch*)
+    echo "󰣇"
+    ;;
+  *Void*)
+    echo ""
+    ;;
+  *)
+    echo "󰌽"
+    ;;
+  esac
 }
 
 PS1="\[\033[1;34m\] \$(parse_logo) \[\e[1;37m\] \W \[\e[1;32m\]\$(parse_git_branch)\[\033[31m\]\$(parse_git_dirty) \[\e[1;34m\] \[\033[00m\]"
