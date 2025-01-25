@@ -2,6 +2,14 @@
 
 DEFAULT_DIR="$HOME/videos/casts"
 SCRIPT_NAME="sccast"
+VIDPID_FILE="/tmp/$SCRIPT_NAME-vidpid"
+AUDPID_FILE="/tmp/$SCRIPT_NAME-audpid"
+MICPID_FILE="/tmp/$SCRIPT_NAME-micpid"
+FILENAME_FILE="/tmp/$SCRIPT_NAME-filename"
+TEMP_DIR="$HOME/.cache/$SCRIPT_NAME"
+
+mkdir -p $DEFAULT_DIR
+mkdir -p $TEMP_DIR
 
 print_help() {
 	cat <<EOF
@@ -17,6 +25,7 @@ Options:
   --video, -v                Record the screen (video only, no audio).
   --mic, -m                  Record microphone audio only.
   --audio, -a                Record system audio only.
+  --clean, -c                Clean and delete all the temp files.
 
 Notes:
   - By default, the output files are saved in: $DEFAULT_DIR
@@ -32,11 +41,190 @@ Examples:
 EOF
 }
 
-mkdir -p $DEFAULT_DIR
+diff_calc() {
+	f1=$1
+	f2=$2
+
+	f1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f1" | awk '{printf "%.0f\n", $1 * 1000}')
+	f2_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f2" | awk '{printf "%.0f\n", $1 * 1000}')
+
+	diff=$(($f2_dur - $f1_dur))
+	if [ $diff -lt 0 ]; then
+		diff=$(($diff * -1))
+	fi
+
+	diff=$(($diff - 100))
+
+	if [ $diff -lt 0 ]; then
+		diff=0
+	fi
+
+	echo $diff
+}
+
+start_rec() {
+	##
+	##
+	##
+	## TODO: clean up when error
+	##
+	##
+	##
+
+	rec_vid=$1
+	rec_mic=$2
+	rec_aud=$3
+	send_notification=$4
+
+	if [ -f "$FILENAME_FILE" ]; then
+		echo "Error: $SCRIPT_NAME already recording" >&2
+		[ $send_notification == 1 ] && notify-send -u critical -t 2500 "Already recording!"
+		exit 1
+	fi
+
+	filename="cast-$(date +%s%3N)-$(date +%F)"
+
+	if [ $rec_vid == 1 ]; then
+		resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
+		ffmpeg -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -qp 0 "$TEMP_DIR/vid-$filename.mp4" &
+
+		if [ $? != 0 ]; then
+			echo "Error: cannot record screen" >&2
+			[ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+			exit 1
+		fi
+
+		echo $! >"$VIDPID_FILE"
+	fi
+
+	if [ $rec_aud == 1 ]; then
+		ffmpeg -f pulse -i 0 "$TEMP_DIR/aud-$filename.wav" &
+
+		if [ $? != 0 ]; then
+			if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
+				kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+				rm "$TEMP_DIR/vid-$filename.mp4"
+			fi
+
+			echo "Error: cannot record screen" >&2
+
+			[ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+			exit 1
+		fi
+
+		echo $! >"$AUDPID_FILE"
+	fi
+
+	if [ $rec_mic == 1 ]; then
+		ffmpeg -f pulse -i 1 "$TEMP_DIR/mic-$filename.wav" &
+
+		if [ $? != 0 ]; then
+			if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
+				kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+				rm "$TEMP_DIR/vid-$filename.mp4"
+			fi
+
+			if [ $rec_aud == 1 ] && [ -f "$AUDPID_FILE" ]; then
+				kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
+				rm "$TEMP_DIR/aud-$filename.wav"
+			fi
+
+			echo "Error: cannot record screen" >&2
+			[ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+			exit 1
+		fi
+
+		echo $! >"$MICPID_FILE"
+	fi
+
+	echo "$filename" >"$FILENAME_FILE"
+
+	[ $send_notification == 1 ] && notify-send -t 1500 "Screen cast started"
+}
+
+kill_rec() {
+	send_notification=$1
+
+	if ! [ -f "$FILENAME_FILE" ]; then
+		[ $send_notification == 1 ] && notify-send -u critical -t 2500 "No screen cast is running!"
+	fi
+
+	[ $send_notification == 1 ] && notify-send -t 2000 "Ending screen cast..."
+
+	cmd="ffmpeg"
+
+	is_recording_vid=0
+	is_recording_aud=0
+	is_recording_mic=0
+
+	if [ -f "$VIDPID_FILE" ]; then
+		kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+		is_recording_vid=1
+	fi
+
+	if [ -f "$AUDPID_FILE" ]; then
+		kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
+		is_recording_aud=1
+	fi
+
+	if [ -f "$MICPID_FILE" ]; then
+		kill -15 "$(cat "$MICPID_FILE")" && rm $MICPID_FILE
+		is_recording_mic=1
+	fi
+
+	filename=$(cat "$FILENAME_FILE")
+	rm "$FILENAME_FILE"
+
+	sleep 1
+
+	if [ $is_recording_vid == 1 ]; then
+		if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
+			diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
+
+			ffmpeg -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$TEMP_DIR/final-aud-$filename.wav"
+		elif [ $is_recording_aud == 1 ] && [ $is_recording_mic != 1 ]; then
+			diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
+
+			ffmpeg -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
+		elif [ $is_recording_aud != 1 ] && [ $is_recording_mic == 1 ]; then
+			diff=$(diff_calc "$TEMP_DIR/mic-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
+
+			ffmpeg -i "$TEMP_DIR/mic-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
+		else
+			cp "$TEMP_DIR/vid-$filename.mp4" "$DEFAULT_DIR/$filename.mp4"
+			[ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+			exit 0
+		fi
+
+		sleep 1
+		ffmpeg -i "$TEMP_DIR/vid-$filename.mp4" -i "$TEMP_DIR/final-aud-$filename.wav" -c:v copy -c:a copy "$DEFAULT_DIR/$filename.mp4"
+
+		[ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+	else
+		if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
+			diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
+			ffmpeg -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$DEFAULT_DIR/$filename.wav"
+
+			[ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+			exit 0
+		fi
+
+		if [ $is_recording_mic == 1 ]; then
+			cp "$TEMP_DIR/mic-$filename.wav" "$DEFAULT_DIR/$filename.wav"
+		fi
+
+		if [ $is_recording_aud == 1 ]; then
+			cp "$TEMP_DIR/aud-$filename.wav" "$DEFAULT_DIR/$filename.wav"
+		fi
+
+		[ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+	fi
+}
 
 rec_vid=0
 rec_mic=0
 rec_aud=0
+kill_flag=0
 send_notification=0
 
 while [ $# -gt 0 ]; do
@@ -45,17 +233,16 @@ while [ $# -gt 0 ]; do
 		print_help
 		exit 0
 		;;
+	--clean | -c)
+		rm -rf "$TEMP_DIR"
+		mkdir -p "$TEMP_DIR"
+		exit 0
+		;;
 	--notify | -n)
 		send_notification=1
 		;;
 	--stop | --kill | -k)
-		pids=$(ps -eo pgid,cmd | grep "$SCRIPT_NAME" | grep -v grep | awk '{print $1}')
-		for pid in $pids; do
-			pgrep -P $pid | xargs -r kill
-		done
-		echo "Stopped all sccast processes"
-		[ $send_notification == 1 ] && notify-send -t 2000 "Stopped all screen casts"
-		exit 0
+		kill_flag=1
 		;;
 	--full | --all | -f)
 		rec_vid=1
@@ -79,49 +266,15 @@ while [ $# -gt 0 ]; do
 	shift 1
 done
 
-filename="cast-$(date +%s%3N)-$(date +%F)"
+if [ $kill_flag == 1 ]; then
+	if [ $rec_vid == 1 ] || [ $rec_mic == 1 ] || [ $rec_aud == 1 ]; then
+		echo "You cannot use [kill flag] with any recording option" >&2
+		exit 1
+	fi
 
-if [ $rec_aud == 0 ] && [ $rec_vid == 0 ] && [ $rec_mic == 0 ]; then
-	echo "No option specified" >&2
-	exit 1
+	kill_rec $send_notification
+	exit 0
 fi
 
-cmd="ffmpeg"
-
-# specify video format
-if [ $rec_vid == 1 ]; then
-	resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
-	cmd="$cmd -f x11grab -s $resolution -i :0.0"
-fi
-
-# specify output audio format
-if [ $rec_aud == 1 ]; then
-	output_audio_monitor="$(pacmd list-sources | grep -PB 1 "analog.*monitor>" | head -n 1 | perl -pe 's/.* //g')"
-	cmd="$cmd -f pulse -i "$output_audio_monitor""
-fi
-
-# specify microphone audio format
-if [ $rec_mic == 1 ]; then
-	cmd="$cmd -f alsa -i default"
-fi
-
-# specify merge when microphone & output audio are on
-if [ $rec_mic == 1 ] && [ $rec_aud == 1 ]; then
-	cmd="$cmd -filter_complex amerge -ac 2"
-fi
-
-# specify video codec
-if [ $rec_vid == 1 ]; then
-	cmd="$cmd -c:v libx264 -framerate 30"
-fi
-
-# specify audio codec
-if [ $rec_aud == 1 ] || [ $rec_mic == 1 ]; then
-	cmd="$cmd -c:a flac"
-fi
-
-# specify output file
-cmd="$cmd "$DEFAULT_DIR/$filename.mp4""
-
-[ $send_notification == 1 ] && notify-send -t 2000 "Starting screen cast..."
-$cmd
+start_rec $rec_vid $rec_mic $rec_aud $send_notification
+exit 0
