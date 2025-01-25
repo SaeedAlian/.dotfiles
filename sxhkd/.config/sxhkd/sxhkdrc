@@ -75,7 +75,7 @@ super + o
 ######### functions #########
 
 # screen cast
-super + shift + g : {f,v,o,m,k}
+super + v : {f,v,o,m,k}
   $HOME/.local/bin/sccast -n {-f,-v,-a -v,-m -v,-k}
 
 # toggle mobile broadband
@@ -174,7 +174,7 @@ super + shift + control + r
     pkill sxhkd 2>/dev/null; sxhkd; notify-send 'sxhkd' 'Reloaded config'
 
 # centerize floating node
-super + minus
+super + slash
   $HOME/.config/bspwm/bspfloatcenterize
 
 # close
@@ -211,7 +211,11 @@ super + shift + s
 
 # focus the next/previous node in the current desktop
 super + {j,k}
-    bspc node -f {next,prev}.local.!hidden.window
+    bspc node -f {prev,next}.local.!hidden.window
+
+# focus on the node in the given direction
+super + {h,l}
+    bspc node -f {west,east}
 
 # focus the last desktop
 super + Tab
@@ -222,11 +226,11 @@ super + {_,shift + }{1-9,0,grave}
 	bspc {desktop -f,node -d} '^{1-9,10,11}'
 
 # preselect the direction south
-super + semicolon
+super + minus
 	bspc node -p south
 
 # preselect the direction east
-super + apostrophe
+super + equal
 	bspc node -p east
 
 # cancel the preselection for the focused node
