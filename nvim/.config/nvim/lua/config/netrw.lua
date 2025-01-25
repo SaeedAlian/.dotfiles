@@ -22,7 +22,9 @@ function ToggleNetRWWindow()
   else
     vim.api.nvim_command("Ex")
     local win_id = vim.api.nvim_get_current_win()
-    vim.api.nvim_win_set_cursor(win_id, { vim.g.NetRWCursorLine, 1 })
+    if not pcall(vim.api.nvim_win_set_cursor, win_id, { vim.g.NetRWCursorLine, 1 }) then
+      vim.api.nvim_win_set_cursor(win_id, { 1, 1 })
+    end
   end
 end
 
