@@ -59,14 +59,14 @@ bspc rule -a Alacritty rectangle=950x650+0+0
 bspc rule -a 'Alacritty-float' state=floating rectangle=1200x800+360+140 focus=on
 bspc rule -a Yad state=floating rectangle=400x200+1500+850 focus=on
 bspc rule -a qalculate-qt state=floating rectangle=850x650+535+215 focus=on
-bspc rule -a ffplay state=floating rectangle=200x100+20+20 follow=on focus=off sticky=on
+bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=off sticky=on
 
 ###### scripts ######
 
 if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar") ]; then
-  $HOME/.config/bspwm/bspautohidebar &
+	$HOME/.config/bspwm/bspautohidebar &
 fi
 
 if [ -z $(pgrep bspfloatpos --list-full | grep -E "bspfloatpos") ]; then
-  $HOME/.config/bspwm/bspfloatpos &
+	$HOME/.config/bspwm/bspfloatpos &
 fi

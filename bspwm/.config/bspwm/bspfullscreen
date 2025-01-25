@@ -21,10 +21,7 @@ current_layout=$(bspc query -T -d | jq -r '.layout')
 
 if [ "$current_layout" == "tiled" ]; then
 	bspc desktop -l monocle
-
-	if [[ $BSPWM_WINDOW_GAPS -lt 8 ]]; then
-		$POLYBAR_SCRIPT -h
-	fi
+	$POLYBAR_SCRIPT -s
 elif [ "$current_layout" == "monocle" ]; then
 	bspc desktop -l tiled
 	$POLYBAR_SCRIPT -s
