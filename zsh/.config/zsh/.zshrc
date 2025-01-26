@@ -15,6 +15,9 @@ setopt inc_append_history # add history immediately after typing a command
 # source env vars
 source $HOME/.config/env/env_vars
 
+# source private env vars
+source $HOME/.config/env/private_env_vars
+
 # source prompt
 source $XDG_CONFIG_HOME/zsh/.zprompt
 
