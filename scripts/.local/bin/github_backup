@@ -157,7 +157,7 @@ for s in ${selected_repos[@]}; do
   echo $s
 done
 
-read -e -p "Is this OK? [y/N]" -i "" ans
+read -e -p "Is this OK? [y/N] " -i "" ans
 
 if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
   exit 0
