@@ -1,0 +1,185 @@
+#!/bin/sh
+
+USERNAME="SaeedAlian"
+TOKEN="$GITHUB_PAT"
+API_URL="https://api.github.com/user/repos"
+
+if ! ssh-add -l > /dev/null; then
+  eval $(ssh-agent -s)
+  ssh-add ~/.ssh/id_ed25519
+fi
+
+check_dirname() {
+  local dirname="$1"
+
+  if [ -z $dirname ]; then
+    echo "Error: Directory name is empty" >&2
+    exit 1
+  fi
+
+  dirname="${dirname%% }"
+  dirname="${dirname## }"
+
+  if [[ "$dirname" == *"$'\0'"* ]]; then
+      echo "Error: Directory name contains null bytes" >&2
+      exit 1
+  fi
+
+  if ! [[ "$dirname" =~ ^(/?[^<>:;,?*|]+)+$ ]]; then
+    echo "Error: Invalid directory name '$dirname'" >&2
+    exit 1
+  fi
+}
+
+get_all_repos() {
+  local response=$(curl -s -u "$USERNAME:$TOKEN" "$API_URL?per_page=100")
+
+  if [[ $? -ne 0 ]]; then
+    echo "Error: Failed to fetch repositories" >&2
+    exit 1
+  fi
+
+  echo "$response" | jq -r '.[].full_name'
+}
+
+include_all=0
+include_mode=0
+exclude_mode=0
+
+selected_dir=""
+
+while [ $# -gt 0 ]; do
+  case $1 in
+  --help | -h)
+    print_help
+    exit 0
+    ;;
+  --include-mode | -i)
+    include_mode=1
+    ;;
+  --exclude-mode | -e)
+    exclude_mode=1
+    ;;
+  --all | -a)
+    include_all=1
+    ;;
+  --directory|-d)
+    shift 1
+    selected_dir=$1
+    check_dirname $selected_dir
+    ;;
+  *)
+    echo "Invalid option $1" >&2
+    exit 1
+    ;;
+  esac
+  shift 1
+done
+
+if [ -z "$selected_dir" ]; then
+  echo "You must specify a directory" >&2
+  exit 1
+fi
+
+if [ $exclude_mode == 0 ] && [ $include_all == 0 ] && [ $include_mode == 0 ]; then
+  include_mode=1
+fi
+
+if [ $exclude_mode == 1 ] && [ $include_all == 1 ]; then
+  echo "You cannot use the 'include all' option and 'exclude mode' option at the same time" >&2
+  exit 1
+fi
+
+if [ $include_mode == 1 ] && [ $include_all == 1 ]; then
+  echo "You cannot use the 'include all' option and 'include mode' option at the same time" >&2
+  exit 1
+fi
+
+if [ $include_mode == 1 ] && [ $exclude_mode == 1 ]; then
+  echo "You cannot use the 'include mode' option and 'exclude mode' option at the same time" >&2
+  exit 1
+fi
+
+repos_res=$(get_all_repos)
+repos=($repos_res)
+selected_repos=()
+
+echo "Repo list:"
+
+for i in ${!repos[@]}; do
+  echo "$((i+1)) - ${repos[$i]}"
+done
+
+if [ $include_mode == 1 ]; then
+  read -e -p "Enter the repo numbers that you want to include with space between them: " -i "" ans
+
+  for i in $ans; do
+    if [ $i -gt ${#repos[@]} ] || [ $i -lt 1 ]; then
+      echo "Index out of range" >&2
+      exit 1
+    fi
+
+    selected_repos+=(${repos[$((i - 1))]})
+  done
+fi
+
+if [ $exclude_mode == 1 ]; then
+  read -e -p "Enter the repo numbers that you want to exclude with space between them: " -i "" ans
+
+  for i in $ans; do
+    if [ $i -gt ${#repos[@]} ] || [ $i -lt 1 ]; then
+      echo "Index out of range" >&2
+      exit 1
+    fi
+  done
+
+  founded=false
+
+  for i in ${!repos[@]}; do
+    for j in $ans; do
+      if [ $((j - 1)) == $i ]; then
+        founded=true
+      fi
+    done
+
+    if $founded; then
+      founded=false
+      continue
+    fi
+
+    selected_repos+=(${repos[$i]})
+  done
+fi
+
+echo "Selected repos:"
+
+for s in ${selected_repos[@]}; do
+  echo $s
+done
+
+read -e -p "Is this OK? [y/N]" -i "" ans
+
+if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
+  exit 0
+fi
+
+echo "Cloning repositories into $selected_dir..."
+mkdir -p "$selected_dir"
+
+urls=()
+
+for r in ${selected_repos[@]}; do
+  url="git@github.com:$r.git"
+  name=$(basename "$url" .git)
+
+  if [[ -d "$selected_dir/$name" ]]; then
+    echo "Skipping $name (already cloned)"
+  else
+    echo "Cloning $name..."
+    git clone "$url" "$selected_dir/$name"
+  fi
+done
+
+echo "Cloning completed"
+
+exit 0
