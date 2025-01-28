@@ -27,6 +27,8 @@ shopt -s cmdhist                                   # save multi-line commands in
 export HISTCONTROL="ignoredups:erasedups"          # no duplicate entries
 export PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # makes history immediately write the current/new lines to the history file
 export HISTFILE="$HOME/.cache/.bash_history"       # history file location
+export HISTSIZE=10000                              # history file size
+export HISTFILESIZE=10000                          # history file size
 
 ######## launch x server ########
 if [[ "$(tty)" = "/dev/tty1" ]]; then
