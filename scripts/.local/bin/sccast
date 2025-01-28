@@ -63,14 +63,6 @@ diff_calc() {
 }
 
 start_rec() {
-	##
-	##
-	##
-	## TODO: clean up when error
-	##
-	##
-	##
-
 	rec_vid=$1
 	rec_mic=$2
 	rec_aud=$3
@@ -86,7 +78,7 @@ start_rec() {
 
 	if [ $rec_vid == 1 ]; then
 		resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
-		ffmpeg -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -qp 0 "$TEMP_DIR/vid-$filename.mp4" &
+		ffmpeg -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -qp 0 -threads 24 -preset veryfast "$TEMP_DIR/vid-$filename.mp4" &
 
 		if [ $? != 0 ]; then
 			echo "Error: cannot record screen" >&2
