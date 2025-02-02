@@ -22,6 +22,14 @@ pgrep -x clementine >/dev/null || clementine &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
 
+###### lockstartups ######
+if [ ! -f "/tmp/startuplock" ]; then
+	$HOME/.local/bin/toggle_bluetooth --off
+	$HOME/.local/bin/toggle_touchscreen --off
+
+	touch "/tmp/startuplock"
+fi
+
 ###### desktops ######
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10 0
 
