@@ -140,7 +140,7 @@ XF86AudioMute
 
 # microphone mute
 XF86AudioMicMute
-  $HOME/.local/bin/microphone -m
+  $HOME/.local/bin/microphone -t
 
 # screenshot
 Print
