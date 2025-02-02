@@ -119,6 +119,12 @@ local telescope_config = function()
 			find_files = {
 				previewer = false,
 				hidden = true,
+				no_ignore = true,
+				no_ignore_parent = true,
+			},
+			git_files = {
+				previewer = false,
+				hidden = true,
 			},
 			live_grep = {
 				previewer = false,
