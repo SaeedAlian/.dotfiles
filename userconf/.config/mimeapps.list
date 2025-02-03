@@ -47,6 +47,8 @@ video/x-sgi-movie=mpv.desktop
 video/ogg=mpv.desktop
 video/vivo=mpv.desktop
 video/vnd.vivo=mpv.desktop
+x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop
+x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
@@ -92,3 +94,5 @@ video/x-sgi-movie=mpv.desktop;
 video/ogg=mpv.desktop;
 video/vivo=mpv.desktop;
 video/vnd.vivo=mpv.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop;
+x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop;
