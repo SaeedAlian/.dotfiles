@@ -74,6 +74,9 @@ super + o
 
 ######### functions #########
 
+super + shift + Escape
+  $HOME/.local/bin/startup --force
+
 # screen cast
 super + v : {f,v,o,m,k}
   $HOME/.local/bin/sccast -n {-f,-v,-a -v,-m -v,-k}

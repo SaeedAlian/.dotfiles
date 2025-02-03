@@ -1,0 +1,18 @@
+#!/bin/sh
+
+run() {
+  $HOME/.local/bin/toggle_bluetooth --off
+  $HOME/.local/bin/toggle_touchscreen --off
+}
+
+is_forced=false
+
+if [ "$1" == "--force" ]; then
+  run
+  exit 0
+fi
+
+if [ ! -f "/tmp/startuplock" ]; then
+  run
+  touch "/tmp/startuplock"
+fi

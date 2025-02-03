@@ -22,13 +22,8 @@ pgrep -x clementine >/dev/null || clementine &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
 
-###### lockstartups ######
-if [ ! -f "/tmp/startuplock" ]; then
-	$HOME/.local/bin/toggle_bluetooth --off
-	$HOME/.local/bin/toggle_touchscreen --off
-
-	touch "/tmp/startuplock"
-fi
+###### startups ######
+$HOME/.local/bin/startup
 
 ###### desktops ######
 bspc monitor -d 1 2 3 4 5 6 7 8 9 10 0
@@ -72,9 +67,9 @@ bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=of
 ###### scripts ######
 
 if [ -z $(pgrep bspautohidebar --list-full | grep -E "bspautohidebar") ]; then
-	$HOME/.config/bspwm/bspautohidebar &
+  $HOME/.config/bspwm/bspautohidebar &
 fi
 
 if [ -z $(pgrep bspfloatpos --list-full | grep -E "bspfloatpos") ]; then
-	$HOME/.config/bspwm/bspfloatpos &
+  $HOME/.config/bspwm/bspfloatpos &
 fi
