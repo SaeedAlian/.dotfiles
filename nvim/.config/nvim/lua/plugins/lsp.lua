@@ -19,7 +19,7 @@ local mason_config = function()
 		ensure_installed = {
 			"html",
 			"cssls",
-			"tsserver",
+			"ts_ls",
 			"tailwindcss",
 			"lua_ls",
 			"pyright",
@@ -83,7 +83,7 @@ local lsp_config = function()
 	})
 
 	-- typescript
-	lspconfig["tsserver"].setup({
+	lspconfig["ts_ls"].setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
