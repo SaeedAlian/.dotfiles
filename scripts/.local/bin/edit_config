@@ -8,7 +8,7 @@ declare -a opts=(
 	"fastfetch"
 	"i3"
   "mpv"
-	"neovim"
+	"nvim"
 	"picom"
 	"polybar"
 	"redshift"
