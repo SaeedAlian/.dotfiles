@@ -1,5 +1,3 @@
-local diagnostic_signs = require("util.icons").diagnostic_signs
-
 local mason_config = function()
 	local mason = require("mason")
 	local mason_lspconfig = require("mason-lspconfig")
@@ -70,56 +68,50 @@ local lsp_config = function()
 	local cmp_nvim_lsp = require("cmp_nvim_lsp")
 	local capabilities = cmp_nvim_lsp.default_capabilities()
 
-	-- set diagnostics icons
-	for type, icon in pairs(diagnostic_signs) do
-		local hl = "DiagnosticSign" .. type
-		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-	end
-
 	-- html
-	lspconfig["html"].setup({
+	lspconfig.html.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- typescript
-	lspconfig["ts_ls"].setup({
+	lspconfig.ts_ls.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- css
-	lspconfig["cssls"].setup({
+	lspconfig.cssls.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- tailwindcss
-	lspconfig["tailwindcss"].setup({
+	lspconfig.tailwindcss.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- python
-	lspconfig["pyright"].setup({
+	lspconfig.pyright.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- bash
-	lspconfig["bashls"].setup({
+	lspconfig.bashls.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- rust
-	lspconfig["rust_analyzer"].setup({
+	lspconfig.rust_analyzer.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 	})
 
 	-- c\c++
-	lspconfig["clangd"].setup({
+	lspconfig.clangd.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 		filetypes = { "cpp", "c", "h", "hpp", "cc" },
@@ -130,7 +122,7 @@ local lsp_config = function()
 	})
 
 	-- lua
-	lspconfig["lua_ls"].setup({
+	lspconfig.lua_ls.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 		settings = {
@@ -142,7 +134,7 @@ local lsp_config = function()
 		},
 	})
 
-	lspconfig["gopls"].setup({
+	lspconfig.gopls.setup({
 		capabilities = capabilities,
 		on_attach = LspOnAttach,
 		cmd = { "gopls" },

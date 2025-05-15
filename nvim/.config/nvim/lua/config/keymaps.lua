@@ -50,16 +50,16 @@ map("v", "K", ":m '<-2<CR>gv=gv", "Move the visually selected lines up")
 
 -- rename selected word globally
 map(
-	"v",
-	"<leader>r",
-	[["hy:<C-w>%s/\(<C-r>h\)/<C-r>h/gI<Left><Left><Left>]],
-	"Rename selected word (visually) globally"
+  "v",
+  "<leader>r",
+  [["hy:<C-w>%s/\(<C-r>h\)/<C-r>h/gI<Left><Left><Left>]],
+  "Rename selected word (visually) globally"
 )
 map(
-	"n",
-	"<leader>r",
-	[[:%s/\(<C-r><C-w>\)/<C-r><C-w>/gI<Left><Left><Left>]],
-	"Rename selected word (under cursor) globally"
+  "n",
+  "<leader>r",
+  [[:%s/\(<C-r><C-w>\)/<C-r><C-w>/gI<Left><Left><Left>]],
+  "Rename selected word (under cursor) globally"
 )
 
 -- force the cursor to be the same place when using J to move the lines into one line
@@ -74,15 +74,15 @@ map("n", "n", "nzzzv", "Incremental search forward")
 map("n", "N", "Nzzzv", "Incremental search backward")
 
 -- window management
-map("n", "sv", ":vsplit<Return>", "Vertical split") -- vertical split
-map("n", "ss", ":split<Return>", "Horizontal split") -- horizontal split
-map("n", "<A-h>", "<C-w><", "Resize pane left side") -- resize left
-map("n", "<A-k>", "<C-w>+", "Resize pane up side") -- resize up
+map("n", "sv", ":vsplit<Return>", "Vertical split")   -- vertical split
+map("n", "ss", ":split<Return>", "Horizontal split")  -- horizontal split
+map("n", "<A-h>", "<C-w><", "Resize pane left side")  -- resize left
+map("n", "<A-k>", "<C-w>+", "Resize pane up side")    -- resize up
 map("n", "<A-l>", "<C-w>>", "Resize pane right side") -- resize right
-map("n", "<A-j>", "<C-w>-", "Resize pane down side") -- resize down
+map("n", "<A-j>", "<C-w>-", "Resize pane down side")  -- resize down
 
 -- buffer management
-map("n", "<tab>", ":bnext<Return>", "Next buffer") -- next buffer
+map("n", "<tab>", ":bnext<Return>", "Next buffer")       -- next buffer
 map("n", "<s-tab>", ":bprev<Return>", "Previous buffer") -- previous buffer
 
 -- indenting
@@ -100,8 +100,8 @@ map("n", "<leader>gp", ":Git push<CR>", "Git push")
 -- undotree
 map("n", "<leader>uf", ":UndotreeFocus<CR>", "Undo tree focus")
 map("n", "<leader>u", function()
-	vim.cmd.UndotreeToggle()
-	vim.cmd.UndotreeFocus()
+  vim.cmd.UndotreeToggle()
+  vim.cmd.UndotreeFocus()
 end, "Undo tree toggle")
 
 -- telescope
@@ -111,12 +111,12 @@ map("n", "<leader>pg", ":Telescope git_files<CR>", "Search through git files wit
 map("n", "<leader>lg", ":Telescope live_grep<CR>", "Search with live grep in telescope")
 map("n", "<leader>pb", ":Telescope buffers<CR>", "Search through buffers with telescope")
 map("n", "<leader>pt", function()
-	local builtin = require("telescope.builtin")
-	builtin.treesitter()
+  local builtin = require("telescope.builtin")
+  builtin.treesitter()
 end, "Search through variables, functions etc. in a code buffer which has treesitter with telescope")
 map("n", "<leader>pD", function()
-	local builtin = require("telescope.builtin")
-	builtin.diagnostics()
+  local builtin = require("telescope.builtin")
+  builtin.diagnostics()
 end, "Search through diagnostics with telescope")
 
 -- vim maximizer
@@ -131,43 +131,40 @@ map("n", "<C-\\>", "<cmd><C-U>TmuxNavigatePrevious<CR>", "Vim/Tmux pane navigate
 
 -- lsp on attach
 function LspOnAttach(_, bufnr)
-	local opts = { noremap = true, silent = true, buffer = bufnr }
+  local opts = { noremap = true, silent = true, buffer = bufnr }
 
-	map("n", "<leader>gr", "<cmd>Telescope lsp_references<CR>", "Show LSP references", opts)
-	map("n", "<leader>gd", vim.lsp.buf.definition, "Go to definition", opts)
-	map("n", "<leader>ca", vim.lsp.buf.code_action, "See available code actions", opts)
-	map("n", "<leader>sr", vim.lsp.buf.rename, "Smart rename", opts)
-	map("n", "<leader>ld", vim.diagnostic.open_float, "Show line diagnostics", opts)
-	map("n", "[d", vim.diagnostic.goto_prev, "Go to previous diagnostic", opts)
-	map("n", "]d", vim.diagnostic.goto_next, "Go to next diagnostic", opts)
-	map("n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor", opts)
+  map("n", "<leader>gr", "<cmd>Telescope lsp_references<CR>", "Show LSP references", opts)
+  map("n", "<leader>gd", vim.lsp.buf.definition, "Go to definition", opts)
+  map("n", "<leader>ca", vim.lsp.buf.code_action, "See available code actions", opts)
+  map("n", "<leader>sr", vim.lsp.buf.rename, "Smart rename", opts)
+  map("n", "<leader>ld", vim.diagnostic.open_float, "Show line diagnostics", opts)
+  map("n", "[d", vim.diagnostic.goto_prev, "Go to previous diagnostic", opts)
+  map("n", "]d", vim.diagnostic.goto_next, "Go to next diagnostic", opts)
+  map("n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor", opts)
 end
 
 -- format buffer
 map("n", "<leader>f", function()
-	vim.lsp.buf.format({ timeout_ms = 10000 })
+  vim.lsp.buf.format({ timeout_ms = 10000 })
 end, "Format the current buffer", {})
-
--- render markdown toggle
-map("n", "<leader>md", ":RenderMarkdown toggle<CR>", "Toggle render markdown")
 
 -- preview markdown
 map("n", "<leader>mp", function()
-	MarkdownPreview()
+  MarkdownPreview()
 end, "Markdown previewer with zathura and pandoc")
 
 -- save markdown preview
 map("n", "<leader>mds", function()
-	SaveMarkdownPreview()
+  SaveMarkdownPreview()
 end, "Save markdown preview with pandoc in pdf format")
 
 -- toggle autoformat on save
 map("n", "<leader>af", function()
-	if vim.g.autoformat then
-		vim.g.autoformat = false
-		print("Autoformat turned off")
-	else
-		vim.g.autoformat = true
-		print("Autoformat turned on")
-	end
+  if vim.g.autoformat then
+    vim.g.autoformat = false
+    print("Autoformat turned off")
+  else
+    vim.g.autoformat = true
+    print("Autoformat turned on")
+  end
 end, "Save markdown preview with pandoc in pdf format")
