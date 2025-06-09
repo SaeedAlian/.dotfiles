@@ -4,11 +4,9 @@ local g = vim.g
 
 -- removes netrw window
 g.netrw_browse_split = 0
-g.netrw_banner = 0
 g.netrw_winsize = 25
 
 -- removes .. and . in the top of netrw buffer
-g.netrw_list_hide = "^\\.\\.\\/$"
 
 vim.g.NetRWCursorLine = 1
 
