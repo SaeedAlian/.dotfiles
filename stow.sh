@@ -57,6 +57,7 @@ stow X11
 stow dunst
 stow fastfetch
 stow fonts
+stow git
 stow mpv
 stow nvim
 stow picom
