@@ -49,6 +49,7 @@ video/vivo=mpv.desktop
 video/vnd.vivo=mpv.desktop
 x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop
 x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop
+x-scheme-handler/postman=Postman.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
