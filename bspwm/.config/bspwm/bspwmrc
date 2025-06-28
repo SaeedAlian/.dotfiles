@@ -18,9 +18,9 @@ pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/start_lockscreen
 pgrep -x light >/dev/null || light -I &
 pgrep -x xfce-polkit >/dev/null || /usr/lib/xfce-polkit/xfce-polkit &
 pgrep -x picom >/dev/null || picom -b --config $HOME/.config/picom/picom.conf &
-pgrep -x clementine >/dev/null || clementine &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
+setxkbmap -option ctrl:nocaps &
 
 ###### startups ######
 $HOME/.local/bin/startup
