@@ -74,6 +74,7 @@ super + o
 
 ######### functions #########
 
+# force run startup script
 super + shift + Escape
   $HOME/.local/bin/startup --force
 
