@@ -20,7 +20,7 @@ pgrep -x xfce-polkit >/dev/null || /usr/lib/xfce-polkit/xfce-polkit &
 pgrep -x picom >/dev/null || picom -b --config $HOME/.config/picom/picom.conf &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
-setxkbmap -option ctrl:nocaps &
+setxkbmap -option caps:none
 
 ###### startups ######
 $HOME/.local/bin/startup
