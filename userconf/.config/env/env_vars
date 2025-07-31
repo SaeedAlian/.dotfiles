@@ -14,7 +14,11 @@ export EDITOR="nvim"
 export VPN="hiddify"
 export TERMINAL="alacritty"
 export BROWSER="brave"
-export FILEMANAGER="pcmanfm-qt"
+export FILEMANAGER="thunar"
 export CALCULATOR="qalculate-qt"
+
+export XINITRC="$HOME/.config/X11/xinitrc"
+
+export YAZI_CONFIG_HOME="$HOME/.config/yazi"
 
 export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin:$HOME/.local/share/applications"
