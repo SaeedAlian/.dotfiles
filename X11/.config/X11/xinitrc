@@ -1,6 +1,5 @@
 #!/bin/sh
 
-export XAUTHORITY="$HOME/.config/X11/Xauthority"
 export XDG_CURRENT_DESKTOP="bspwm"
 
 xrdb -load ~/.config/X11/Xresources
