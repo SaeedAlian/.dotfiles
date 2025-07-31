@@ -1,12 +1,18 @@
 #!/bin/sh
 
+function print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [markdown_preview --help] for help"
+}
+
 if ! type "zathura" > /dev/null; then
-  echo "Error: zathura is not installed"
+  print_err "Zathura is not installed"
   exit 1
 fi
 
 if ! type "pandoc" > /dev/null; then
-  echo "Error: pandoc is not installed"
+  print_err "Pandoc is not installed"
   exit 1
 fi
 
@@ -35,12 +41,6 @@ Arguments:
   else
     echo "$help"
   fi
-}
-
-function print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [markdown_preview --help] for help"
 }
 
 # check for help option
@@ -103,9 +103,9 @@ if [ ! -f $filename ]; then
 	exit 1
 fi
 
-if [ $ext != "md" ]; then
-	print_err "File is not markdown"
-	exit 1
+if [ "$ext" != "md" ]; then
+  print_err "File is not markdown"
+  exit 1
 fi
 
 save_path="/tmp/$name.pdf"
