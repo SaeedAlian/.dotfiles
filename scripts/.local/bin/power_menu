@@ -13,9 +13,9 @@ texts[shutdown]="󰐥 Shutdown"
 declare -A actions
 actions[lockscreen]="start_lockscreen"
 actions[logout]="bspc quit"
-actions[suspend]="loginctl suspend"
-actions[reboot]="loginctl reboot"
-actions[shutdown]="loginctl poweroff"
+actions[suspend]="suspend"
+actions[reboot]="reboot"
+actions[shutdown]="poweroff"
 
 confirmations=(reboot shutdown logout)
 
