@@ -52,6 +52,29 @@ while [ $# -gt 0 ]; do
   shift 1
 done
 
+# make default dirs
+
+mkdir -p $HOME/.themes
+mkdir -p $HOME/.local/bin
+mkdir -p $HOME/.local/share/fonts
+mkdir -p $HOME/.local/share/applications
+mkdir -p $HOME/.config/env
+
+mkdir -p $HOME/.config/X11
+mkdir -p $HOME/.config/dunst
+mkdir -p $HOME/.config/fastfetch
+mkdir -p $HOME/.config/git
+mkdir -p $HOME/.config/mpv
+mkdir -p $HOME/.config/nvim
+mkdir -p $HOME/.config/picom
+mkdir -p $HOME/.config/polybar
+mkdir -p $HOME/.config/redshift
+mkdir -p $HOME/.config/rofi
+mkdir -p $HOME/.config/sxiv
+mkdir -p $HOME/.config/tmux
+mkdir -p $HOME/.config/yazi
+mkdir -p $HOME/.config/zathura
+
 # stow defaults
 stow X11
 stow dunst
@@ -72,19 +95,24 @@ stow yazi
 stow zathura
 
 if [ $use_alacritty == 1 ]; then
+  mkdir -p $HOME/.config/alacritty
   stow alacritty
 fi
 
 if [ $use_bspwm == 1 ]; then
+  mkdir -p $HOME/.config/bspwm
+  mkdir -p $HOME/.config/sxhkd
   stow bspwm
   stow sxhkd
 fi
 
 if [ $use_i3 == 1 ]; then
+  mkdir -p $HOME/.config/i3
   stow i3
 fi
 
 if [ $use_zsh == 1 ]; then
+  mkdir -p $HOME/.config/zsh
   stow zsh
 fi
 
