@@ -1,7 +1,11 @@
 #!/bin/sh
 
+PASSWORD_FILE=$(mktemp)
+TERMINAL_FLOAT_CLASS="Alacritty-float"
+
 notify-send "Getting list of available Wi-Fi networks..." -t 2000
 wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list | sed 1d | sed 's/  */ /g' | sed -E "s/WPA*.?\S/ /g" | sed "s/^--/ /g" | sed "s/  //g" | sed "/--/d")
+wifi_bssid_list=$(nmcli --fields "BSSID,SSID" device wifi list | sed 1d)
 
 has_simcard_module=true
 simcard_module_name="cdc-wdm0"
@@ -14,7 +18,7 @@ elif [[ "$connected" =~ "disabled" ]]; then
   toggle_wifi="󰖩  Enable Wi-Fi"
 fi
 
-if [ -z "$simcard_module_status" ]; then
+if [ -z "$simcard_module_status" ] || [ "$simcard_module_status" == "unavailable" ]; then
   has_simcard_module=false
 fi
 
@@ -30,9 +34,10 @@ else
   chosen_network=$(echo -e "$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
 fi
 
-read -r chosen_id <<<"${chosen_network:3}"
+read -r chosen_network_name <<<"${chosen_network:3}"
+chosen_bssid=$(echo "$wifi_bssid_list" | grep "$chosen_network_name" | awk '{print $1}')
 
-if [ "$chosen_network" = "" ]; then
+if [ "$chosen_bssid" = "" ]; then
   exit
 elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
   nmcli radio wifi on
@@ -43,15 +48,25 @@ elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱔  Enable Mobile Netwo
 elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱟  Disable Mobile Network" ]; then
   nmcli device down $simcard_module_name
 else
-  success_message="You are now connected to the Wi-Fi network \"$chosen_id\"."
-  saved_connections=$(nmcli -g NAME connection)
+  success_message="You are now connected to the Wi-Fi network \"$chosen_network_name\"."
+  saved_connections="$(nmcli connection show | grep wifi)"
 
-  if [[ $(echo "$saved_connections" | grep -w "$chosen_id") = "$chosen_id" ]]; then
-    nmcli connection up id "$chosen_id" | grep "successfully" && notify-send "Connection Established" "$success_message"
+  found=$(echo "$saved_connections" | grep "$chosen_network_name")
+
+  if [[ "$found" != "" ]]; then
+    uuid=$(echo "$found" | awk '{print $2}')
+    nmcli connection up uuid "$uuid" | grep "successfully" && notify-send "Connection Established" "$success_message"
   else
     if [[ "$chosen_network" =~ "" ]]; then
-      wifi_password=$(rofi -dmenu -p "Password: ")
+      alacritty --class $TERMINAL_FLOAT_CLASS -e bash -c "
+        echo 'Enter password: '
+        read -s password
+        echo \$password > \"$PASSWORD_FILE\"
+      "
+      wifi_password=$(cat "$PASSWORD_FILE")
+
+      rm -f "$PASSWORD_FILE"
     fi
-    nmcli device wifi connect "$chosen_id" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
+    nmcli device wifi connect "$chosen_bssid" password "$wifi_password" | grep "successfully" && notify-send "Connection Established" "$success_message"
   fi
 fi
