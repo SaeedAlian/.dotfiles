@@ -1,0 +1,4 @@
+hiddify-next-bin
+brave-bin
+light
+xfce-polkit
