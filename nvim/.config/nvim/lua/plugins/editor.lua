@@ -13,6 +13,17 @@ local comment_config = function()
 	})
 end
 
+local netrw_config = function()
+	require("netrw").setup({
+		icons = {
+			symlink = "",
+			directory = "",
+			file = "",
+		},
+		use_devicons = true,
+	})
+end
+
 local treesitter_config = function()
 	require("nvim-treesitter.configs").setup({
 		build = ":TSUpdate",
@@ -131,6 +142,11 @@ local telescope_config = function()
 end
 
 return {
+	{
+		"prichrd/netrw.nvim",
+		lazy = false,
+		config = netrw_config,
+	},
 	{
 		"numToStr/Comment.nvim",
 		lazy = false,
