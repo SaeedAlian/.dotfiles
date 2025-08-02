@@ -6,7 +6,7 @@ API_URL="https://api.github.com/user/repos"
 
 if ! ssh-add -l > /dev/null; then
   eval $(ssh-agent -s)
-  ssh-add ~/.ssh/id_ed25519
+  ssh-add ~/.ssh/id_ed25519_github
 fi
 
 check_dirname() {
