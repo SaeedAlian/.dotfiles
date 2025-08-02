@@ -1,0 +1,68 @@
+#!/bin/sh
+
+MOUNT_DIR="/mnt"
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+
+function print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [dumount --help] for help"
+  exit 1
+}
+
+function print_help() {
+  help="dumount: A command-line tool for safely unmounting mounted devices from /mnt/<mountpoint>.
+
+Usage:
+
+  dumount <mountpoint>
+
+Arguments:
+
+  mountpoint         The name of the mount directory inside /mnt (e.g., mydrive).
+
+Options:
+
+  --help             Show this help message and exit.
+
+Examples:
+
+• Unmount /mnt/usb:
+  dumount usb
+
+• Unmount /mnt/mydrive and all nested mounts (recursive unmount):
+  dumount mydrive
+
+Notes:
+ • This script checks if the given path is an actual mountpoint before unmounting.
+ • Uses recursive unmount (-R) in case there are nested mounts under the mountpoint.
+ • Requires sudo access to perform unmounting.
+
+"
+
+  if type "less" > /dev/null; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+if [ "$1" = "--help" ]; then
+  print_help
+  exit 0
+fi
+
+mountpoint=$1
+
+if [ -z "$mountpoint" ]; then
+  print_err "Mountpoint is empty"
+fi
+
+mountpoint="$MOUNT_DIR/$mountpoint"
+
+if ! mountpoint -q "$mountpoint"; then
+  print_err "$mountpoint is not a mountpoint!!"
+fi
+
+sudo umount -R "$mountpoint"
