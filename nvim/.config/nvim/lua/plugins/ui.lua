@@ -30,11 +30,11 @@ local statusline_config = function()
     if branch ~= "" then
       return branch
     end
-    return ""
+    return "[No Git]"
   end
 
   local function file_name()
-    if vim.bo.filetype == "oil" then
+    if vim.bo.filetype == "oil" or vim.bo.filetype == "netrw" then
       return "[Explorer]"
     end
     local path = vim.fn.expand("%:p")

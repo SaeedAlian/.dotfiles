@@ -13,90 +13,16 @@ local comment_config = function()
 	})
 end
 
-local oil_config = function()
-	require("oil").setup({
-		default_file_explorer = true,
-		columns = {
-			"icon",
-		},
-		buf_options = {
-			buflisted = false,
-			bufhidden = "hide",
-		},
-		win_options = {
-			wrap = false,
-			signcolumn = "yes",
-			cursorcolumn = false,
-			foldcolumn = "0",
-			spell = false,
-			list = false,
-			conceallevel = 3,
-			concealcursor = "nvic",
-		},
-		skip_confirm_for_simple_edits = false,
-		prompt_save_on_select_new_entry = true,
-		lsp_file_methods = {
-			enabled = true,
-			timeout_ms = 5000,
-			autosave_changes = false,
-		},
-		constrain_cursor = "editable",
-		watch_for_changes = true,
-		keymaps = {
-			["<leader>?"] = { "actions.show_help", mode = "n" },
-			["<CR>"] = "actions.select",
-			["<C-p>"] = "actions.preview",
-			["<C-c>"] = { "actions.close", mode = "n" },
-			["<C-;>"] = "actions.refresh",
-			["-"] = { "actions.parent", mode = "n" },
-			["_"] = { "actions.open_cwd", mode = "n" },
-			["`"] = { "actions.cd", mode = "n" },
-			["~"] = { "actions.cd", opts = { scope = "tab" }, mode = "n" },
-			["."] = { "actions.toggle_hidden", mode = "n" },
-		},
-		use_default_keymaps = false,
-		view_options = {
-			show_hidden = true,
-			is_always_hidden = function(name, _)
-				return name == ".."
-			end,
-			natural_order = "fast",
-			case_insensitive = false,
-			sort = {
-				{ "type", "asc" },
-				{ "name", "asc" },
-			},
-		},
-	})
-
-	vim.api.nvim_create_user_command("OilToggle", function()
-		local current_buf = vim.api.nvim_get_current_buf()
-		local current_filetype = vim.api.nvim_buf_get_option(current_buf, "filetype")
-
-		local bufs = vim.api.nvim_list_bufs()
-
-		if current_filetype == "oil" then
-			if #bufs > 1 then
-				vim.cmd("b#")
-			end
-		else
-			vim.cmd("Oil")
-		end
-	end, { nargs = 0 })
-end
-
 local treesitter_config = function()
 	require("nvim-treesitter.configs").setup({
 		build = ":TSUpdate",
+		sync_install = false,
+		auto_install = true,
 		indent = {
 			enable = true,
 		},
 		autotag = {
 			enable = true,
-		},
-		event = {
-			"BufReadPre",
-			"BufNewFile",
 		},
 		ensure_installed = {
 			"c",
@@ -114,9 +40,10 @@ local treesitter_config = function()
 			"dockerfile",
 			"gitignore",
 			"sql",
+			"go",
 			"markdown_inline",
+			"typst",
 		},
-		auto_install = true,
 		parser_install_dir = "$HOME/.local/share/treesitter",
 		highlight = {
 			enable = true,
@@ -204,11 +131,6 @@ local telescope_config = function()
 end
 
 return {
-	{
-		"stevearc/oil.nvim",
-		lazy = false,
-		config = oil_config,
-	},
 	{
 		"numToStr/Comment.nvim",
 		lazy = false,

@@ -19,6 +19,7 @@ require("config.globals")
 require("config.options")
 require("config.keymaps")
 require("config.autocmds")
+require("config.netrw")
 
 local plugins_path = "plugins"
 
@@ -38,7 +39,6 @@ local opt = {
 			"tohtml",
 			"tutor",
 			"zipPlugin",
-			"netrw",
 		},
 	},
 	change_detection = {

@@ -1,8 +1,7 @@
 local map = require("util.keymapper").map
-local MarkdownPreview = require("util.markdown").MarkdownPreview
-local SaveMarkdownPreview = require("util.markdown").SaveMarkdownPreview
-local TypstPreview = require("util.typst").TypstPreview
-local SaveTypstPreview = require("util.typst").SaveTypstPreview
+local markdown = require("util.markdown")
+local typst = require("util.typst")
+local helpers = require("util.helpers")
 
 -- remove some keymaps
 map("n", "Q", "<nop>", "Remove Q")
@@ -141,7 +140,7 @@ map("n", "]d", vim.diagnostic.goto_next, "Go to next diagnostic")
 map("n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor")
 
 -- file explorer
-map("n", "<leader>pd", ":OilToggle<CR>", "Toggle Oil")
+map("n", "<leader>pd", ":ToggleNetRW<CR>", "Toggle file explorer")
 
 -- format buffer
 map("n", "<leader>f", function()
@@ -150,13 +149,21 @@ end, "Format the current buffer", {})
 
 -- preview markdown
 map("n", "<leader>mp", function()
-	TypstPreview()
-end, "Markdown previewer with zathura and pandoc")
+	if helpers.CheckTypFile() then
+		typst.TypstPreview()
+	else
+		markdown.MarkdownPreview()
+	end
+end, "Typst/Markdown previewer with zathura")
 
 -- save markdown preview
 map("n", "<leader>mds", function()
-	SaveTypstPreview()
-end, "Save markdown preview with pandoc in pdf format")
+	if helpers.CheckTypFile() then
+		typst.SaveTypstPreview()
+	else
+		markdown.SaveMarkdownPreview()
+	end
+end, "Save typst/markdown preview in pdf format")
 
 -- toggle autoformat on save
 map("n", "<leader>af", function()
@@ -167,4 +174,4 @@ map("n", "<leader>af", function()
 		vim.g.autoformat = true
 		print("Autoformat turned on")
 	end
-end, "Save markdown preview with pandoc in pdf format")
+end, "Toggle auto format")
