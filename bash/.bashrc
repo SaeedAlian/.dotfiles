@@ -112,7 +112,7 @@ alias mkpj="mkproject"
 alias upmu="update_music"
 alias hs="bash_hsearch max"
 
-alias fastfetch="fastfetch -l arch_small"
+alias fastfetch="fastfetch -l artix2_small"
 alias neofetch="fastfetch"
 
 alias pac="sudo pacman"
