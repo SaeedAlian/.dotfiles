@@ -1,5 +1,7 @@
 #!/bin/sh
 
+TMP_DIR="/tmp/previewer"
+
 function print_err() {
   err=$1
   echo "Error: $1" >&2
@@ -16,6 +18,10 @@ if ! type "pandoc" > /dev/null; then
   exit 1
 fi
 
+if ! [ -d "$TMP_DIR" ]; then
+  mkdir -p "$TMP_DIR"
+fi
+
 function print_help() {
   help="markdown_preview: preview markdown file with pandoc and zathura
 
@@ -25,7 +31,7 @@ Usage: markdown_preview [options] [filename]
 Options:
   -o, --open            Opens markdown preview in zathura
 
-  -s, --save            Saves the markdown preview in the current directory instead of /tmp
+  -s, --save            Saves the markdown preview in the current directory instead of $TMP_DIR
 
   -e, --engine          Sets the pdf engine for pandoc
 
@@ -108,7 +114,7 @@ if [ "$ext" != "md" ]; then
   exit 1
 fi
 
-save_path="/tmp/$name.pdf"
+save_path="$TMP_DIR/$name.pdf"
 
 if [ $save_in_temp != 1 ]; then
 	dir=$(dirname $filename)
