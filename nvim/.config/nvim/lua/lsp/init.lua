@@ -29,7 +29,9 @@ vim.lsp.config("ts_ls", require("lsp.tsls"))
 
 vim.lsp.config("rust_analyzer", require("lsp.rustanalyzer"))
 
-vim.lsp.enable({ "lua_ls", "gopls", "clangd", "pyright", "html", "css", "ts_ls", "rust_analyzer" })
+vim.lsp.config("bash_ls", require("lsp.bashls"))
+
+vim.lsp.enable({ "lua_ls", "gopls", "clangd", "pyright", "html", "css", "ts_ls", "rust_analyzer", "bash_ls" })
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = lsp_group,
@@ -77,8 +79,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 				return vim.fn.pumvisible() and ("<C-p>" or "<Up>")
 			end, "Select previous in the autocompletion menu", { expr = true, noremap = true })
 
-			map("i", "<CR>", function()
-				return vim.fn.pumvisible() and ("<C-Y>" or "<CR>")
+			map("i", "<C-e>", function()
+				if vim.fn.pumvisible() then
+					return "<C-Y>"
+				end
 			end, "Select next in the autocompletion menu", { expr = true, noremap = true })
 		end
 	end,
