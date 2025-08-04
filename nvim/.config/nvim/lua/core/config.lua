@@ -8,6 +8,7 @@ local helpers = require("utils.helpers")
 -- -- augroups -- --
 
 local main_group = vim.api.nvim_create_augroup("main", { clear = true })
+local statusline_group = vim.api.nvim_create_augroup("statusline", { clear = true })
 local netrw_group = vim.api.nvim_create_augroup("netrw", { clear = true })
 
 -- -- globals -- --
@@ -388,7 +389,38 @@ local function file_type()
 	return ft
 end
 
+local function set_diagnostics()
+	local buf = vim.api.nvim_get_current_buf()
+	local counts = vim.diagnostic.count(buf)
+
+	local errs = counts[vim.diagnostic.severity.ERROR] or 0
+	local warns = counts[vim.diagnostic.severity.WARN] or 0
+	local info = counts[vim.diagnostic.severity.INFO] or 0
+	local hints = counts[vim.diagnostic.severity.HINT] or 0
+
+	local new_str = ""
+
+	if errs > 0 then
+		new_str = string.format("%sE %d ", new_str, errs)
+	end
+
+	if warns > 0 then
+		new_str = string.format("%sW %d ", new_str, warns)
+	end
+
+	if info > 0 then
+		new_str = string.format("%sI %d ", new_str, info)
+	end
+
+	if hints > 0 then
+		new_str = string.format("%sH %d ", new_str, hints)
+	end
+
+	return new_str
+end
+
 _G.mode_icon = mode_icon
+_G.set_diagnostics = set_diagnostics
 _G.git_branch = git_branch
 _G.file_type = file_type
 _G.file_size = file_size
@@ -399,6 +431,7 @@ vim.cmd([[
 ]])
 
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+	group = statusline_group,
 	callback = function()
 		vim.opt_local.statusline = table.concat({
 			" ",
@@ -413,6 +446,8 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
 			"%{v:lua.file_type()}",
 			" │ ",
 			"%{v:lua.file_size()}",
+			" │ ",
+			"%{v:lua.set_diagnostics()}",
 			"%=",
 			"%l:%c ",
 		})
@@ -422,6 +457,7 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
 vim.api.nvim_set_hl(0, "StatusLineBold", { bold = true })
 
 vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
+	group = statusline_group,
 	callback = function()
 		vim.opt_local.statusline = " %{v:lua.file_name()} │ %{v:lua.file_type()} | %=  %l:%c "
 	end,
