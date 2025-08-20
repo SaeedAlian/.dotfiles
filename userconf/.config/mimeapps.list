@@ -47,9 +47,12 @@ video/x-sgi-movie=mpv.desktop
 video/ogg=mpv.desktop
 video/vivo=mpv.desktop
 video/vnd.vivo=mpv.desktop
-x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop
-x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop
+x-scheme-handler/tg=userapp-Telegram Desktop-NFY7A3.desktop
+x-scheme-handler/tonsite=userapp-Telegram Desktop-2347A3.desktop
 x-scheme-handler/postman=Postman.desktop
+application/vnd.comicbook-rar=org.pwmt.zathura.desktop
+application/vnd.comicbook+zip=org.pwmt.zathura.desktop
+application/vnd.comicbook-zip=org.pwmt.zathura.desktop
 
 [Added Associations]
 application/octet-stream=nvim.desktop;
@@ -95,5 +98,8 @@ video/x-sgi-movie=mpv.desktop;
 video/ogg=mpv.desktop;
 video/vivo=mpv.desktop;
 video/vnd.vivo=mpv.desktop;
-x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop;
-x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-3ITX02.desktop;userapp-Telegram Desktop-NFY7A3.desktop;
+x-scheme-handler/tonsite=userapp-Telegram Desktop-TE1X02.desktop;userapp-Telegram Desktop-2347A3.desktop;
+application/vnd.comicbook-rar=org.pwmt.zathura.desktop;
+application/vnd.comicbook+zip=org.pwmt.zathura.desktop;
+application/vnd.comicbook-zip=org.pwmt.zathura.desktop;
