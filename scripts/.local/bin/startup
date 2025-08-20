@@ -3,6 +3,9 @@
 run() {
   $HOME/.local/bin/toggle_bluetooth --off
   $HOME/.local/bin/toggle_touchscreen --off
+
+  setxkbmap -layout us,ir -option 'grp:alt_shift_toggle'
+  setxkbmap -option caps:none
 }
 
 is_forced=false
