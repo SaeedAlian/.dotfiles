@@ -48,7 +48,7 @@ vim.lsp.enable({
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = lsp_group,
-	callback = function(args)
+	callback = function()
 		map("n", "<leader>gd", vim.lsp.buf.definition, "Go to definition")
 		map("n", "<leader>ca", vim.lsp.buf.code_action, "See available code actions")
 		map("n", "<leader>sr", vim.lsp.buf.rename, "Smart rename")
@@ -60,48 +60,6 @@ vim.api.nvim_create_autocmd("LspAttach", {
 			vim.diagnostic.jump({ count = -1, float = true })
 		end, "Go to next diagnostic")
 		map("n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor")
-
-		local client = vim.lsp.get_client_by_id(args.data.client_id)
-
-		if client and client:supports_method("textDocument/completion") then
-			-- trigger autocompletion on every keypress (may be slow!)
-			local chars = {}
-			for i = 32, 126 do
-				table.insert(chars, string.char(i))
-			end
-			client.server_capabilities.completionProvider.triggerCharacters = chars
-
-			vim.lsp.completion.enable(true, client.id, args.buf, { autotrigger = true })
-
-			-- set colors for pmenu
-			vim.api.nvim_set_hl(0, "Pmenu", { bg = "#1f2335", fg = "#c0caf5" })
-			vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#7aa2f7", fg = "#1f2335" })
-			vim.api.nvim_set_hl(0, "PmenuSbar", { bg = "#292e42" })
-			vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#7aa2f7" })
-
-			-- set width and height of pmenu
-			vim.opt.pumheight = 12
-			vim.opt.pumwidth = 5
-
-			-- keybinds for autocompletion menu
-			map("i", "<C-Space>", function()
-				vim.lsp.completion.get()
-			end, "Trigger autocompletion menu")
-
-			map("i", "<C-j>", function()
-				return vim.fn.pumvisible() and ("<C-n>" or "<Down>")
-			end, "Select next in the autocompletion menu", { expr = true, noremap = true })
-
-			map("i", "<C-k>", function()
-				return vim.fn.pumvisible() and ("<C-p>" or "<Up>")
-			end, "Select previous in the autocompletion menu", { expr = true, noremap = true })
-
-			map("i", "<C-e>", function()
-				if vim.fn.pumvisible() then
-					return "<C-Y>"
-				end
-			end, "Select next in the autocompletion menu", { expr = true, noremap = true })
-		end
 	end,
 })
 
