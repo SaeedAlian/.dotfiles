@@ -25,9 +25,14 @@ vim.g.netrw_localcopydircmd = "cp -r"
 
 function ToggleNetRWWindow()
 	if vim.bo.filetype == "netrw" then
-		vim.api.nvim_command("Rex")
-		if vim.bo.filetype == "netrw" then
-			vim.api.nvim_command("bdel")
+		local count = 0
+		while vim.bo.filetype == "netrw" do
+			if count > 4 then
+				vim.api.nvim_command("bdel")
+				break
+			end
+			vim.api.nvim_command("Rex")
+			count = count + 1
 		end
 	else
 		local current_bufpath = vim.fn.expand("%:p")
@@ -67,7 +72,7 @@ vim.api.nvim_create_autocmd("FileType", {
 	group = netrw_group,
 	pattern = "netrw",
 	callback = function()
-		map("n", "<esc>", "<CMD>ToggleNetRW<CR>", "Toggle netrw", { noremap = true, silent = true, buffer = true })
+		map("n", "<Esc>", "<CMD>ToggleNetRW<CR>", "Toggle netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "s", "<Nop>", "Disable sort in netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "r", "<Nop>", "Disable reverse sort in netrw", { noremap = true, silent = true, buffer = true })
 		map(
