@@ -27,11 +27,24 @@ vim.lsp.config("css", require("lsp.cssls"))
 
 vim.lsp.config("ts_ls", require("lsp.tsls"))
 
+vim.lsp.config("tailwind_ls", require("lsp.tailwindls"))
+
 vim.lsp.config("rust_analyzer", require("lsp.rustanalyzer"))
 
 vim.lsp.config("bash_ls", require("lsp.bashls"))
 
-vim.lsp.enable({ "lua_ls", "gopls", "clangd", "pyright", "html", "css", "ts_ls", "rust_analyzer", "bash_ls" })
+vim.lsp.enable({
+	"lua_ls",
+	"gopls",
+	"clangd",
+	"pyright",
+	"html",
+	"css",
+	"ts_ls",
+	"rust_analyzer",
+	"bash_ls",
+	"tailwind_ls",
+})
 
 vim.api.nvim_create_autocmd("LspAttach", {
 	group = lsp_group,
