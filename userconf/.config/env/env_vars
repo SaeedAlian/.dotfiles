@@ -1,9 +1,9 @@
 #!/bin/sh
 
-export GTK_THEME="Flat-Remix-GTK-Blue-Darkest-Solid"
+export GTK_THEME="darkcat"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 
-export npm_config_prefix="$HOME/.local/node" 
+export npm_config_prefix="$HOME/.local/node"
 
 export XDG_CONFIG_HOME="$HOME/.config"
 export XDG_DATA_HOME="$HOME/.local/share"

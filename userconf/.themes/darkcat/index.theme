@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=darkcat
+Comment=A combination of onedark and catppuccin themes
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+Name=darkcat
+GtkTheme=darkcat
+IconTheme=Adwaita
+CursorTheme=Adwaita
