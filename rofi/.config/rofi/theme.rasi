@@ -1,26 +1,29 @@
 * {
-  bg-norm: #000407;
-  bg-sel: #4080b0;
-  bg-label: #4080b0;
-  border-color: #4080b0;
-  fg-norm: #bbbbbb;
-  fg-sel: #eeeeee;
-  fg-label: #eeeeee;
+  bg-norm: #14151B;
+  bg-sel: #7190D3;
+  bg-label: #11111B;
+  border-color: #7190D3;
+  fg-norm: #CED1D9;
+  fg-sel: #14151B;
+  fg-label: #CED1D9;
 }
 
 window {
   background-color: @bg-norm;
-  padding: 4px;
+  padding: 10px;
   border: 3;
+  border-radius: 0.6em;
   border-color: @border-color;
-  width: 100%;
-  location: north;
+  width: 40%;
+  location: center;
   anchor: north;
+  y-offset: -320px;
 }
 
 element {
   background-color: transparent;
   text-color: @fg-norm;
+  border-radius: 0.3em;
 }
 
 element selected {
@@ -29,12 +32,14 @@ element selected {
 }
 
 element-text {
+  padding: 0.3em;
   background-color: transparent;
   text-color: inherit;
 }
 
 element-icon {
-  size: 0;
+  size: 20;
+  padding: 0.3em;
   background-color: transparent;
 }
 
@@ -47,6 +52,7 @@ inputbar {
   children: [prompt, entry];
   background-color: @bg-norm;
   text-color: @fg-norm;
+  padding: 0.3em;
 }
 
 listview {
