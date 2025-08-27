@@ -1,61 +1,61 @@
 [colors]
 draw_bold_text_with_bright_colors = true
 
-[colors.bright]
-black = "#474B51"
-blue = "#5090d0"
-cyan = "#66c6c2"
-green = "#9ac37f"
-magenta = "#a658bd"
-red = "#f07c75"
-white = "#f5f8d6"
-yellow = "#eacc7b"
-
-[colors.dim]
-black = "#272B31"
-blue = "#5090d0"
-cyan = "#56b6c2"
-green = "#98c379"
-magenta = "#a658bd"
-red = "#e06c65"
-white = "#e5e8e6"
-yellow = "#e5c07b"
-
-[colors.hints.end]
-background = "#000000"
-foreground = "#1E1E2E"
-
-[colors.hints.start]
-background = "#000000"
-foreground = "#1E1E2E"
+[colors.primary]
+background = "#14151B"
+foreground = "#CED1D9"
+bright_foreground = "#D7DAE7"
+dim_foreground = "#BEC0CB"
 
 [colors.normal]
-black = "#373B41"
-blue = "#4c8fcc"
-cyan = "#56b6c2"
-green = "#98c379"
-magenta = "#bf6fbf"
-red = "#e06c75"
-white = "#f5f8d6"
-yellow = "#e5c07b"
+black   = "#212329"
+red     = "#D27078"
+green   = "#98C379"
+yellow  = "#D5916E"
+blue    = "#7190D3"
+magenta = "#DD9CF0"
+cyan    = "#5DA3AC"
+white   = "#CED1D9"
 
-[colors.primary]
-background = "#000000"
-bright_foreground = "#F8F8F2"
-dim_foreground = "#F8F8F2"
-foreground = "#F8F8F2"
+[colors.bright]
+black   = "#262A2F"
+red     = "#E5946A"
+green   = "#A6E391"
+yellow  = "#EBC97A"
+blue    = "#8CB4FF"
+magenta = "#E2B2F5"
+cyan    = "#569FC9"
+white   = "#D7DAE7"
 
-[colors.search.focused_match]
-background = "#98c379"
-foreground = "#1E1E2E"
+[colors.dim]
+black   = "#131115"
+red     = "#C75A64"
+green   = "#7FA766"
+yellow  = "#C0A760"
+blue    = "#6A8ED0"
+magenta = "#B785C7"
+cyan    = "#569FC9"
+white   = "#BEC0CB"
 
 [colors.search.matches]
-background = "#A6ADC8"
-foreground = "#1E1E2E"
+background = "#201F25"
+foreground = "#E2E2F0"
+
+[colors.search.focused_match]
+background = "#201F25"
+foreground = "#E2E2F0"
 
 [colors.selection]
-background = "#e5c07b"
-text = "#1E1E2E"
+background = "#9AA9CB"
+text = "#24262B"
+
+[colors.hints.start]
+background = "#1F2025"
+foreground = "#D3D5E2"
+
+[colors.hints.end]
+background = "#1F2025"
+foreground = "#D3D5E2"
 
 [debug]
 log_level = "OFF"
@@ -63,10 +63,10 @@ persistent_logging = false
 render_timer = false
 
 [env]
-TERM = "xterm-256color"
+TERM="xterm-256color"
 
 [font]
-size = 9.3
+size = 10.6
 
 [font.bold]
 family = "JetBrainsMono Nerd Font"
@@ -195,7 +195,7 @@ program = "/bin/bash"
 
 [window]
 dynamic_padding = false
-opacity = 0.85
+opacity = 1.00
 title = "Alacritty"
 
 [window.class]
@@ -207,7 +207,7 @@ columns = 25
 lines = 75
 
 [window.padding]
-x = 1
-y = 2
+x = 10
+y = 7
 
 [terminal]
