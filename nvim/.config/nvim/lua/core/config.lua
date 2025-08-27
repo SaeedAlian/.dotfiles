@@ -135,6 +135,7 @@ vim.opt.smartcase = true
 
 -- ui
 vim.opt.nu = true
+vim.opt.winborder = "rounded"
 vim.opt.relativenumber = true
 vim.opt.termguicolors = true
 vim.opt.cmdheight = 1
@@ -216,6 +217,12 @@ map("n", "<C-n><C-a>", "<cmd>silent !tmux neww ~/.local/bin/dnote -af<CR>", "Sta
 map("v", "J", ":m '>+1<CR>gv=gv", "Move the visually selected lines down")
 map("v", "K", ":m '<-2<CR>gv=gv", "Move the visually selected lines up")
 
+-- navigating splits
+map("n", "<C-j>", "<C-w><C-j>", "Navigate to bottom split")
+map("n", "<C-k>", "<C-w><C-k>", "Navigate to top split")
+map("n", "<C-l>", "<C-w><C-l>", "Navigate to right split")
+map("n", "<C-h>", "<C-w><C-h>", "Navigate to left split")
+
 -- rename selected word globally
 map(
 	"v",
@@ -282,13 +289,6 @@ end, "Search through variables, functions etc. in a code buffer which has treesi
 
 -- vim maximizer
 map("n", "sm", "<cmd>MaximizerToggle<CR>", "Maximize/Minimize a split buffer")
-
--- vim/tmux navigator
-map("n", "<C-h>", "<cmd><C-U>TmuxNavigateLeft<CR>", "Vim/Tmux pane navigate left")
-map("n", "<C-j>", "<cmd><C-U>TmuxNavigateDown<CR>", "Vim/Tmux pane navigate down")
-map("n", "<C-k>", "<cmd><C-U>TmuxNavigateUp<CR>", "Vim/Tmux pane navigate up")
-map("n", "<C-l>", "<cmd><C-U>TmuxNavigateRight<CR>", "Vim/Tmux pane navigate right")
-map("n", "<C-\\>", "<cmd><C-U>TmuxNavigatePrevious<CR>", "Vim/Tmux pane navigate previous")
 
 -- file explorer
 map("n", "<leader>pd", ":ToggleNetRW<CR>", "Toggle file explorer")
