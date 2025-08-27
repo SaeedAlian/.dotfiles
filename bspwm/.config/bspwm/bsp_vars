@@ -3,4 +3,8 @@
 SCREEN_W=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/\(.*\)x.*/\1/')
 SCREEN_H=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/.*x\(.*\)/\1/')
 
-BSPWM_WINDOW_GAPS=0
+
+TOP_PADDING=35
+BOTTOM_PADDING=0
+
+BSPWM_WINDOW_GAPS=15
