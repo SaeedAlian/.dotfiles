@@ -68,6 +68,8 @@ mkdir -p $HOME/.config/mpv
 mkdir -p $HOME/.config/nvim
 mkdir -p $HOME/.config/picom
 mkdir -p $HOME/.config/polybar
+mkdir -p $HOME/.config/qt5ct/colors
+mkdir -p $HOME/.config/qt6ct/colors
 mkdir -p $HOME/.config/redshift
 mkdir -p $HOME/.config/rofi
 mkdir -p $HOME/.config/sxiv
