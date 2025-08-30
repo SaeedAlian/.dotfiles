@@ -5,49 +5,67 @@ LOCKSCREENS_DIR="$HOME/pictures/wallpapers/lockscreens"
 BACKGROUND_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/background"
 LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/start_lockscreen"
 
+WALLPAPERS_TEMP_DIR="/tmp/wallpaper_script_tmp_dir/walls"
+LOCKSCREENS_TEMP_DIR="/tmp/wallpaper_script_tmp_dir/lockscreens"
+
 function print_help() {
-  help="Usage: wallpaper [COMMAND] [OPTIONS]
+  help="wallpaper: A command-line tool to manage wallpapers and lockscreen images.
+
+Usage:
+
+  wallpaper <command> [arguments]
 
 Commands:
-  --help, -h                     Display this help message.
 
-  add <file_path> <wall_name>    Add a new wallpaper image to the wallpapers directory. 
-                                 Converts the image to JPG if necessary, and creates 
-                                 a lockscreen image for it.
+  add <file_path> <prefix>       Add a new wallpaper image. Converts to jpg if necessary and creates a lockscreen image.
 
-  create-lockscreen <file_name>  Create a lockscreen image based on an existing wallpaper
-                                 in the wallpapers directory.
+  create-lockscreen <name>       Create a lockscreen image for an existing wallpaper.
 
-  set-lockscreens                Generate lockscreen images for all wallpapers in the
-                                 wallpapers directory. Prompts for confirmation.
+  set-lockscreens                Generate lockscreen images for all wallpapers that don't have one.
 
-  set <wall_name>                Set a wallpaper as the current background and update
-                                 the related scripts.
+  set <name>                     Set the current wallpaper by name.
 
-  mode <background_mode>         Set the background display mode. Options are:
-                                 - center
-                                 - max
-                                 - tile
-                                 - fill
+  mode <center|max|tile|fill>    Set the display mode for the wallpaper.
+
+  cleanlock                      Remove lockscreen images that no longer have corresponding wallpapers.
+
+  resetnumber                    Reset numbering of wallpapers and lockscreen images.
 
 Options:
-  <file_path>                    Path to the image file to be added as wallpaper.
-  <wall_name>                    Name for the wallpaper image (without extension).
-  <file_name>                    Name of the wallpaper file (including extension).
-  <background_mode>              Display mode for the wallpaper (e.g., center, max).
+
+  --help, -h                     Show this help message and exit.
 
 Examples:
-  wallpaper add /path/to/image.png new_wallpaper
-  wallpaper create-lockscreen existing_wallpaper.jpg
+
+  # Add a new wallpaper image
+  wallpaper add ~/Downloads/mywall.png nature
+
+  # Set a wallpaper as background
+  wallpaper set nature_1
+
+  # Create a lockscreen image for an existing wallpaper
+  wallpaper create-lockscreen nature_1
+
+  # Set lockscreen images for all wallpapers
   wallpaper set-lockscreens
-  wallpaper set new_wallpaper
+
+  # Change wallpaper display mode to fill
   wallpaper mode fill
 
-Note:
-  - Ensure the required directories and scripts exist as specified in the script.
-  - This script depends on tools like 'ffmpeg', 'sed', and 'xss-lock'.
+  # Cleanup old lockscreen images
+  wallpaper cleanlock
+
+  # Reset numbering of wallpapers and lockscreens
+  wallpaper resetnumber
+
+Notes:
+ • Wallpapers are stored in $WALLPAPERS_DIR.
+ • Lockscreens are stored in $LOCKSCREENS_DIR.
+ • This script uses ffmpeg to convert and blur images for lockscreen creation.
+ • Requires write access to the directories above.
+ • This script depends on tools like 'sed', and 'xss-lock'.
 "
-  
+
   if type "less" > /dev/null; then
     echo "$help" | less
   else
@@ -57,48 +75,19 @@ Note:
 
 function print_err() {
   err=$1
-  echo "$1" >&2
+  echo "Error: $1" >&2
   echo "Enter [wallpaper --help] for help"
   exit 1
-}
-
-# converts an image to jpg and moves it into WALLPAPERS directory
-add_wall_image() {
-  image_path=$1
-  new_image_name=$2
-
-  if [ ! -f "$image_path" ]; then
-    print_err "Error: File doesn't exists."
-    exit 1
-  fi
-
-  extension=${image_path##*.}
-  mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
-
-  if [ "$mimetype" != "image" ]; then
-    print_err "Error: Selected file is not an image."
-    exit 1
-  fi
-
-  if [ "$extension" = "jpg" ]; then
-    echo "Copying image into wallpapers directory..."
-    cp "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg"
-    echo "Wallpaper image is moved into wallpapers directory successfully."
-  else
-    echo "File is not jpg, converting to jpg..."
-    ffmpeg -i "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg" -loglevel error
-    echo "Wallpaper image converted into jpg, and moved into wallpapers directory successfully."
-  fi
 }
 
 # selects an image inside WALLPAPERS directory and creates a lockscreen image based on it
 create_lockscreen_image() {
   image_name=$1
   silent_flag=$2
-  image_path=$WALLPAPERS_DIR/$image_name
+  image_path="$WALLPAPERS_DIR/$image_name.jpg"
 
   if [ ! -f "$image_path" ]; then
-    print_err "Error: Wallpaper with name: $image_name doesn't exists inside wallpapers directory."
+    print_err "Wallpaper with name: $image_name doesn't exist inside wallpapers directory."
     exit 1
   fi
 
@@ -106,7 +95,7 @@ create_lockscreen_image() {
   mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
-    print_err "Error: Selected file $image_name is not an image or is not jpg."
+    print_err "Selected file $image_name is not an image or is not jpg."
     exit 1
   fi
 
@@ -130,12 +119,57 @@ set_all_lockscreens() {
 
   for file in "$WALLPAPERS_DIR"/*; do
     if [ -f "$file" ]; then
-      file_name=${file##*/}
-      create_lockscreen_image "$file_name" 1
+      filename=${file##*/}
+      wallname=${filename%.*}
+      create_lockscreen_image "$wallname" 1
     fi
   done
 
   echo "Lockscreen images have been created successfully."
+}
+
+# converts an image to jpg and moves it into WALLPAPERS directory
+add_wall_image() {
+  image_path=$1
+  new_image_prefix=$2
+
+  if [ ! -f "$image_path" ]; then
+    print_err "File doesn't exist."
+    exit 1
+  fi
+
+  extension=${image_path##*.}
+  mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+
+  if [ "$mimetype" != "image" ]; then
+    print_err "Selected file is not an image."
+    exit 1
+  fi
+
+  index=0
+  for f in "$WALLPAPERS_DIR"/*.jpg; do
+    [ -f "$f" ] || continue
+    fname=$(basename "$f")
+    prefix=${fname%_*}
+
+    if [ "$prefix" == "$new_image_prefix" ]; then
+      index=$((index+1))
+    fi
+  done
+  
+  new_image_name="${new_image_prefix}_$((index+1))"
+
+  if [ "$extension" = "jpg" ]; then
+    echo "Copying image into wallpapers directory..."
+    cp "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg"
+    echo "Wallpaper image is moved into wallpapers directory successfully."
+  else
+    echo "File is not jpg, converting to jpg..."
+    ffmpeg -i "$image_path" "$WALLPAPERS_DIR/$new_image_name.jpg" -loglevel error
+    echo "Wallpaper image converted into jpg, and moved into wallpapers directory successfully."
+  fi
+
+  create_lockscreen_image "$new_image_name" 0
 }
 
 # sets the background variable name
@@ -144,7 +178,7 @@ set_background() {
   image_path=$WALLPAPERS_DIR/$image_name.jpg
 
   if [ ! -f "$image_path" ]; then
-    print_err "Error: Wallpaper with name: $image_name.jpg doesn't exists inside wallpapers directory."
+    print_err "Wallpaper with name: $image_name.jpg doesn't exist inside wallpapers directory."
     exit 1
   fi
 
@@ -152,7 +186,7 @@ set_background() {
   mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
-    print_err "Error: Selected file $image_name is not an image or is not jpg."
+    print_err "Selected file $image_name is not an image or is not jpg."
     exit 1
   fi
 
@@ -171,7 +205,7 @@ set_background_mode() {
   image_bg_mode=$1
 
   if [ "$image_bg_mode" != "center" ] && [ $image_bg_mode != "max" ] && [ $image_bg_mode != "tile" ] && [ $image_bg_mode != "fill" ]; then
-    print_err "Error: Wrong option"
+    print_err "Wrong option"
     exit 1
   fi
 
@@ -180,6 +214,90 @@ set_background_mode() {
   echo "Scripts updated."
   $BACKGROUND_SCRIPT_PATH
   echo "Wallpaper updated successfully."
+}
+
+# remove the lockscreens which there is no wallpaper of them in the wallpapers directory
+cleanup_lockscreens() {
+  for f in "$LOCKSCREENS_DIR"/*; do
+    filename=$(basename "$f")
+    wallfilename=$(echo "$filename" | sed "s/\.png/\.jpg/")
+    if ! [ -f "$WALLPAPERS_DIR/$wallfilename" ]; then
+      rm "$f"
+    fi
+  done
+}
+
+# resets the numbering order of the wallpapers and lockscreens
+reset_wallpaper_numbers() {
+  echo "Resetting wallpaper numbers..."
+
+  if ! [ -d "$LOCKSCREENS_TEMP_DIR" ]; then
+    mkdir -p "$LOCKSCREENS_TEMP_DIR"
+  fi
+
+  if ! [ -d "$WALLPAPERS_TEMP_DIR" ]; then
+    mkdir -p "$WALLPAPERS_TEMP_DIR"
+  fi
+
+  for f in "$WALLPAPERS_TEMP_DIR"/*.jpg; do
+    if [ -f "$f" ]; then
+      rm "$f"
+    fi
+  done
+
+  for f in "$LOCKSCREENS_TEMP_DIR"/*.png; do
+    if [ -f "$f" ]; then
+      rm "$f"
+    fi
+  done
+
+  declare -A index
+  for f in "$WALLPAPERS_DIR"/*.jpg; do
+    [ -f "$f" ] || continue
+    fname=$(basename "$f")
+    prefix=${fname%_*}
+
+    i=${index["$prefix"]}
+    [ -z "$i" ] && i=0
+    i=$((i+1))
+    index["$prefix"]=$i
+
+    new_wall="$WALLPAPERS_TEMP_DIR/${prefix}_${i}.jpg"
+    new_lock="$LOCKSCREENS_TEMP_DIR/${prefix}_${i}.png"
+    old_lock="$LOCKSCREENS_DIR/${fname%.jpg}.png"
+
+    cp "$f" "$new_wall"
+    cp "$old_lock" "$new_lock"
+  done
+
+  for f in "$WALLPAPERS_DIR"/*.jpg; do
+    if [ -f "$f" ]; then
+      rm "$f"
+    fi
+  done
+
+  for f in "$LOCKSCREENS_DIR"/*.png; do
+    if [ -f "$f" ]; then
+      rm "$f"
+    fi
+  done
+
+  for f in "$WALLPAPERS_TEMP_DIR"/*.jpg; do
+    if [ -f "$f" ]; then
+      mv "$f" "$WALLPAPERS_DIR"
+    fi
+  done
+
+  for f in "$LOCKSCREENS_TEMP_DIR"/*.png; do
+    if [ -f "$f" ]; then
+      mv "$f" "$LOCKSCREENS_DIR"
+    fi
+  done
+
+  rm -rf "$WALLPAPERS_TEMP_DIR"
+  rm -rf "$LOCKSCREENS_TEMP_DIR"
+
+  echo "Wallpaper numbers reset."
 }
 
 cmd=$1
@@ -192,34 +310,35 @@ case $cmd in
 "add")
   shift 1
   file_path=$1
-  wall_name=$2
+  wall_prefix=$2
 
-  [ -z "$wall_name" ] && print_err "Wallpaper name not found"
-  [ -z "$file_path" ] && print_err "File path not found"
+  [ -z "$wall_prefix" ] && print_err "Wallpaper prefix not specified"
+  [ -z "$file_path" ] && print_err "File path not specified"
 
-  add_wall_image "$file_path" "$wall_name"
-  create_lockscreen_image "$wall_name.jpg" 0
+  add_wall_image "$file_path" "$wall_prefix"
 
   exit 0
   ;;
 "create-lockscreen")
   shift 1
-  file_name=$1
+  wall_name=$1
 
-  [ -z "$file_name" ] && print_err "File name not specified"
+  [ -z "$wall_name" ] && print_err "Wallpaper name not specified"
 
-  create_lockscreen_image "$file_name" 0
+  create_lockscreen_image "$wall_name" 0
   exit 0
   ;;
 "set-lockscreens")
-  printf "Are you sure that you want to set all the lockscreen images? [y/n] "
-  read -r ans
-
-  if [ "$ans" = "y" ]; then
+  read -p "Are you sure that you want to set all the lockscreen images? (y/n): " choice
+  case "$choice" in
+  y|Y ) 
     set_all_lockscreens
-  fi
-
-  exit 1
+    exit 0
+    ;;
+  * ) 
+    exit 0
+    ;;
+  esac
   ;;
 "set")
   shift 1
@@ -241,6 +360,31 @@ case $cmd in
 
   exit 0
   ;;
+"cleanlock")
+  read -p "Do you want to remove all extra lockscreens? (y/n): " choice
+  case "$choice" in
+  y|Y ) 
+    cleanup_lockscreens
+    exit 0
+    ;;
+  * ) 
+    exit 0
+    ;;
+  esac
+  ;;
+"resetnumber")
+  read -p "Do you want to reset the wallpaper numbers? (y/n): " choice
+  case "$choice" in
+  y|Y ) 
+    cleanup_lockscreens
+    reset_wallpaper_numbers
+    exit 0
+    ;;
+  * ) 
+    exit 0
+    ;;
+  esac
+  ;;
 esac
 
-print_err "Error: Invalid command"
+print_err "Invalid command"
