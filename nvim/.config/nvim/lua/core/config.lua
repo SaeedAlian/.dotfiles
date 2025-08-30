@@ -334,11 +334,17 @@ end, "Format buffer")
 -- -- statusline -- --
 
 local function git_branch()
-	local branch = vim.fn.system("git branch --show-current 2>/dev/null | tr -d '\n'")
-	if branch ~= "" then
-		return branch
+	local gitsigns = vim.b.gitsigns_status_dict
+	if gitsigns and gitsigns.head and gitsigns.head ~= "" then
+		return " " .. gitsigns.head
 	end
-	return "[No Git]"
+	local branch = vim.fn.system("git branch --show-current 2>/dev/null | tr -d '\n'")
+	return (branch ~= "" and (" " .. branch)) or ""
+end
+
+local function file_type()
+	local ft = vim.bo.filetype
+	return ft
 end
 
 local function file_name()
@@ -361,12 +367,27 @@ local function file_size()
 		return ""
 	end
 	if size < 1024 then
-		return size .. "B "
+		return size .. "B"
 	elseif size < 1024 * 1024 then
 		return string.format("%.1fK", size / 1024)
 	else
-		return string.format("%.1fM", size / 1024 / 1024)
+		return string.format("%.1fM", size / (1024 * 1024))
 	end
+end
+
+local function mode_color()
+	local mode = vim.fn.mode()
+	local mode_colors = {
+		n = "%#StatusLineNormal#",
+		i = "%#StatusLineInsert#",
+		v = "%#StatusLineVisual#",
+		V = "%#StatusLineVisualLine#",
+		["\22"] = "%#StatusLineVisualBlock#",
+		c = "%#StatusLineCommand#",
+		R = "%#StatusLineReplace#",
+		t = "%#StatusLineTerminal#",
+	}
+	return mode_colors[mode] or ""
 end
 
 local function mode_icon()
@@ -378,20 +399,10 @@ local function mode_icon()
 		V = "V-LINE",
 		["\22"] = "V-BLOCK",
 		c = "COMMAND",
-		s = "SELECT",
-		S = "S-LINE",
-		["\19"] = "S-BLOCK",
 		R = "REPLACE",
-		r = "REPLACE",
-		["!"] = "SHELL",
 		t = "TERMINAL",
 	}
-	return modes[mode] or ("  " .. mode:upper())
-end
-
-local function file_type()
-	local ft = vim.bo.filetype
-	return ft
+	return modes[mode] or mode:upper()
 end
 
 local function set_diagnostics()
@@ -424,47 +435,51 @@ local function set_diagnostics()
 	return new_str
 end
 
+local function modified_flag()
+	return vim.bo.modified and "  [+]" or ""
+end
+
 _G.mode_icon = mode_icon
+_G.modified_flag = modified_flag
 _G.set_diagnostics = set_diagnostics
 _G.git_branch = git_branch
 _G.file_type = file_type
 _G.file_size = file_size
 _G.file_name = file_name
 
-vim.cmd([[
-  highlight StatusLineBold gui=bold cterm=bold
-]])
-
-vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter" }, {
+-- statusline
+vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "ModeChanged" }, {
 	group = statusline_group,
 	callback = function()
+		vim.api.nvim_set_hl(0, "StatusLineNormal", { fg = "#14151B", bg = "#7190D3", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineInsert", { fg = "#14151B", bg = "#98C379", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineVisual", { fg = "#14151B", bg = "#DD9CF0", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineVisualLine", { fg = "#CED1D9", bg = "#8800B0", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineVisualBlock", { fg = "#14151B", bg = "#C100F9", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineCommand", { fg = "#14151B", bg = "#D5916E", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineReplace", { fg = "#14151B", bg = "#D27078", bold = true })
+		vim.api.nvim_set_hl(0, "StatusLineTerminal", { fg = "#14151B", bg = "#CED1D9", bold = true })
+
 		vim.opt_local.statusline = table.concat({
-			" ",
-			"%#StatusLineBold#",
-			"%{v:lua.mode_icon()}",
+			mode_color() .. " %{v:lua.mode_icon()} ",
 			"%#StatusLine#",
-			" │ ",
-			"%{v:lua.file_name()}%m",
-			" │ ",
-			"%{v:lua.git_branch()}",
-			" │ ",
-			"%{v:lua.file_type()}",
-			" │ ",
-			"%{v:lua.file_size()}",
-			" │ ",
-			"%{v:lua.set_diagnostics()}",
+			" %{v:lua.file_name()}%{v:lua.modified_flag()} ",
+			"│ %{v:lua.git_branch()} ",
+			"│ %{v:lua.file_type()} ",
+			"│ %{v:lua.file_size()} ",
+			"│ %{v:lua.set_diagnostics()} ",
 			"%=",
-			"%l:%c ",
+			"Ln %l, Col %c ",
 		})
 	end,
 })
 
-vim.api.nvim_set_hl(0, "StatusLineBold", { bold = true })
-
 vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
 	group = statusline_group,
 	callback = function()
-		vim.opt_local.statusline = " %{v:lua.file_name()} │ %{v:lua.file_type()} | %=  %l:%c "
+		vim.api.nvim_set_hl(0, "StatusLineDim", { fg = "#82838C", bg = "#212329", bold = true })
+
+		vim.opt_local.statusline = "%#StatusLineDim# %{v:lua.file_name()} │ %{v:lua.file_type()} %= Ln %l, Col %c "
 	end,
 })
 
