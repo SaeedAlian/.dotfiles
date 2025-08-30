@@ -5,26 +5,22 @@ source $HOME/.config/bspwm/bsp_vars
 POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
 
 if [ "$1" == "-f" ] || [ "$1" == "--fullscreen" ]; then
-	current_node_state=$(bspc query -T -n | jq -r '.client.state')
-	if [ "$current_node_state" != "fullscreen" ]; then
-		bspc node -t fullscreen
-		$POLYBAR_SCRIPT -h
-	else
-		bspc node -t tiled
-		$POLYBAR_SCRIPT -s
-	fi
+  current_node_state=$(bspc query -T -n | jq -r '.client.state')
+  if [ "$current_node_state" != "fullscreen" ]; then
+    bspc node -t fullscreen
+  else
+    bspc node -t tiled
+  fi
 
-	exit 0
+  exit 0
 fi
 
 current_layout=$(bspc query -T -d | jq -r '.layout')
 
 if [ "$current_layout" == "tiled" ]; then
-	bspc desktop -l monocle
-	$POLYBAR_SCRIPT -s
+  bspc desktop -l monocle
 elif [ "$current_layout" == "monocle" ]; then
-	bspc desktop -l tiled
-	$POLYBAR_SCRIPT -s
+  bspc desktop -l tiled
 else
-	exit 0
+  exit 0
 fi

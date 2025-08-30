@@ -1,5 +1,7 @@
 #!/bin/sh
 
+source $HOME/.config/bspwm/bsp_vars
+
 help() {
   echo "Usage: $0 [option]"
   echo ""
@@ -15,8 +17,8 @@ help() {
 
 show() {
   polybar-msg cmd show >/dev/null
-  bspc config top_padding 35
-  bspc config bottom_padding 0
+  bspc config top_padding $TOP_PADDING
+  bspc config bottom_padding $BOTTOM_PADDING
   touch /tmp/polybarshow 2>/dev/null
 }
 
