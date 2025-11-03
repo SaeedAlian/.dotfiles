@@ -97,6 +97,8 @@ alias bashsrc="source $HOME/.bashrc"
 alias dot="cd $HOME/.dotfiles && $EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
 alias cnote="cd $HOME/documents/notes"
 
+alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
+
 alias v="nvim"
 alias v.="nvim ."
 alias z="zathura"
@@ -119,6 +121,13 @@ alias neofetch="fastfetch"
 alias pac="sudo pacman"
 
 alias rv="sudo bash -c '$VPN &'"
+
+alias pandoc="dc-pandoc pandoc"
+alias md2pdf="dc-pandoc md2pdf"
+alias pdflatex="dc-texlive pdflatex"
+alias xelatex="dc-texlive xelatex"
+alias typst="dc-typst typst"
+alias typcomp="dc-typst typst compile"
 
 ######## prompt ########
 
