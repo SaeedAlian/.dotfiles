@@ -2,14 +2,14 @@
 
 MOUNT_DIR="$HOME/mount"
 
-function print_err() {
+print_err() {
   err=$1
   echo "Error: $1" >&2
   echo "Enter [dumount --help] for help"
   exit 1
 }
 
-function print_help() {
+print_help() {
   help="androidumount: A command-line tool for safely unmounting Android MTP devices from $MOUNT_DIR/<mountpoint>.
 
 Usage:
@@ -34,7 +34,7 @@ Notes:
     • Requires sudo access to perform the unmount operation.
 "
 
-  if type "less" > /dev/null; then
+  if type "less" >/dev/null; then
     echo "$help" | less
   else
     echo "$help"

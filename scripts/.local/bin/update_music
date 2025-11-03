@@ -2,7 +2,7 @@
 
 declare -A musicExtensions=([mp3]=1 [flac]=1)
 
-function editMusicTags() {
+edit_music_tags() {
   oldDirectory=$1
   newDirectory=$2
   filename=$3
@@ -73,7 +73,7 @@ newAlbumDirectory="$HOME/music/$artist-($year)-$album"
 mkdir "$newAlbumDirectory"
 
 for file in "$inputAlbumDirectory"/*; do
-  editMusicTags "$inputAlbumDirectory" "$newAlbumDirectory" "${file##*/}" "$artist" "$album" "$year"
+  edit_music_tags "$inputAlbumDirectory" "$newAlbumDirectory" "${file##*/}" "$artist" "$album" "$year"
 done
 
 mv "$inputAlbumDirectory" "$inputAlbumDirectory (done)"

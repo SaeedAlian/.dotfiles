@@ -2,19 +2,19 @@
 
 MOUNT_DIR="$HOME/mount"
 
-function print_err() {
+print_err() {
   err=$1
   echo "Error: $1" >&2
   echo "Enter [dmount --help] for help"
   exit 1
 }
 
-if ! type "aft-mtp-mount" > /dev/null; then
+if ! type "aft-mtp-mount" >/dev/null; then
   print_err "aft-mtp-mount not found"
   exit 1
 fi
 
-function print_help() {
+print_help() {
   help="androidmount: A command-line tool for safely mounting Android devices over MTP to $MOUNT_DIR/<mountpoint> with user ownership.
 
 Usage:
@@ -39,7 +39,7 @@ Notes:
     • The script checks if the mountpoint is already in use before mounting.
 "
 
-  if type "less" > /dev/null; then
+  if type "less" >/dev/null; then
     echo "$help" | less
   else
     echo "$help"
@@ -47,7 +47,7 @@ Notes:
 }
 
 if ! [ -d "$MOUNT_DIR" ]; then
-	mkdir -p "$MOUNT_DIR"
+  mkdir -p "$MOUNT_DIR"
 fi
 
 if [ "$1" = "--help" ]; then
@@ -61,7 +61,6 @@ if [ -z "$mountpoint" ]; then
   print_err "Mountpoint is empty"
 fi
 
-
 mountpoint="$MOUNT_DIR/$mountpoint"
 
 if mountpoint -q "$mountpoint"; then
@@ -69,7 +68,7 @@ if mountpoint -q "$mountpoint"; then
 fi
 
 if ! [ -d "$mountpoint" ]; then
-	mkdir -p "$mountpoint"
+  mkdir -p "$mountpoint"
 fi
 
 aft-mtp-mount "$mountpoint"

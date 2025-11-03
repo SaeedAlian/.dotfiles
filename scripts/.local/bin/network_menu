@@ -37,9 +37,7 @@ fi
 read -r chosen_network_name <<<"${chosen_network:3}"
 chosen_bssid=$(echo "$wifi_bssid_list" | grep "$chosen_network_name" | awk '{print $1}')
 
-if [ "$chosen_bssid" = "" ]; then
-  exit
-elif [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
+if [ "$chosen_network" = "󰖩  Enable Wi-Fi" ]; then
   nmcli radio wifi on
 elif [ "$chosen_network" = "󰖪  Disable Wi-Fi" ]; then
   nmcli radio wifi off
@@ -47,6 +45,8 @@ elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱔  Enable Mobile Netwo
   nmcli device up $simcard_module_name
 elif [ $has_simcard_module ] && [ "$chosen_network" = "󰱟  Disable Mobile Network" ]; then
   nmcli device down $simcard_module_name
+elif [ "$chosen_bssid" = "" ]; then
+  exit
 else
   success_message="You are now connected to the Wi-Fi network \"$chosen_network_name\"."
   saved_connections="$(nmcli connection show | grep wifi)"

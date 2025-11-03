@@ -4,14 +4,14 @@ MOUNT_DIR="$HOME/mount"
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 
-function print_err() {
+print_err() {
   err=$1
   echo "Error: $1" >&2
   echo "Enter [dmount --help] for help"
   exit 1
 }
 
-function print_help() {
+print_help() {
   help="dmount: A command-line tool for safely mounting devices to $MOUNT_DIR/<mountpoint> with user ownership.
 
 Usage:
@@ -44,7 +44,7 @@ Notes:
 
 "
 
-  if type "less" > /dev/null; then
+  if type "less" >/dev/null; then
     echo "$help" | less
   else
     echo "$help"
@@ -52,7 +52,7 @@ Notes:
 }
 
 if ! [ -d "$MOUNT_DIR" ]; then
-	mkdir -p "$MOUNT_DIR"
+  mkdir -p "$MOUNT_DIR"
 fi
 
 if [ "$1" = "--help" ]; then
@@ -71,7 +71,6 @@ if [ -z "$mountpoint" ]; then
   print_err "Mountpoint is empty"
 fi
 
-
 device="/dev/$device"
 mountpoint="$MOUNT_DIR/$mountpoint"
 
@@ -84,7 +83,7 @@ if mountpoint -q "$mountpoint"; then
 fi
 
 if ! [ -d "$mountpoint" ]; then
-	sudo mkdir -p "$mountpoint"
+  sudo mkdir -p "$mountpoint"
 fi
 
 sudo mount -o uid="$USER_ID",gid="$GROUP_ID",fmask=0111,dmask=0000 "$device" "$mountpoint"

@@ -3,7 +3,7 @@
 SV_DIR="/etc/runit/sv"
 ACTIVE_DIR="/etc/runit/runsvdir/default"
 
-function print_err() {
+print_err() {
   err=$1
   echo "Error: $1" >&2
   echo "Enter [srvc --help] for help"
@@ -76,7 +76,6 @@ activate_service() {
     if [ "$name" == "$srv" ]; then
       found=1
 
-
       if [ -L "$ACTIVE_DIR/$name" ]; then
         print_err "service is already active"
       fi
@@ -88,6 +87,7 @@ activate_service() {
   fi
 
   sudo ln -s "$SV_DIR/$srv" "$ACTIVE_DIR"
+  echo "service $srv activated"
 }
 
 deactivate_service() {
@@ -110,16 +110,17 @@ deactivate_service() {
   fi
 
   sudo rm -rf "$ACTIVE_DIR/$srv"
+  echo "service $srv deactivated"
 }
 
 arg=$1
 
 case $1 in
---list|-l)
+--list | -l)
   list_services
   ;;
 
---activate|-a)
+--activate | -a)
   srv=$2
   if [ -z "$srv" ]; then
     print_err "service is empty"
@@ -128,7 +129,7 @@ case $1 in
   activate_service "$srv"
   ;;
 
---deactivate|-d)
+--deactivate | -d)
   srv=$2
   if [ -z "$srv" ]; then
     print_err "service is empty"
@@ -136,7 +137,7 @@ case $1 in
 
   deactivate_service "$srv"
   ;;
---help|-h)
+--help | -h)
   print_help
   exit 0
   ;;

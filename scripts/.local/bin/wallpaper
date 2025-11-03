@@ -8,7 +8,7 @@ LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/start_lockscreen"
 WALLPAPERS_TEMP_DIR="/tmp/wallpaper_script_tmp_dir/walls"
 LOCKSCREENS_TEMP_DIR="/tmp/wallpaper_script_tmp_dir/lockscreens"
 
-function print_help() {
+print_help() {
   help="wallpaper: A command-line tool to manage wallpapers and lockscreen images.
 
 Usage:
@@ -73,7 +73,7 @@ Notes:
   fi
 }
 
-function print_err() {
+print_err() {
   err=$1
   echo "Error: $1" >&2
   echo "Enter [wallpaper --help] for help"
