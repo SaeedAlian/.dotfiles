@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # ▗▄▄▄ ▗▖  ▗▖ ▗▄▖▗▄▄▄▖▗▄▄▄▖
-# ▐▌  █▐▛▚▖▐▌▐▌ ▐▌ █  ▐▌   
+# ▐▌  █▐▛▚▖▐▌▐▌ ▐▌ █  ▐▌
 # ▐▌  █▐▌ ▝▜▌▐▌ ▐▌ █  ▐▛▀▀▘
 # ▐▙▄▄▀▐▌  ▐▌▝▚▄▞▘ █  ▐▙▄▄▖
 #
@@ -13,91 +13,88 @@
 
 NOTES_DIR=$HOME/documents/notes
 PRIMARY_NOTE_FILENAME="primary"
-DAILY_NOTE_FILENAME="daily"
-TMUX_SESSION_NAME=notes
-MAX_WINDOW_NUMBER=5
+DEFAULT_NOTE_DIR="defaults"
+TMUX_SESSION_NAME="notes"
 ED="$EDITOR"
+TERMINAL="${TERMINAL:-alacritty}"
 TERMINAL_FLOAT_CLASS="Alacritty-float"
 
-if ! type "tmux" > /dev/null; then
-  echo "Error: tmux is not installed"
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [dnote --help] for help"
   exit 1
+}
+
+if ! type "tmux" >/dev/null; then
+  print_err "tmux is not installed"
 fi
 
-if ! type "fzf" > /dev/null; then
-  echo "Error: fzf is not installed"
-  exit 1
+if ! type "fzf" >/dev/null; then
+  print_err "fzf is not installed"
 fi
 
-if [ -z $ED ]; then
+if [ -z "$ED" ]; then
   ED="vim"
 fi
 
-function print_help() {
-  help="dnote: A command-line tool for creating and managing notes.
+print_help() {
+  help="dnote - A command-line tool for managing notes in tmux sessions.
 
-Usage: dnote [options] [filename]
+Usage:
+
+  dnote <command> [options]
+
+Commands:
+
+  new-note <dirname> <filename>     Create/open a note file in a directory.
+
+  new-dir <dirname>                 Create/open a directory in tmux.
+
+  dir-fzf                           Fuzzy-select a directory using fzf and open it.
+
+  file-fzf                          Fuzzy-select a file within a directory and open it.
+
+  prompt                            Interactive mode: prompts for directory & filename.
+
+  primary                           Toggle (open/close) the primary note in floating terminal.
 
 Options:
-  -p, --prompt          Use prompt to read directory and file from user input. Cannot be used with -f, -n.
 
-  -r, --primary         Toggle open primary note file. Don't provide a filename with this flag. Cannot be used with -p, -f, -a, -fa, -d, -c, -n.
+  -t, --type [md|typ|tex]           Set note file extension (default: md).
 
-  -m, --daily           Open or create the daily note file. Cannot be used with -p, -f, -a, -fa, -d, -c, -n.
+  -h, --help                        Show this help message.
 
-  -f, --fzf             Use fzf to interactively select a directory and file. Cannot be used with -p, -n, -c.
+Defaults:
 
-  -a, --all             Use fzf to interactively search for a file in all the note directories. Can only be used with -f.
+  Notes directory:     \$HOME/documents/notes
 
-  -fa, -af, --fzf-all   Using -f and -a at the same time.
+  Default note folder: defaults
 
-  -d, --delete          Delete an existing note. Requires a filename. Cannot be used with -c.
+  Primary note:        primary.md
 
-  -c, --current-window  Create a new note in the current tmux window (make sure that you are in a notes tmux session). Cannot be used with -n, -d or -f.
+  Editor:              \$EDITOR (fallback: vim)
 
-  -n, --name <dirname>  Specify the directory name for the new note. The default directory name is the current date in the format %Y-%m-%d-%A. Cannot be used with -f, -p or -c.
-
-  -nt, --no-tmux        Run without attaching or creating a tmux session. Cannot be used with -c.
-
-Arguments:
-
-  filename              The name of the note file (default extension is .md).
+  Tmux session prefix: notes-<dirname>
 
 Examples:
 
-• Create a new note named \"my_note.md\" in the default directory:
-  dnote my_note
+  dnote new-note work meeting
 
-• Create a new note named \"my_note.md\" in the directory \"my_project\":
-  dnote -n my_project my_note
+  dnote new-note work ideas -t typ
 
-• Delete a note \"important_notes.md\" from the default directory:
-  dnote -d important_notes
+  dnote new-dir journal
 
-• Delete a note \"important_notes.md\" from the directory \"my_project\":
-  dnote -n my_project -d important_notes
+  dnote file-fzf work
 
-• Interactively select a directory and file using fzf:
-  dnote -f
+  dnote dir-fzf
 
-• Open or create the daily note file:
-  dnote -m
+  dnote prompt
 
-• Open the primary note file:
-  dnote -r
-
-• Create a note named \"my_note\" in the current tmux window:
-  dnote -c my_note
-
-• Run without tmux:
-  dnote -nt my_note
-
-Notes:
- • This script uses fzf (fuzzy finder) and tmux. Make sure these are installed before using the script.
- • Make sure to set the 'EDITOR' environment variable to choose your own editor. (default is vim).
+  dnote primary
 "
 
-  if type "less" > /dev/null; then
+  if command -v less >/dev/null 2>&1; then
     echo "$help" | less
   else
     echo "$help"
@@ -153,202 +150,141 @@ primary_note_template() {
 ---"
 }
 
-daily_note_template() {
-  d=$1
-
-  echo "# Daily Notes ($d)
-
-## Work
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
----
-
-## Study
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
----
-
-## Personal
-
-> [!DANGER] IMPORTANT
-
-### Tasks
-
-- [ ] Task 1
-
----
-
-## Notes
-
----"
-}
-
 default_note_template() {
   title=$1
   d=$2
   subtitle=$3
 
   if [ -z "$subtitle" ]; then
-    echo "# $title
-
-**Date:** $d
-
----"
+    echo "$title - $d"
   else
-    echo "# $title
+    echo "$title - $d
 
-## $subtitle 
-
-**Date:** $d
-
----"
+$subtitle"
   fi
 }
 
-function print_err() {
-  err=$1
-  echo "$1" >&2
-  echo "Enter [dnote --help] for help"
-  exit 1
-}
-
-function check_filename() {
+check_filename() {
   filename="$1"
 
   if [[ -z "$filename" ]]; then
-    print_err "Error: Filename cannot be empty"
-    exit 1
+    print_err "Filename cannot be empty"
   fi
 
-  if grep -q '[\\\/\:\*\?\"\<\>\|]' <<< "$filename"; then
-    print_err "Error: Filename contains disallowed characters"
-    exit 1
+  if grep -q '[\\\/\:\*\?\"\<\>\|]' <<<"$filename"; then
+    print_err "Filename contains disallowed characters"
   fi
 
   if [[ "$filename" =~ ^[-_.] ]]; then
-    print_err "Error: Filename must not start with '.' or '-' or '_'"
-    exit 1
+    print_err "Filename must not start with '.' or '-' or '_'"
   fi
 
   filename="${filename%% }"
   filename="${filename## }"
 
   if [[ "$filename" == *"$'\0'"* ]]; then
-      print_err "Error: Filename contains null bytes"
-      exit 1
+    print_err "Filename contains null bytes"
   fi
 
   if [[ ${#filename} -gt 255 ]]; then
-      print_err "Error: Filename exceeds 255 characters"
-      exit 1
+    print_err "Filename exceeds 255 characters"
   fi
 }
 
-function check_dirname() {
+check_dirname() {
   dirname="$1"
 
-  if [ -z $dirname ]; then
-    print_err "Error: Directory name is empty"
-    exit 1
+  if [ -z "$dirname" ]; then
+    print_err "Directory name is empty"
   fi
 
-  if grep -q '[\\\/\:\*\?\"\<\>\|\;]' <<< "$dirname"; then
-    print_err "Error: Invalid directory name, directory name must not contain illegal characters"
-    exit 1
+  if grep -q '[\\\/\:\*\?\"\<\>\|\;]' <<<"$dirname"; then
+    print_err "Invalid directory name, directory name must not contain illegal characters"
   fi
 
   if [[ "$dirname" =~ ^[-_] ]]; then
-    print_err "Error: Invalid directory name, directory name must not start with '-' or '_'"
-    exit 1
+    print_err "Invalid directory name, directory name must not start with '-' or '_'"
   fi
 
   if [[ "$dirname" == "." ]]; then
-    print_err "Error: Invalid directory name, directory name must not equal to '.'"
-    exit 1
+    print_err "Invalid directory name, directory name must not equal to '.'"
   fi
 
   if [[ "$dirname" == ".." ]]; then
-    print_err "Error: Invalid directory name, directory name must not equal to '..'"
-    exit 1
+    print_err "Invalid directory name, directory name must not equal to '..'"
   fi
 
   dirname="${dirname%% }"
   dirname="${dirname## }"
 
   if [[ "$dirname" == *"$'\0'"* ]]; then
-      print_err "Error: Directory name contains null bytes"
-      exit 1
+    print_err "Directory name contains null bytes"
   fi
 
   if [[ ${#dirname} -gt 255 ]]; then
-      print_err "Error: Directory name exceeds 255 characters"
-      exit 1
+    print_err "Directory name exceeds 255 characters"
   fi
 }
 
-function fzf_note_dirs() {
-	retval=$(find "$NOTES_DIR" -mindepth 1 -maxdepth 1 -type d | sed 's/.*\///g' | fzf -e -i)
+check_note_type() {
+  note_type="$1"
+
+  if [ -z "$note_type" ]; then
+    print_err "Note type is empty"
+  fi
+
+  note_type="${note_type%% }"
+  note_type="${note_type## }"
+
+  case "$note_type" in
+  md | typ | tex) ;;
+  *)
+    print_err "Note type must be in [md|typ|tex]."
+    ;;
+  esac
+}
+
+fzf_note_dirs() {
+  retval=$(find "$NOTES_DIR" -mindepth 1 -maxdepth 1 -type d | sed 's/.*\///g' | fzf -e -i)
   echo $retval
 }
 
-function fzf_notes() {
+fzf_notes() {
   dir=$1
 
   if ! [ -d "$NOTES_DIR/$dir" ]; then
-    print_err "Error: directory doesn't exist"
-    exit 1
+    print_err "Directory doesn't exist"
   fi
 
-	retval=$(find "$NOTES_DIR/$dir" -mindepth 1 -maxdepth 1 -iname "*.md" -type f | sed 's/.*\///g' | fzf -e -i)
+  retval=$(
+    find "$NOTES_DIR/$dir" -mindepth 1 -type f \( -name "*.typ" -o -name "*.tex" -o -name "*.md" \) |
+      sed "s|^$NOTES_DIR/$dir/||" |
+      fzf -e -i
+  )
   echo $retval
 }
 
-function fzf_all_notes() {
-  if ! [ -d "$NOTES_DIR" ]; then
-    print_err "Error: directory doesn't exist"
-    exit 1
-  fi
-
-	retval=$(find "$NOTES_DIR" -mindepth 2 -maxdepth 2 -iname "*.md" -type f | sed 's/.*\/\(.*\)\//\1\//g' | fzf -e -i)
-  echo $retval
-}
-
-function create_note_dir() {
+create_note_dir() {
   dir=$1
   mkdir -p "$NOTES_DIR/$dir"
 }
 
-function create_note() {
+create_note() {
   dir=$1
+  dirbasename=$(basename "$1")
   filename=$2
+  filebasename=$(basename "$2")
+  filebasename=${filebasename%.*}
 
-  # 0 or empty is default, 1 is primary and 2 is daily
+  # 0 or empty is default, 1 is primary
   type=$3
 
-  if [ -n "$type" ] && [ $type == 2 ]; then
-    fullpath="$NOTES_DIR/$dir/$DAILY_NOTE_FILENAME.md"
-    d=$(date +%Y-%m-%d)
-
-    if [ ! -f $fullpath ]; then
-      touch $fullpath
-      daily_note_template $d > $fullpath
-    fi
-  elif [ -n "$type" ] && [ $type == 1 ]; then
+  if [ -n "$type" ] && [[ $type == 1 ]]; then
     fullpath="$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
 
     if [ ! -f "$fullpath" ]; then
       touch $fullpath
-      primary_note_template > $fullpath
+      primary_note_template >$fullpath
     fi
   else
     fullpath="$NOTES_DIR/$dir/$filename"
@@ -356,194 +292,86 @@ function create_note() {
 
     if [ ! -f $fullpath ]; then
       touch $fullpath
-      if [ "$dir" == "$d" ]; then
-        title=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
-         default_note_template $title $d "" > $fullpath
-      else 
-        title=$(echo "$dir" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
-        subtitle=$(echo "$filename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+      if [[ "$dir" == "$d" ]]; then
+        title=$(echo "$filebasename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+        default_note_template $title $d "" >$fullpath
+      else
+        title=$(echo "$dirbasename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
+        subtitle=$(echo "$filebasename" | tr '_-' ' ' | awk '{ for(i=1; i<=NF; i++) $i = toupper(substr($i,1,1)) substr($i,2) } 1')
 
-         default_note_template $title $d $subtitle > $fullpath
+        default_note_template $title $d $subtitle >$fullpath
       fi
     fi
   fi
 }
 
-function delete_note() {
-  dir=$1
-  filename=$2
-
-  fullpath="$NOTES_DIR/$dir/$filename"
-
-  if [ -f $fullpath ]; then
-    rm $fullpath
-  else
-    print_err "Error: file doesn't exist"
-    exit 1
-  fi
-}
-
-
-function attach_tmux() {
-  dir=$1
+attach_tmux() {
+  dir=$(basename "$1")
   orig_filename=$2
-  filename=$(echo "${orig_filename%.*}" | sed 's/\.//g')
-  use_current_window=$3
+  filename=""
 
   no_filename=0
 
-  if [ -z $dir ]; then
-    print_err "Error: Directory must be specified"
-    exit 1
+  if [ -z "$dir" ]; then
+    print_err "Directory must be specified"
   fi
 
-  # define tmux env vars
+  if ! [ -d "$NOTES_DIR/$dir" ]; then
+    print_err "Directory doesn't exist"
+  fi
+
   session_name="$TMUX_SESSION_NAME-$dir"
-  window="$session_name:$filename"
-  pane=${window}.0
 
-  # if filename is empty set the tmux env to the note directory
-  if [ -z $filename ]; then
-    filename="nofile"
-    window="$session_name:notedir"
-    no_filename=1
-  fi
+  if [ -z "$orig_filename" ]; then
+    if ! tmux has-session -t="$session_name" 2>/dev/null; then
+      tmux new-session -ds "$session_name" -c "$NOTES_DIR/$dir"
+    fi
 
-  # create session if doesn't exist
-  if ! tmux has-session -t="$session_name" 2>/dev/null; then
-    tmux new-session -ds "$session_name" -c "$NOTES_DIR/$dir" -n "$filename"
-  fi
-
-  current_session=$(tmux display-message -p '#S' 2>/dev/null)
-
-  # if use_current_window is true
-  if [[ $use_current_window =~ ^[0-9]+$ ]] && [ $use_current_window == 1 ]; then
-    # check for tmux to be attached
     if [ -z "$TMUX" ]; then
-      print_err "Error: Invalid --current option, you must be in a notes session"
-      exit 1
+      tmux attach -t "$session_name"
+    else
+      tmux switch-client -t "$session_name"
     fi
 
-    wd=$(pwd)
-
-    # and check for the current working directory to be a notes directory
-    if [ "$NOTES_DIR/$dir" != "$wd" ]; then
-      print_err "Error: Invalid --current option, you must be in a notes directory"
-      exit 1
-    fi
-
-    wd_note_dirname=$(echo "$wd" | sed 's/.*\///g')
-
-    # also match the tmux session name with the current directory name
-    if [ "$TMUX_SESSION_NAME-$wd_note_dirname" != "$session_name" ]; then
-      print_err "Error: Invalid --current option, you must be in a notes session"
-      exit 1
-    fi
-
-    # if all the checks were ok, then rename the current tmux
-    # window and also send keys to it to launch the editor
-    tmux rename-window "$filename"
-    tmux select-window -t "$session_name:$filename"
-    tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
     exit 0
   fi
 
-  # get the window names of tmux session
-  windows_str=$(tmux list-windows -F '#W' -t "$session_name" 2>/dev/null)
+  filename=$(basename "$2")
+  filename=${filename%.*}
 
-  if [ $? != 0 ]; then
-    print_err "Error: Cannot get the number of windows"
-    exit 1
+  if [ -z "$filename" ]; then
+    print_err "Filename must be specified"
   fi
 
-  # split the windows_str into an array
-  readarray -t windows < <(printf '%s\n' "$windows_str" | tr ' ' '\n')
-  windows_len=${#windows[@]}
-  
-  if [ $? != 0 ]; then
-    print_err "Error: Cannot get the window names"
-    exit 1
-  fi
+  window="$session_name:$filename"
+  pane="${window}.0"
 
-  # if we reached the maximum window number, we use the first window
-  # to launch the editor for the file
-  if [ $windows_len -ge $MAX_WINDOW_NUMBER ]; then
-    # also we have to check for the filename window to not exist in 
-    # the current windows
-    if [ "$(echo "${windows[@]}" | grep "$filename")" == "" ]; then
-      tmux rename-window -t "$session_name:1" "$filename"
-      tmux select-window -t "$session_name:1"
-    else
-      # if the filename window exist in the windows, then we just switch to that window
-      # but be aware the -S option in the new-window command will switch to the window
-      # if it already exists
-      tmux new-window -S -n "$filename" -t "$session_name:" -c "$NOTES_DIR/$dir"
-    fi
+  if ! tmux has-session -t="$session_name" 2>/dev/null; then
+    tmux new-session -ds "$session_name" -c "$NOTES_DIR/$dir" -n "$filename"
   else
-    # otherwise we launch a new window
     tmux new-window -S -n "$filename" -t "$session_name:" -c "$NOTES_DIR/$dir"
   fi
 
-  tmux select-pane -t "$pane"
+  tmux select-window -t "$session_name:$filename"
+  current_cmd=$(tmux display-message -p -t "$pane" '#{pane_current_command}')
 
-  # if we selected a file we must run the editor as well
-  if [ "$filename" != "nofile" ] && [ $no_filename != 1 ]; then
-    # get the window titles and names
-    window_titles_str=$(tmux list-panes -s -F "#T\n\n\n\n\n" -t "$session_name")
-    window_names_str=$(tmux list-panes -s -F "#W\n\n\n\n\n" -t "$session_name")
-    window_titles=()
-    window_names=()
-
-    # split window titles string into array
-    IFS=$'\n\n\n\n\n'
-    while read -r line; do
-        window_titles+=("${line:0:-10}")
-    done <<< "$window_titles_str"
-
-    # split window names string into array
-    IFS=$'\n\n\n\n\n'
-    while read -r line; do
-        window_names+=("${line:0:-10}")
-    done <<< "$window_names_str"
-
-    # loop through the window names to find a match for the current window
-    # and if it exists then check for the title
-    # if the title is matched with the "{USERNAME}@{HOSTNAME}:{DIRECTORY}
-    # or it is equal to the $HOSTNAME (which means the window is generated currently)
-    # it means we can run commands in the terminal
-    # so we send keys to run the editor
-    for n in "${!window_names[@]}"; do
-      name=${window_names[$n]}
-      if [ "$name" == "$filename" ]; then
-        title=${window_titles[$n]}
-
-        if [[ "$title" == "$HOSTNAME" ]] || [[ $(echo "$title" | grep -E "^[a-zA-Z0-9_]+@[a-zA-Z0-9._-]+:~/.+$" ) ]]; then
-          tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
-          break
-        else
-          tmux send-keys -t "$pane" C-z 
-          tmux send-keys -t "$pane" "$ED $NOTES_DIR/$dir/$orig_filename" Enter
-        fi
-      fi
-    done
+  if [ "$current_cmd" != "$ED" ]; then
+    tmux send-keys -t "$pane" "$ED \"$NOTES_DIR/$dir/$orig_filename\"" Enter
   fi
 
-  # finally if the tmux is already running we just switch-client
   if [ ! -z "$TMUX" ]; then
     tmux switch-client -t "$session_name"
   else
-    # otherwise we attach-session
-    tmux attach-session -t "$session_name" 
+    tmux attach-session -t "$session_name"
   fi
 
   exit 0
 }
 
 # check for help option
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
   if [[ $# -gt 1 ]]; then
-    print_err "Error: [help flag] cannot be combined with other options"
-    exit 1
+    print_err "[help flag] cannot be combined with other options"
   fi
 
   print_help
@@ -552,78 +380,98 @@ fi
 
 mkdir -p "$NOTES_DIR"
 
-dirname=$(date +%Y-%m-%d-%A)
+dirname="$DEFAULT_NOTE_DIR"
 filename=""
+note_type="md"
 
-prompt_flag=0
-no_file_flag=0
-dirname_flag=0
-fzf_flag=0
-fzf_all_notes_flag=0
-delete_flag=0
-current_window_flag=0
-primary_flag=0
-daily_flag=0
-no_tmux=0
+if [[ $# -lt 1 ]]; then
+  print_err "Empty arguments received"
+fi
 
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    -f|--fzf)
-      fzf_flag=1
-      ;;
-    -nt|--no-tmux)
-      no_tmux=1
-      ;;
-    -r|--primary)
-      primary_flag=1
-      ;;
-    -m|--daily)
-      daily_flag=1
-      ;;
-    -fa|-af|--fzf-all)
-      fzf_flag=1
-      fzf_all_notes_flag=1
-      ;;
-    -a|--all)
-      fzf_all_notes_flag=1
-      ;;
-    -p|--prompt)
-      prompt_flag=1
-      ;;
-    -d|--delete)
-      delete_flag=1
-      ;;
-    -c|--current-window)
-      current_window_flag=1
-      ;;
-    -n|--name)
-      dirname_flag=1
-      dirname="$2"
-      check_dirname "$dirname"
-      shift 1
-      ;;
-    *)
-      if [ $# == 1 ] && [ $fzf_flag == 0 ] && [ $daily_flag == 0 ] && [ -z $filename ]; then
-        filename="$1.md"
-        check_filename "$filename"
-      else
-        print_err "Error: Invalid option $1"
-        exit 1
-      fi
-      ;;
-  esac
+cmd=$1
+shift 1
+
+case $cmd in
+new-note)
+  dirname="$1"
+  check_dirname "$dirname"
+  filename="$2"
+  check_filename "$filename"
+  shift 2
+  ;;
+
+new-dir)
+  dirname="$1"
+  check_dirname "$dirname"
   shift 1
-done
+  ;;
 
-if [ $primary_flag == 1 ]; then
+file-fzf)
+  dirname=$(fzf_note_dirs)
+  if [ -z "$dirname" ]; then
+    echo "Operation cancelled"
+    exit 0
+  fi
+
+  check_dirname "$dirname"
+  filename=$(fzf_notes "$dirname")
+
+  if [ -z "$filename" ]; then
+    echo "Operation cancelled"
+    exit 0
+  fi
+
+  check_filename "$filename"
+  attach_tmux "$dirname" "$filename"
+  exit 0
+  ;;
+
+dir-fzf)
+  dirname=$(fzf_note_dirs)
+  if [ -z "$dirname" ]; then
+    echo "Operation cancelled"
+    exit 0
+  fi
+
+  check_dirname "$dirname"
+  attach_tmux "$dirname" ""
+  exit 0
+  ;;
+
+prompt)
+  d=""
+  f=""
+
+  read -e -p "Enter Directory Name: (if empty it will use the default directory, type fzf for fuzzy find the directory) " -i "" d
+
+  if [ ! -z "$d" ]; then
+    if [[ "$d" == "fzf" ]]; then
+      dirname=$(fzf_note_dirs)
+      if [ -z "$dirname" ]; then
+        echo "Operation cancelled"
+        exit 0
+      fi
+    else
+      dirname=$d
+    fi
+  fi
+
+  check_dirname "$dirname"
+
+  read -e -p "Enter Filename: " -i "" f
+  check_filename "$f"
+  filename="$f"
+  ;;
+
+primary)
   list_str=$(pgrep alacritty --list-full | grep -E "$TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"" | awk '{print $1}')
   pids=()
 
   IFS=$'\n'
   while read -r line; do
     pids+=("$line")
-  done <<< "$list_str"
-  
+  done <<<"$list_str"
+
   pids_len=${#pids[@]}
 
   if [ -n "$list_str" ] && [ $pids_len -gt 0 ]; then
@@ -637,178 +485,31 @@ if [ $primary_flag == 1 ]; then
   create_note "" "" 1
   $TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
   exit 0
-fi
+  ;;
+esac
 
-if [ $fzf_all_notes_flag == 1 ] && [ $fzf_flag != 1 ]; then
-  print_err "Error: Invalid option, if you want to use [fzf all notes flag] you must include [fzf flag] too"
-  exit 1
-fi
-
-if [ $prompt_flag == 1 ] && [ $fzf_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [prompt flag] with [fzf flag]"
-  exit 1
-fi
-
-if [ $prompt_flag == 1 ] && [ $dirname_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [prompt flag] with [directory name flag]"
-  exit 1
-fi
-
-if [ $fzf_flag == 1 ] && [ $current_window_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [fzf flag] with [current window flag]"
-  exit 1
-fi
-
-if [ $fzf_flag == 1 ] && [ $dirname_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [fzf flag] with [directory name flag]"
-  exit 1
-fi
-
-if [ $current_window_flag == 1 ] && [ $dirname_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [current window flag] with [directory name flag]"
-  exit 1
-fi
-
-if [ $current_window_flag == 1 ] && [ $delete_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [current window flag] with [delete flag]"
-  exit 1
-fi
-
-if [ $current_window_flag == 1 ] && [ $no_tmux == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [current window flag] with [no tmux flag]"
-  exit 1
-fi
-
-if [ $daily_flag == 1 ] && [ $delete_flag == 1 ]; then
-  print_err "Error: Invalid option, you cannot use [daily flag] with [delete flag]"
-  exit 1
-fi
-
-if [ $prompt_flag == 0 ] && [ $fzf_flag == 0 ] && [ -z $filename ]; then
-  no_file_flag=1
-fi
-
-if [ $current_window_flag == 1 ]; then
-  dirname=$(pwd | sed 's/.*\///g')
-fi
-
-if [ $fzf_flag == 1 ]; then
-  if [ $fzf_all_notes_flag == 1 ]; then
-    selected=$(fzf_all_notes)
-
-    if [ -z $selected ]; then
-      echo "Operation cancelled"
-      exit 0
-    fi
-
-    dirname=$(echo "$selected" | sed 's/\(.*\)\/.*/\1/')
-    filename=$(echo "$selected" | sed 's/.*\///')
-
-    if [ -z $dirname ] || [ -z $filename ]; then
-      echo "Operation cancelled"
-      exit 0
-    fi
-  else
-    dirname=$(fzf_note_dirs)
-    if [ -z $dirname ]; then
-      echo "Operation cancelled"
-      exit 0
-    fi
-
-    if [ $daily_flag != 1 ]; then
-      filename=$(fzf_notes "$dirname")
-
-      while [ -z $filename ]; do
-        dirname=$(fzf_note_dirs)
-        if [ -z $dirname ]; then
-          echo "Operation cancelled"
-          exit 0
-        fi
-        filename=$(fzf_notes "$dirname")
-      done
-    fi
-  fi
-fi
-
-if [ $prompt_flag == 1 ]; then
-  d=""
-  f=""
-
-  if [ $current_window_flag != 1 ]; then
-    read -e -p "Enter Directory Name: (if empty it will use the current date, type fzf for fuzzy find the directory) " -i "" d
-
-    if [ ! -z $d ]; then
-      if [ "$d" == "fzf" ]; then
-        dirname=$(fzf_note_dirs)
-        if [ -z $dirname ]; then
-          echo "Operation cancelled"
-          exit 0
-        fi
-      else
-        dirname=$d
-      fi
-    fi
-  fi
-
-  if [ $daily_flag != 1 ]; then
-    read -e -p "Enter Filename: " -i "" f
-    filename="$f.md"
-  fi
-fi
-
-if [ $delete_flag == 1 ]; then
-  check_dirname "$dirname"
-  check_filename "$filename"
-
-  ans="N"
-  read -e -p "Do you really want to delete note $filename at $dirname? [y/N] " -i "" ans
-
-  if [ "$ans" == "y" ] || [ "$ans" == "Y" ]; then
-    delete_note "$dirname" "$filename"
-    echo "File $filename deleted successfully"
-  else
-    echo "Delete operation cancelled"
-  fi
-
-  exit 0
-fi
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -t | --type)
+    note_type="$2"
+    check_note_type "$note_type"
+    shift 1
+    ;;
+  *)
+    print_err "Invalid option $1"
+    ;;
+  esac
+  shift 1
+done
 
 create_note_dir "$dirname"
-check_dirname "$dirname"
 
-if [ $daily_flag == 1 ]; then
-  create_note_dir "$dirname"
-  check_dirname "$dirname"
-
-  create_note "$dirname" "" 2
-
-  if [ $no_tmux == 1 ]; then
-    $ED "$NOTES_DIR/$dirname/$DAILY_NOTE_FILENAME.md"
-  else
-    attach_tmux "$dirname" "$DAILY_NOTE_FILENAME.md" $current_window_flag
-  fi
-
-  exit 0
-fi
-
-if [ $no_tmux == 1 ]; then
-  if [ $no_file_flag == 1 ]; then
-    cd "$NOTES_DIR/$dirname"
-    exec $SHELL
-  else
-    check_filename "$filename"
-    create_note "$dirname" "$filename"
-    echo "$dirname/$filename"
-    $ED "$NOTES_DIR/$dirname/$filename"
-  fi
+if [[ -z "$filename" ]]; then
+  attach_tmux "$dirname" ""
 else
-  if [ $no_file_flag == 1 ]; then
-    attach_tmux "$dirname" "" $current_window_flag
-  else
-    check_filename "$filename"
-    create_note "$dirname" "$filename"
-    attach_tmux "$dirname" "$filename" $current_window_flag
-  fi
+  filename="$filename.$note_type"
+  create_note "$dirname" "$filename"
+  attach_tmux "$dirname" "$filename"
 fi
 
 exit 0
