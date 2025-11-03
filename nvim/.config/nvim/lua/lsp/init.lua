@@ -54,10 +54,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
 		map("n", "<leader>sr", vim.lsp.buf.rename, "Smart rename")
 		map("n", "<leader>ld", vim.diagnostic.open_float, "Show line diagnostics")
 		map("n", "[d", function()
-			vim.diagnostic.jump({ count = 1, float = true })
+			vim.diagnostic.jump({ count = -1, float = true })
 		end, "Go to previous diagnostic")
 		map("n", "]d", function()
-			vim.diagnostic.jump({ count = -1, float = true })
+			vim.diagnostic.jump({ count = 1, float = true })
 		end, "Go to next diagnostic")
 		map("n", "K", vim.lsp.buf.hover, "Show documentation for what is under cursor")
 	end,

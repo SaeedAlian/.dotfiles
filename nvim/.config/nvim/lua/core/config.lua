@@ -1,7 +1,4 @@
 local map = require("utils.keymapper").map
-local markdown = require("utils.markdown")
-local typst = require("utils.typst")
-local helpers = require("utils.helpers")
 
 -- -- -- -- start config -- -- -- --
 
@@ -293,26 +290,6 @@ map("n", "sm", "<cmd>MaximizerToggle<CR>", "Maximize/Minimize a split buffer")
 -- file explorer
 map("n", "<leader>pd", ":ToggleNetRW<CR>", "Toggle file explorer")
 
--- preview markdown
-map("n", "<leader>mp", function()
-	local filename = helpers.GetCurrentFile()
-	if helpers.CheckTypFile(filename) then
-		typst.TypstPreview()
-	else
-		markdown.MarkdownPreview()
-	end
-end, "Typst/Markdown previewer with zathura")
-
--- save markdown preview
-map("n", "<leader>mds", function()
-	local filename = helpers.GetCurrentFile()
-	if helpers.CheckTypFile(filename) then
-		typst.SaveTypstPreview()
-	else
-		markdown.SaveMarkdownPreview()
-	end
-end, "Save typst/markdown preview in pdf format")
-
 -- toggle autoformat on save
 map("n", "<leader>af", function()
 	if vim.g.autoformat then
@@ -469,7 +446,7 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "ModeChanged" }, {
 			"│ %{v:lua.file_size()} ",
 			"│ %{v:lua.set_diagnostics()} ",
 			"%=",
-			"Ln %l, Col %c ",
+			"%l ",
 		})
 	end,
 })
