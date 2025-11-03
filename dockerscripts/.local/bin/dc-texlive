@@ -1,0 +1,21 @@
+#!/bin/sh
+
+source $HOME/.local/bin/dc-docker-cmd
+
+cmd="$1"
+shift
+
+case "$cmd" in
+pdflatex | bibtex | latex | xelatex | lualatex)
+  docker_cmd run --rm -v "$(pwd):/workspace" dc-texlive "$cmd" "$@"
+  ;;
+shell)
+  docker_cmd run --rm -it -v "$(pwd):/workspace" -w /workspace dc-texlive /bin/sh
+  ;;
+*)
+  echo "Usage: dc-texlive {pdflatex|bibtex|latex|xelatex|lualatex|shell} [args]"
+  exit 1
+  ;;
+esac
+
+exit 0

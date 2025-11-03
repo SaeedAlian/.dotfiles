@@ -56,6 +56,7 @@ done
 
 mkdir -p $HOME/.themes
 mkdir -p $HOME/.local/bin
+mkdir -p $HOME/.local/dccontainers
 mkdir -p $HOME/.local/share/fonts
 mkdir -p $HOME/.local/share/applications
 mkdir -p $HOME/.config/env
@@ -80,6 +81,7 @@ mkdir -p $HOME/.config/zathura
 # stow defaults
 stow X11
 stow dunst
+stow dockerscripts
 stow fastfetch
 stow fonts
 stow git
