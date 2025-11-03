@@ -23,4 +23,6 @@ export XINITRC="$HOME/.config/X11/xinitrc"
 
 export YAZI_CONFIG_HOME="$HOME/.config/yazi"
 
+export CUSTOM_DOCKER_CONTAINERS_PATH="$HOME/.local/dccontainers"
+
 export PATH="$PATH:/usr/local/bin:$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/go/bin:$VOLTA_HOME/bin:/var/lib/flatpak/exports/bin:$HOME/.local/share/applications:$HOME/.local/node:$HOME/.local/node/bin"
