@@ -7,11 +7,14 @@ timeshift
 zathura
 alacritty
 acpi
+android-file-transfer
 bspwm
 sxhkd
 curl
 wget
 dunst
+docker
+docker-compose
 fastfetch
 feh
 ffmpeg
