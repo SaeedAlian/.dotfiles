@@ -69,11 +69,10 @@ bindkey -s ^f "tmux_fzf_session\n"
 bindkey -s ^h "zsh_hsearch 3000\n"
 
 # run dnote fzf
-bindkey -s ^n^n "dnote -f\n"
-# run dnote all fzf
-bindkey -s ^n^a "dnote -af\n"
+bindkey -s ^n^n "dnote file-fzf\n"
+bindkey -s ^n^d "dnote dir-fzf\n"
 # run dnote prompt
-bindkey -s ^p "dnote -p\n"
+bindkey -s ^p "dnote prompt\n"
 
 # reverse move in completion menu
 bindkey '^[[Z' reverse-menu-complete

@@ -84,9 +84,9 @@ bind '"\C-f":"tmux_fzf_session\n"'
 bind '"\C-l":"clear\n"'
 bind '"\C-a":"bash_hsearch 3000\n"'
 bind '"\C-o":"fastfetch\n"'
-bind '"\C-n\C-n":"dnote -nt -f\n"'
-bind '"\C-n\C-a":"dnote -nt -af\n"'
-bind '"\C-p":"dnote -nt -p\n"'
+bind '"\C-n\C-n":"dnote file-fzf\n"'
+bind '"\C-n\C-d":"dnote dir-fzf\n"'
+bind '"\C-p":"dnote prompt\n"'
 
 ######## aliases ########
 alias grep='grep --color=auto'
