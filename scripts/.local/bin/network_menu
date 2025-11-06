@@ -34,6 +34,10 @@ else
   chosen_network=$(echo -e "$toggle_wifi\n$wifi_list" | uniq -u | rofi -dmenu -i -p "Network: ")
 fi
 
+if [[ -z "$chosen_network" ]]; then
+  exit 0
+fi
+
 read -r chosen_network_name <<<"${chosen_network:3}"
 chosen_bssid=$(echo "$wifi_bssid_list" | grep "$chosen_network_name" | awk '{print $1}')
 
