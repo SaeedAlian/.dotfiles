@@ -84,3 +84,11 @@
   dns=none
   ```
 - Make the `/etc/resolv.conf` unwritable with `chattr +i`
+
+## tty login
+
+- In `/etc/runit/sv/agetty-tty1/run`:
+  ```
+  exec setsid ${GETTY} --noclear -o '-p -- entropy' --skip-login ${GETTY_ARGS} \
+  "${tty}" "${BAUD_RATE}" "${TERM_NAME}"
+  ```
