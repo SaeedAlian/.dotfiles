@@ -234,7 +234,7 @@ super + Escape
 	bspc node -p cancel
 
 # cancel the preselection for the focused desktop
-super + ctrl + shift + space
+super + shift + {equal,minus}
 	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
 
 # resize windows
