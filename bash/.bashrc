@@ -94,8 +94,8 @@ alias ls='ls --color=auto'
 
 alias bashsrc="source $HOME/.bashrc"
 
-alias dot="cd $HOME/.dotfiles && $EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
-alias cnote="cd $HOME/documents/notes"
+alias dot="tmux_fzf_session $HOME/.dotfiles"
+alias cnote="tmux_fzf_session $HOME/documents/notes"
 
 alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
