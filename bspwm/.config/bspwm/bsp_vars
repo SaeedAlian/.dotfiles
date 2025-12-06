@@ -3,13 +3,13 @@
 SCREEN_W=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/\(.*\)x.*/\1/')
 SCREEN_H=$(xdpyinfo | grep dimension | awk '{print $2}' | sed 's/.*x\(.*\)/\1/')
 
-DPMS_TIME=600
+DPMS_TIME=300
 
-TOP_PADDING=35
+TOP_PADDING=37
 BOTTOM_PADDING=0
 SPLIT_RATIO=0.53
 
 NORMAL_BORDER_COLOR="#212329"
 FOCUSED_BORDER_COLOR="#7190D3"
 
-BSPWM_WINDOW_GAPS=6
+BSPWM_WINDOW_GAPS=0
