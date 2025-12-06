@@ -1,5 +1,5 @@
 * {
-  bg-norm: #14151B;
+  bg-norm: #111111;
   bg-sel: #7190D3;
   bg-label: #11111B;
   border-color: #7190D3;
@@ -11,8 +11,8 @@
 window {
   background-color: @bg-norm;
   padding: 10px;
-  border: 3;
-  border-radius: 0.6em;
+  border: 1;
+  border-radius: 0.0em;
   border-color: @border-color;
   width: 40%;
   location: center;
@@ -23,7 +23,7 @@ window {
 element {
   background-color: transparent;
   text-color: @fg-norm;
-  border-radius: 0.3em;
+  border-radius: 0.0em;
 }
 
 element selected {
