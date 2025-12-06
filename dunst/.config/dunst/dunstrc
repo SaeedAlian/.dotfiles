@@ -60,7 +60,7 @@
 
     history_length = 20
 
-    corner_radius = 12
+    corner_radius = 0
 
     mouse_right_click = do_action, close_current
     mouse_left_click = close_current
