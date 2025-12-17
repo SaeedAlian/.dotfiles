@@ -14,7 +14,7 @@ window {
   border: 1;
   border-radius: 0.0em;
   border-color: @border-color;
-  width: 40%;
+  width: 30%;
   location: center;
   anchor: north;
   y-offset: -320px;
