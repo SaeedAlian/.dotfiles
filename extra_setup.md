@@ -68,9 +68,9 @@
       Identifier "touchpad"
       Driver "libinput"
       MatchIsTouchpad "on"
-      Option "Tapping" "on"
+      Option "Tapping" "off"
       Option "AccelProfile" "adaptive"
-      Option "AccelSpeed" "-0.1"
+      Option "AccelSpeed" "-0.01"
       Option "NaturalScrolling" "false"
       Option "DisableWhileTyping" "true"
   EndSection
