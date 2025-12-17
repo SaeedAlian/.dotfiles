@@ -2,7 +2,7 @@
 
 source $HOME/.config/bspwm/bsp_vars
 
-RESTRICTED_NODES=("Yad" "ffplay" "Alacritty-float", "TelegramDesktop", "Clementine")
+RESTRICTED_NODES=("Yad" "ffplay" "Alacritty-float")
 
 floatrules_str=$(bspc rule -l | grep "state=floating")
 
