@@ -60,6 +60,7 @@ mkdir -p $HOME/.local/dccontainers
 mkdir -p $HOME/.local/share/fonts
 mkdir -p $HOME/.local/share/applications
 mkdir -p $HOME/.config/env
+mkdir -p $HOME/.config/fontconfig
 
 mkdir -p $HOME/.config/X11
 mkdir -p $HOME/.config/dunst
