@@ -17,6 +17,10 @@ super + Return
 super + n
   $HOME/.local/bin/dnote primary
 
+# win fzf
+super + grave
+  $HOME/.local/bin/winfzf
+
 # gui fm
 super + shift + Return
   $FILEMANAGER
@@ -218,8 +222,8 @@ super + Tab
 	bspc desktop -f last
 
 # focus or send to the given desktop
-super + {_,shift + }{1-9,0,grave}
-	bspc {desktop -f,node -d} '^{1-9,10,11}'
+super + {_,shift + }{1-4,7-9,0}
+	bspc {desktop -f,node -d} '^{1-4,5-7,8}'
 
 # preselect the direction south
 super + minus
