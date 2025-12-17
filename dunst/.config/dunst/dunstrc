@@ -66,12 +66,12 @@
     mouse_left_click = close_current
 
 [urgency_low]
-    background = "#14151B"
+    background = "#111111"
     foreground = "#CED1D9"
     timeout = 2
 
 [urgency_normal]
-    background = "#14151B"
+    background = "#111111"
     foreground = "#CED1D9"
     timeout = 2
 
