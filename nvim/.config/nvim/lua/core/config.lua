@@ -72,6 +72,7 @@ vim.api.nvim_create_autocmd("FileType", {
 		map("n", "<Esc>", "<CMD>ToggleNetRW<CR>", "Toggle netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "s", "<Nop>", "Disable sort in netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "r", "<Nop>", "Disable reverse sort in netrw", { noremap = true, silent = true, buffer = true })
+		map("n", "<C-l>", "<C-w><C-l>", "Fix move to left split", { noremap = true, silent = true, buffer = true })
 		map(
 			"n",
 			"P",
