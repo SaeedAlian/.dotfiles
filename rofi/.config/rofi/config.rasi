@@ -6,11 +6,11 @@ configuration {
   
   show-icons: false;
   icon-theme: "Papirus";
-  kb-row-up: "Control+k";
-  kb-row-down: "Control+j";
-  kb-page-next: "Control+d";
-  kb-page-prev: "Control+u";
-  kb-accept-entry: "Control+Return,KP_Enter";
+  kb-row-up: "Control+k,Super+k";
+  kb-row-down: "Control+j,Super+j,Super+Tab";
+  kb-page-next: "Control+d,Super+d";
+  kb-page-prev: "Control+u,Super+u";
+  kb-accept-entry: "Control+Return,KP_Enter,Super+Return";
   kb-remove-to-eol: "Control+Shift+k";
   kb-accept-custom: "Shift+Return";
   kb-accept-alt: "Return";
