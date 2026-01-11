@@ -29,6 +29,7 @@ $HOME/.local/bin/startup
 ###### desktops ######
 bspc monitor -d 1 2 3 4 7 8 9 10
 
+bspc desktop 1 -l monocle
 bspc desktop 2 -l monocle
 
 ###### ui ######
@@ -59,8 +60,8 @@ bspc rule -a firefox desktop='^3'
 bspc rule -a Zathura desktop='^2' state=tiled
 bspc rule -a Hiddify desktop='^6' state=tiled
 bspc rule -a 'VirtualBox Manager' desktop='^7' state=tiled
-bspc rule -a Clementine desktop='^5' split_ratio=0.7 split_dir=east
-bspc rule -a TelegramDesktop desktop='^5' split_ratio=0.3 split_dir=west
+bspc rule -a Clementine desktop='^5' split_ratio=0.6 split_dir=east
+bspc rule -a TelegramDesktop desktop='^5' split_ratio=0.4 split_dir=west
 bspc rule -a Alacritty rectangle=950x650+0+0
 bspc rule -a 'Alacritty-float' state=floating rectangle=1200x800+360+140 focus=on
 bspc rule -a Yad state=floating rectangle=400x200+760+40 focus=on
