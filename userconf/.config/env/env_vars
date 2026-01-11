@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DPMS_TIME=600
+
 export GTK_THEME="darkcat"
 export QT_QPA_PLATFORMTHEME="qt5ct"
 
