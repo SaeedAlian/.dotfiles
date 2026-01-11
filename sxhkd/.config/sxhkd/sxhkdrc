@@ -14,11 +14,11 @@ super + Return
   $TERMINAL
 
 # primary notes
-super + n
+super + e
   $HOME/.local/bin/dnote primary
 
 # win fzf
-super + grave
+super + w
   $HOME/.local/bin/winfzf
 
 # gui fm
@@ -52,7 +52,7 @@ super + d
 	rofi -show drun -show-icons
 
 # network menu
-super + w
+super + n
 	/bin/bash -c $HOME/.local/bin/network_menu
 
 # bluetooth menu
@@ -210,8 +210,8 @@ super + shift + s
 	$HOME/.config/bspwm/bspstickytoggle
 
 # focus the next/previous node in the current desktop
-super + {j,k}
-    bspc node -f {prev,next}.local.!hidden.window
+super + {j,k,grave}
+    bspc node -f {prev,next,next}.local.!hidden.window
 
 # focus on the node in the given direction
 super + {h,l}
