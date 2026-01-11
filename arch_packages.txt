@@ -1,4 +1,7 @@
 neovim
+ttf-jetbrains-mono-nerd
+vazir-code-fonts
+vazirmatn-fonts
 exiftool
 vim
 fzf
