@@ -33,6 +33,8 @@ export HISTFILESIZE=10000                          # history file size
 ######## launch x server ########
 if [[ "$(tty)" = "/dev/tty1" ]]; then
   startx "$XDG_CONFIG_HOME/X11/xinitrc"
+  setxkbmap -layout us,ir -option 'grp:alt_shift_toggle'
+  setxkbmap -option caps:none
 fi
 
 ######## functions ########

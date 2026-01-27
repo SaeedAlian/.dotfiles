@@ -6,4 +6,7 @@ xrdb -load ~/.config/X11/Xresources
 
 rm -f /tmp/startuplock
 
+setxkbmap -layout us,ir -option 'grp:alt_shift_toggle'
+setxkbmap -option caps:none
+
 exec $XDG_CURRENT_DESKTOP
