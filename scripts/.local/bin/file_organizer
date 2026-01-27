@@ -39,6 +39,7 @@ audios_folder_name="audios"
 videos_folder_name="videos"
 documents_folder_name="documents"
 compresseds_folder_name="compressed"
+subtitles_folder_name="subtitles"
 programs_folder_name="programs"
 others_folder_name="others"
 
@@ -83,6 +84,7 @@ compressed_mimetypes=(
 	"application/x-gzip"
 	"multipart/x-gzip"
 )
+subtitles_mimetypes=("application/x-subrip")
 program_mimetypes=(
 	"application/vnd.debian.binary-package"
 	"application/octet-stream"
@@ -102,6 +104,7 @@ declare category_dirs=(
 	"${documents_folder_name}"
 	"${videos_folder_name}"
 	"${compresseds_folder_name}"
+	"${subtitles_folder_name}"
 	"${programs_folder_name}"
 	"${others_folder_name}"
 )
@@ -162,6 +165,11 @@ for file in "$root_directory"/*; do
 
 	if [[ $(mimetype_contains "$file_mimetype" compressed_mimetypes[@]) == "1" ]]; then
 		move_file "$root_directory" "$file" "$compresseds_folder_name"
+		continue
+	fi
+
+	if [[ $(mimetype_contains "$file_mimetype" subtitles_mimetypes[@]) == "1" ]]; then
+		move_file "$root_directory" "$file" "$subtitles_folder_name"
 		continue
 	fi
 
