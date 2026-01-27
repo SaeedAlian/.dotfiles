@@ -6,7 +6,11 @@ mkdir -p "$ICON_DIR"
 entries=""
 wids=()
 
+focused=$(bspc query -N -n focused)
+
 while read -r wid; do
+  [[ "$wid" == "$focused" ]] && continue
+
   title=$(xprop -id "$wid" WM_NAME | sed -E 's/.*= "(.*)"/\1/')
   [[ -z "$title" ]] && continue
 
