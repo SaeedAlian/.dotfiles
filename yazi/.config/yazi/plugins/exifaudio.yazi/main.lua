@@ -77,19 +77,8 @@ function M:peek(job)
 		status, child = pcall(Exiftool, job.file.url)
 		if not status or child == nil then
 			local error = ui.Line({ ui.Span("Make sure exiftool is installed and in your PATH") })
-			-- TODO)) Remove legacy method when v0.4 gets released
-			local function display_error_legacy()
-				local p = ui.Paragraph(job.area, { error }):wrap(ui.Paragraph.WRAP)
-				ya.preview_widgets(job, { p })
-			end
-			local function display_error()
-				local p = ui.Text(error):area(job.area):wrap(ui.Text.WRAP)
-				ya.preview_widgets(job, { p })
-			end
-			if pcall(display_error) then
-			else
-				pcall(display_error_legacy)
-			end
+			local p = ui.Text(error):area(job.area):wrap(ui.Wrap.YES)
+			ya.preview_widget(job, { p })
 			return
 		end
 	end
@@ -116,19 +105,8 @@ function M:peek(job)
 		end
 	until i >= job.skip + limit
 
-	-- TODO)) Remove legacy method when v0.4 gets released
-	local function display_metadata_legacy()
-		local p = ui.Paragraph(job.area, metadata):wrap(ui.Paragraph.WRAP)
-		ya.preview_widgets(job, { p })
-	end
-	local function display_metadata()
-		local p = ui.Text(metadata):area(job.area):wrap(ui.Text.WRAP)
-		ya.preview_widgets(job, { p })
-	end
-	if pcall(display_metadata) then
-	else
-		pcall(display_metadata_legacy)
-	end
+	local p = ui.Text(metadata):area(job.area):wrap(ui.Wrap.YES)
+	ya.preview_widget(job, { p })
 
 	local cover_width = job.area.w / 2 - 5
 	local cover_height = (job.area.h / 4) + 3
@@ -140,7 +118,7 @@ function M:peek(job)
 		h = cover_height,
 	})
 
-	if self:preload(job) == 1 then
+	if self:preload(job) == true then
 		ya.image_show(cache, bottom_right)
 	end
 end
@@ -212,7 +190,7 @@ end
 function M:preload(job)
 	local cache = ya.file_cache(job)
 	if not cache or fs.cha(cache) then
-		return 1
+		return true
 	end
 
 	local mediainfo_template = 'General;"\
@@ -249,10 +227,10 @@ Channels: %Channel(s)%"\
 		:output()
 
 	if not output then
-		return 0
+		return true, Err("Couldn't extract cover art, error: %s", err)
 	end
 
-	return fs.write(cache, output.stdout) and 1 or 2
+	return fs.write(cache, output.stdout) and true or false
 end
 
 return M
