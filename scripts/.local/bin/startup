@@ -3,6 +3,7 @@
 run() {
   $HOME/.local/bin/toggle_bluetooth --off
   $HOME/.local/bin/toggle_touchscreen --off
+  $HOME/.local/bin/touchpad_setup
 }
 
 if [ "$1" == "--force" ]; then
