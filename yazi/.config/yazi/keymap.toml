@@ -149,7 +149,7 @@ keymap = [
 	{ on = [ "g", "m" ],       run = "cd ~/music",              desc = "Go to the music directory" },
 	{ on = [ "g", "M" ],       run = "cd ~/mount",              desc = "Go to the mount directory" },
 	{ on = [ "g", "p" ],       run = "cd ~/pictures",           desc = "Go to the pictures directory" },
-	{ on = [ "g", "P" ],       run = "cd ~/projects",           desc = "Go to the projects directory" },
+	{ on = [ "g", "P" ],       run = "cd ~/documents/projects", desc = "Go to the projects directory" },
 	{ on = [ "g", "v" ],       run = "cd ~/videos",             desc = "Go to the videos directory" },
 	{ on = [ "g", "t" ],       run = "cd ~/downloads/telegram", desc = "Go to the telegram directory" },
 	{ on = [ "g", "h" ],       run = "cd ~",                    desc = "Go to home directory" },
