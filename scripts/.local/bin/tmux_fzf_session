@@ -1,7 +1,33 @@
 #!/usr/bin/env bash
 set -eu
 
-DIRECTORIES="$HOME/projects"
+DIRS=(
+  "$HOME/documents/notes"
+  "$HOME/documents/projects"
+)
+
+PREFS=(
+  "note"
+  "proj"
+)
+
+SUBS=(
+  "$HOME/documents/"
+  "$HOME/documents/"
+)
+
+EXTRA_DIRS=(
+  ".dotfiles"
+  ".config"
+  "default"
+)
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-sessionizer"
+CACHE_FILE="$CACHE_DIR/sessions.cache"
+META_FILE="$CACHE_DIR/meta.cache"
+
+mkdir -p "$CACHE_DIR"
+
 ROFI_CMD=(rofi -dmenu -i -p)
 FZF_CMD=(fzf -i --wrap --wrap-sign=" " --prompt)
 TMUX_TERMINAL_CLIENT_NAME="xterm-256color"
@@ -11,6 +37,66 @@ TERMINAL_CMD="$TERMINAL -e"
 has_tty() {
   [ -t 0 ] && [ -t 1 ]
 }
+
+config_hash() {
+  printf '%s\n' \
+    "${DIRS[@]}" \
+    "${PREFS[@]}" \
+    "${SUBS[@]}" \
+    "${EXTRA_DIRS[@]}" |
+    sha256sum | awk '{print $1}'
+}
+
+dirs_mtime() {
+  local sum=""
+  for d in "${DIRS[@]}"; do
+    sum+=$(stat -c '%Y' "$d" 2>/dev/null || echo 0)
+  done
+  echo "$sum"
+}
+
+rebuild_cache() {
+  : >"$CACHE_FILE"
+
+  for i in "${!DIRS[@]}"; do
+    base="${DIRS[$i]}"
+    pref="${PREFS[$i]}"
+    sub="${SUBS[$i]}"
+
+    find "$base" -mindepth 1 -maxdepth 1 -type d | while read -r d; do
+      display="${d#$sub}"
+      session="${pref}--$(basename "$d")"
+      session="${session//./}"
+      printf '%s|%s|%s\n' "$display" "$session" "$d" >>"$CACHE_FILE"
+    done
+  done
+
+  for d in "${EXTRA_DIRS[@]}"; do
+    if [ "$d" = "default" ]; then
+      display="default"
+      session="default"
+      dir="$HOME"
+    else
+      display="$d"
+      session="${d//./}"
+      dir="$HOME/$d"
+    fi
+    printf '%s|%s|%s\n' "$display" "$session" "$dir" >>"$CACHE_FILE"
+  done
+
+  printf '%s\n%s\n' "$(config_hash)" "$(dirs_mtime)" >"$META_FILE"
+}
+
+cache_valid() {
+  [ -f "$CACHE_FILE" ] && [ -f "$META_FILE" ] || return 1
+  read -r old_hash <"$META_FILE"
+  old_mtime=$(sed -n '2p' "$META_FILE")
+  [ "$old_hash" = "$(config_hash)" ] && [ "$old_mtime" = "$(dirs_mtime)" ]
+}
+
+if ! cache_valid; then
+  rebuild_cache
+fi
 
 selected_dir=""
 session_name=""
@@ -37,18 +123,9 @@ shift $((OPTIND - 1))
 if [ $# -eq 1 ]; then
   selected_dir=$1
 else
-  find_res=$(find $DIRECTORIES -mindepth 1 -maxdepth 1 -type d)
-
-  declare -a dirs=()
-  for f in $find_res; do
-    dirs+=("${f##$HOME/}")
-  done
-  dirs+=(".dotfiles")
-  dirs+=(".config")
-  dirs+=("documents/notes")
-  dirs+=("default")
-
-  selected_dir=$(printf "%s\n" "${dirs[@]}" | $menu_cmd "Select: ")
+  selected_dir="$(
+    cut -d'|' -f1 "$CACHE_FILE" | $menu_cmd "Select: "
+  )"
 fi
 
 # select between the default session or ordinary session
@@ -56,9 +133,9 @@ if [ "$selected_dir" == "default" ]; then
   session_name="default"
   session_dir="$HOME"
 else
-  session_name=$(basename "$selected_dir")
-  session_name="${session_name//./}"
-  session_dir="$HOME/$selected_dir"
+  read -r _ session_name session_dir <<<"$(
+    awk -F'|' -v s="$selected_dir" '$1 == s {print $1, $2, $3; exit}' "$CACHE_FILE"
+  )"
 fi
 
 # null check
