@@ -197,19 +197,7 @@ map({ "n", "v" }, "C", [["_c$]], "Delete to the end of line and go to insert mod
 
 -- tmux session fuzzy finder
 -- only works when tmux is attached
-map("n", "<C-f>", "<cmd>silent !tmux neww ~/.local/bin/tmux_fzf_session<CR>", "Start tmux session fzf")
-
--- launch dnote in prompt mode
--- only works when tmux is attached
-map("n", "<C-p>", "<cmd>silent !tmux neww ~/.local/bin/dnote -p<CR>", "Start tmux session fzf")
-
--- launch dnote in fzf notes
--- only works when tmux is attached
-map("n", "<C-n><C-n>", "<cmd>silent !tmux neww ~/.local/bin/dnote -f<CR>", "Start tmux session fzf")
-
--- launch dnote in fzf all notes
--- only works when tmux is attached
-map("n", "<C-n><C-a>", "<cmd>silent !tmux neww ~/.local/bin/dnote -af<CR>", "Start tmux session fzf")
+map("n", "<C-f>", "<cmd>silent !tmux neww ~/.local/bin/tools/tmux_fzf_session<CR>", "Start tmux session fzf")
 
 -- move the visually selected lines up and down
 map("v", "J", ":m '>+1<CR>gv=gv", "Move the visually selected lines down")
