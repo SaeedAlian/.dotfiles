@@ -15,11 +15,11 @@ super + Return
 
 # primary notes
 super + e
-  $HOME/.local/bin/dnote primary
+  pnote
 
 # win fzf
 super + w
-  $HOME/.local/bin/winfzf
+  winfzf
 
 # gui fm
 super + shift + Return
@@ -31,7 +31,7 @@ super + shift + q
 
 # yad calendar
 super + t
-  $HOME/.local/bin/calendar
+  yad_calendar
 
 # vpn
 super + shift + v
@@ -39,7 +39,7 @@ super + shift + v
 
 # webcam
 super + shift + control + w
-  $HOME/.local/bin/webcam
+  webcam
 
 # sxiv in wallpapers
 super + shift + z
@@ -53,122 +53,118 @@ super + d
 
 # network menu
 super + n
-	/bin/bash -c $HOME/.local/bin/network_menu
+	/bin/bash -c network_menu
 
 # bluetooth menu
 super + p
-	/bin/bash -c $HOME/.local/bin/bluetooth -m
+	/bin/bash -c bluetooth_menu
 
 # power menu
 super + x
-	/bin/bash -c $HOME/.local/bin/power_menu
-
-# edit config menu
-super + o
-	/bin/bash -c $HOME/.local/bin/edit_config
+	/bin/bash -c power_menu
 
 # tmux session menu
 super + s
-  $HOME/.local/bin/tmux_fzf_session
+  tmux_fzf_session
 
 # tmux session menu with new terminal instance
 super + control + s
-  $HOME/.local/bin/tmux_fzf_session -n
+  tmux_fzf_session -n
 
 
 ######### functions #########
 
 # force run startup script
 super + shift + Escape
-  $HOME/.local/bin/startup --force
+  startup --force
 
 # screen cast
 super + v : {f,v,o,m,k}
-  $HOME/.local/bin/sccast -n {-f,-v,-a -v,-m -v,-k}
+  sccast -n {-f,-v,-a -v,-m -v,-k}
 
 # toggle mobile broadband
 super + shift + w
-  $HOME/.local/bin/toggle_mobilebroadband
+  network_menu --cellular-toggle
 
 # toggle bluetooth
 super + shift + p
-  $HOME/.local/bin/toggle_bluetooth
+  bluetooth_menu --toggle
 
 # toggle wifi
 super + control + w
-  $HOME/.local/bin/toggle_wifi
+  network_menu --toggle
 
 # toggle touchpad
 super + comma
-  $HOME/.local/bin/toggle_touchpad
+  toggle_touchpad
 
 # toggle touchscreen
 super + period
-  $HOME/.local/bin/toggle_touchscreen
+  toggle_touchscreen
 
 # toggle polybar
 super + b
-  $HOME/.local/bin/polybar_visibility -t
+  polybar_visibility -t
 
 # music play/pause
 F11
-  $HOME/.local/bin/music -t
+  music_ctrl -t
 
 # music play next
 F12
-  $HOME/.local/bin/music -n
+  music_ctrl -n
 
 # music play previous
 F10
-  $HOME/.local/bin/music -p
+  music_ctrl -p
 
 # light up
 XF86MonBrightnessUp
-  $HOME/.local/bin/set_light -u
+  set_light -u
 
 # light down
 XF86MonBrightnessDown
-  $HOME/.local/bin/set_light -d
+  set_light -d
 
 # lockscreen
 super + shift + x
-  $HOME/.local/bin/start_lockscreen
+  start_lockscreen
 
 # volume up
 XF86AudioRaiseVolume
-  $HOME/.local/bin/volume -u
+  volume -u
 
 # volume dowm
 XF86AudioLowerVolume
-  $HOME/.local/bin/volume -d
+  volume -d
 
 # volume mute
 XF86AudioMute
-  $HOME/.local/bin/volume -m
+  volume -m
 
 # microphone mute
 XF86AudioMicMute
-  $HOME/.local/bin/microphone -t
+  microphone -t
 
 # screenshot
 Print
-  $HOME/.local/bin/screenshot
+  screenshot
 
 # screenshot select
 shift + Print
-  $HOME/.local/bin/screenshot -s
+  screenshot -s
 
 # toggle redshift
 super + control + r
-  $HOME/.local/bin/toggle_redshift
+  toggle_redshift
 
 # dpms off
 super + shift + m
-  $HOME/.local/bin/dpms_off
+  dpms_off
 
 # dpms on
 super + shift + n
-  $HOME/.local/bin/dpms_on
+  dpms_on
 
 
 ######### hotkeys #########
