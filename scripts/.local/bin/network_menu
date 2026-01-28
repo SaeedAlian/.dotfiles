@@ -58,7 +58,7 @@ else
   found=$(echo "$saved_connections" | grep "$chosen_network_name")
 
   if [[ "$found" != "" ]]; then
-    uuid=$(echo "$found" | awk '{print $2}')
+    uuid=$(echo "$found" | grep -oE '[0-9a-fA-F-]{8,}')
     nmcli connection up uuid "$uuid" | grep "successfully" && notify-send "Connection Established" "$success_message"
   else
     if [[ "$chosen_network" =~ "" ]]; then
