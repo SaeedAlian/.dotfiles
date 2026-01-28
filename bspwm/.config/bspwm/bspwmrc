@@ -6,7 +6,7 @@ source $HOME/.config/bspwm/bsp_vars
 bspc rule -r "*"
 
 ###### autostarts ######
-$HOME/.local/bin/background &
+background &
 $HOME/.config/polybar/launch.sh &
 
 xset +dpms dpms 0 $DPMS_TIME $DPMS_TIME
@@ -15,7 +15,7 @@ xset r rate 400 35
 pkill sxhkd &
 sxhkd &
 pgrep -x nm-applet >/dev/null || nm-applet &
-pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/start_lockscreen &
+pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/utils/start_lockscreen &
 pgrep -x light >/dev/null || light -I &
 pgrep -x xfce-polkit >/dev/null || /usr/lib/xfce-polkit/xfce-polkit &
 pgrep -x picom >/dev/null || picom -b --config $HOME/.config/picom/picom.conf &
@@ -24,7 +24,7 @@ setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
 setxkbmap -option caps:none &
 
 ###### startups ######
-$HOME/.local/bin/startup
+startup &
 
 ###### desktops ######
 bspc monitor -d 1 2 3 4 7 8 9 10

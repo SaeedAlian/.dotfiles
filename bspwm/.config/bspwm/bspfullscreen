@@ -2,7 +2,7 @@
 
 source $HOME/.config/bspwm/bsp_vars
 
-POLYBAR_SCRIPT="$HOME/.local/bin/polybar_visibility"
+POLYBAR_SCRIPT="$HOME/.local/bin/bar/polybar_visibility"
 
 if [ "$1" == "-f" ] || [ "$1" == "--fullscreen" ]; then
   current_node_state=$(bspc query -T -n | jq -r '.client.state')
