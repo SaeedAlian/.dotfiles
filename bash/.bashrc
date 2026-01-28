@@ -84,18 +84,12 @@ bind '"\C-f":"tmux_fzf_session\n"'
 bind '"\C-l":"clear\n"'
 bind '"\C-a":"bash_hsearch 3000\n"'
 bind '"\C-o":"fastfetch\n"'
-bind '"\C-n\C-n":"dnote file-fzf\n"'
-bind '"\C-n\C-d":"dnote dir-fzf\n"'
-bind '"\C-p":"dnote prompt\n"'
 
 ######## aliases ########
 alias grep='grep --color=auto'
 alias ls='ls --color=auto'
 
 alias bashsrc="source $HOME/.bashrc"
-
-alias dot="tmux_fzf_session $HOME/.dotfiles"
-alias cnote="tmux_fzf_session $HOME/documents/notes"
 
 alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
@@ -108,10 +102,10 @@ alias fm="$FILEMANAGER"
 alias ex="arextract"
 alias bcd="bettercd"
 alias wlp="wallpaper"
-alias mdp="markdown_preview"
 alias orgtel="file_organizer $HOME/downloads/telegram"
 alias orgdown="file_organizer $HOME/downloads"
 alias mkpj="mkproject"
+alias mknt="mknote"
 alias upmu="update_music"
 alias hs="bash_hsearch max"
 
