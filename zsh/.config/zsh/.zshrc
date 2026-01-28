@@ -68,12 +68,6 @@ bindkey -s ^f "tmux_fzf_session\n"
 # run history fuzzy finder
 bindkey -s ^h "zsh_hsearch 3000\n"
 
-# run dnote fzf
-bindkey -s ^n^n "dnote file-fzf\n"
-bindkey -s ^n^d "dnote dir-fzf\n"
-# run dnote prompt
-bindkey -s ^p "dnote prompt\n"
-
 # reverse move in completion menu
 bindkey '^[[Z' reverse-menu-complete
 
@@ -81,15 +75,18 @@ bindkey '^[[Z' reverse-menu-complete
 bindkey -s ^o "fastfetch\n"
 
 ### aliases ###
+alias grep="grep --color=auto"
+alias ls="ls --color=auto"
 
 alias zshsrc="source $XDG_CONFIG_HOME/zsh/.zshrc"
 
-alias dot="cd $HOME/.dotfiles && $EDITOR $HOME/.dotfiles --cmd 'cd $HOME/.dotfiles'"
-alias cnote="cd $HOME/documents/notes"
+alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
 alias v="nvim"
+alias v.="nvim ."
 alias z="zathura"
-alias fm="pcmanfm"
+alias h="htop"
+alias fm="$FILEMANAGER"
 
 alias ex="arextract"
 alias bcd="bettercd"
@@ -98,6 +95,7 @@ alias mdp="markdown_preview"
 alias orgtel="file_organizer $HOME/downloads/telegram"
 alias orgdown="file_organizer $HOME/downloads"
 alias mkpj="mkproject"
+alias mknt="mknote"
 alias upmu="update_music"
 alias h="zsh_hsearch"
 alias hm="zsh_hsearch max"
@@ -106,6 +104,13 @@ alias fastfetch="fastfetch -l Fedora_small"
 alias neofetch="fastfetch"
 
 alias rv="sudo bash -c '$VPN &'"
+
+alias pandoc="dc-pandoc pandoc"
+alias md2pdf="dc-pandoc md2pdf"
+alias pdflatex="dc-texlive pdflatex"
+alias xelatex="dc-texlive xelatex"
+alias typst="dc-typst typst"
+alias typcomp="dc-typst typst compile"
 
 # autoload colors for completion
 autoload compinit && compinit -d "$ZSH_COMPDUMP"
