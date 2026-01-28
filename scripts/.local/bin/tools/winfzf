@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+ICON_DIR="$HOME/.cache/winfzf-icons"
+
+print_help() {
+  echo "Usage: $(basename "$0")"
+  echo ""
+  echo "This script lists all windows in a desktop (workspace) in bspwm (excluding the focused one) with their icons"
+  echo "and allows switching to a selected window using rofi."
+  echo ""
+  echo "Requirements:"
+  echo "  - bspwm"
+  echo "  - rofi compiled with icon support"
+  echo "  - ImageMagick (for converting icons)"
+  echo ""
+}
+
+if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+mkdir -p "$ICON_DIR"
+
+entries=""
+wids=()
+
+focused=$(bspc query -N -n focused)
+
+while read -r wid; do
+  [[ "$wid" == "$focused" ]] && continue
+
+  title=$(xprop -id "$wid" WM_NAME | sed -E 's/.*= "(.*)"/\1/')
+  title=$(basename "$title")
+  [[ -z "$title" ]] && continue
+
+  pam="$ICON_DIR/$wid.pam"
+  png="$ICON_DIR/$wid.png"
+
+  if [[ ! -f "$png" ]]; then
+    xprop -id "$wid" -notype 32c _NET_WM_ICON |
+      perl -0777 -pe '@_=/\d+/g;
+        printf "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", splice@_,0,2;
+        $_=pack "N*", @_;
+        s/(.)(...)/$2$1/gs' >"$pam" 2>/dev/null
+
+    magick "$pam" -resize 32x32 "$png" 2>/dev/null
+    rm -f "$pam"
+  fi
+
+  entries+="$title\0icon\x1f$png\n"
+  wids+=("$wid")
+done < <(bspc query -N -n .local.window)
+
+idx=$(printf "%b" "$entries" | rofi -dmenu -i -show-icons -format i -p 'Windows: ')
+
+if [[ -n "$idx" ]]; then
+  bspc node "${wids[$idx]}" -f
+fi

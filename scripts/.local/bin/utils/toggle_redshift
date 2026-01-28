@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+pids_str=$(pidof -x redshift)
+IFS=' ' read -a pids <<<"$pids_str"
+
+len=${#pids[@]}
+
+if [ $len -eq 0 ]; then
+  redshift &
+else
+  for pid in "${pids[@]}"; do
+    kill $pid
+  done
+fi

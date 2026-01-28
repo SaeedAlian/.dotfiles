@@ -1,8 +1,0 @@
-#!/bin/sh
-
-s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')
-if [ "$s" == "yes" ]; then
-  echo "%{F#E06C75}󰍭"
-else
-  echo "%{F#7AA2F7}󰍬"
-fi

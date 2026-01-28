@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+DMENU_CMD="rofi -dmenu -i -p"
+
+print_help() {
+  echo "Power Menu Script"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0")"
+  echo ""
+  echo "This script presents a graphical menu to perform:"
+  echo "  - Lock Screen"
+  echo "  - Logout"
+  echo "  - Suspend"
+  echo "  - Reboot"
+  echo "  - Shutdown"
+  echo ""
+}
+
+all=(shutdown reboot suspend logout lockscreen)
+show=("${all[@]}")
+
+declare -A texts
+texts[lockscreen]="󰌾 Lock Screen"
+texts[logout]="󰍃 Logout"
+texts[suspend]="󰒲 Suspend"
+texts[reboot]="󰜉 Reboot"
+texts[shutdown]="󰐥 Shutdown"
+
+declare -A actions
+actions[lockscreen]="start_lockscreen"
+actions[logout]="bspc quit"
+actions[suspend]="loginctl suspend"
+actions[reboot]="loginctl reboot"
+actions[shutdown]="loginctl poweroff"
+
+confirmations=(reboot shutdown logout)
+
+ask_for_confirmation() {
+  ans="$(echo -e "No\nYes" | $DMENU_CMD "Are you sure??")"
+
+  if [ "$ans" == "Yes" ]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+show_menu() {
+  options=""
+
+  for entry in "${all[@]}"; do
+    text=${texts[$entry]}
+    if [ -z "$options" ]; then
+      options="$text"
+    else
+      options="$options\n$text"
+    fi
+  done
+  options="$options\nExit"
+
+  chosen="$(echo -e "$options" | $DMENU_CMD "Power Menu")"
+
+  if [ "$chosen" == "Exit" ] || [ -z "$chosen" ]; then
+    exit 0
+  fi
+
+  chosen_entry=""
+
+  for entry in "${all[@]}"; do
+    text=${texts[$entry]}
+    if [ "$text" == "$chosen" ]; then
+      chosen_entry=$entry
+    fi
+  done
+
+  if [ -z "$chosen_entry" ]; then
+    exit 1
+  fi
+
+  action=${actions[$chosen_entry]}
+
+  for c in "${confirmations[@]}"; do
+    text=${texts[$c]}
+    if [ "$text" == "$chosen" ]; then
+      if ask_for_confirmation; then
+        exit 0
+      fi
+    fi
+  done
+
+  $action
+}
+
+show_menu

@@ -1,0 +1,314 @@
+#!/usr/bin/env bash
+
+DMENU_CMD="rofi -dmenu -i -p"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Bluetooth Manager Script"
+  echo ""
+  echo "Usage: $(basename $0) [option]"
+  echo ""
+  echo "Options:"
+  echo "  -s, --status      Display the current Bluetooth status (ON/OFF)."
+  echo "  -t, --toggle      Toggle the Bluetooth status (ON/OFF)."
+  echo "  -m, --menu        Launch the Bluetooth management menu using Rofi."
+  echo "  --on              Set the status to ON."
+  echo "  --off             Set the status to OFF."
+  echo ""
+  echo "  -h, --help        Show this help message."
+}
+
+is_power_on() {
+  if bluetoothctl show | grep -q "Powered: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+power_on() {
+  if ! is_power_on; then
+    if rfkill list bluetooth | grep -q 'blocked: yes'; then
+      rfkill unblock bluetooth && sleep 3
+    fi
+    bluetoothctl power on
+    notify-send -t 2000 "Bluetooth connected"
+  fi
+}
+
+power_off() {
+  if is_power_on; then
+    bluetoothctl power off
+    notify-send -t 2000 "Bluetooth disconnected"
+  fi
+}
+
+toggle_power_menu() {
+  if is_power_on; then
+    power_off
+    show_menu
+  else
+    power_on
+    show_menu
+  fi
+}
+
+is_scan_on() {
+  if bluetoothctl show | grep -q "Discovering: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_scan_menu() {
+  if is_scan_on; then
+    kill $(pgrep -f "bluetoothctl scan on")
+    bluetoothctl scan off
+    notify-send -u normal -t 2000 "Scan turned off"
+    show_menu
+  else
+    bluetoothctl scan on &
+    notify-send -u normal -t 3000 "Scanning..."
+    sleep 5
+    show_menu
+  fi
+}
+
+is_pairable_on() {
+  if bluetoothctl show | grep -q "Pairable: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_pairable_menu() {
+  if is_pairable_on; then
+    bluetoothctl pairable off
+    notify-send -u normal -t 2000 "Pairable turned off"
+    show_menu
+  else
+    bluetoothctl pairable on
+    notify-send -u normal -t 2000 "Pairable is on"
+    show_menu
+  fi
+}
+
+is_discoverable_on() {
+  if bluetoothctl show | grep -q "Discoverable: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_discoverable_menu() {
+  if is_discoverable_on; then
+    bluetoothctl discoverable off
+    notify-send -u normal -t 2000 "Bluetooth is now not discoverable"
+    show_menu
+  else
+    bluetoothctl discoverable on
+    notify-send -u normal -t 2000 "Bluetooth is now discoverable"
+    show_menu
+  fi
+}
+
+device_connected() {
+  device_info=$(bluetoothctl info "$1")
+  if echo "$device_info" | grep -q "Connected: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_connection_menu() {
+  if device_connected "$1"; then
+    notify-send -u normal -t 2000 "Disconnecting $device..."
+    bluetoothctl disconnect "$1"
+    device_menu "$device"
+  else
+    notify-send -u normal -t 2000 "Connecting to $device..."
+    bluetoothctl connect "$1"
+    device_menu "$device"
+  fi
+}
+
+device_paired() {
+  device_info=$(bluetoothctl info "$1")
+  if echo "$device_info" | grep -q "Paired: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_paired_menu() {
+  if device_paired "$1"; then
+    notify-send -u normal -t 2000 "Removing pair $device..."
+    bluetoothctl remove "$1"
+    device_menu "$device"
+  else
+    notify-send -u normal -t 2000 "Pairing to $device..."
+    bluetoothctl pair "$1"
+    device_menu "$device"
+  fi
+}
+
+device_trusted() {
+  device_info=$(bluetoothctl info "$1")
+  if echo "$device_info" | grep -q "Trusted: yes"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+toggle_trust_menu() {
+  if device_trusted "$1"; then
+    notify-send -u normal -t 2000 "Untrusting $device..."
+    bluetoothctl untrust "$1"
+    device_menu "$device"
+  else
+    notify-send -u normal -t 2000 "Trusting $device..."
+    bluetoothctl trust "$1"
+    device_menu "$device"
+  fi
+}
+
+device_menu() {
+  device=$1
+
+  device_name=$(echo "$device" | cut -d ' ' -f 3-)
+  mac=$(echo "$device" | cut -d ' ' -f 2)
+
+  if device_connected "$mac"; then
+    connected="Connected: yes"
+  else
+    connected="Connected: no"
+  fi
+  paired=$(device_paired "$mac")
+  trusted=$(device_trusted "$mac")
+
+  divider="---------"
+  options="$connected\n$paired\n$trusted\n$divider\nBack\nExit"
+
+  chosen="$(echo -e "$options" | rofi -dmenu -p "Device $device_name")"
+
+  case "$chosen" in
+  "" | "$divider")
+    exit 0
+    ;;
+  "Exit")
+    exit 0
+    ;;
+  "$connected")
+    toggle_connection_menu "$mac"
+    ;;
+  "$paired")
+    toggle_paired_menu "$mac"
+    ;;
+  "$trusted")
+    toggle_trust_menu "$mac"
+    ;;
+  "Back")
+    show_menu
+    ;;
+  esac
+}
+
+show_menu() {
+  if is_power_on; then
+    power="Power: on"
+
+    devices=$(bluetoothctl devices | grep Device | cut -d ' ' -f 3-)
+    scan=$(is_scan_on)
+    pairable=$(is_pairable_on)
+    discoverable=$(is_discoverable_on)
+
+    divider="---------"
+    options="$devices\n$divider\n$power\n$scan\n$pairable\n$discoverable\nExit"
+  else
+    power="Power: off"
+    options="$power\nExit"
+  fi
+
+  chosen="$(echo -e "$options" | rofi -dmenu -p "Bluetooth")"
+
+  case "$chosen" in
+  "" | "$divider")
+    exit 0
+    ;;
+  "Exit")
+    exit 0
+    ;;
+  "$power")
+    toggle_power_menu
+    ;;
+  "$scan")
+    toggle_scan_menu
+    ;;
+  "$discoverable")
+    toggle_discoverable_menu
+    ;;
+  "$pairable")
+    toggle_pairable_menu
+    ;;
+  *)
+    device=$(bluetoothctl devices | grep "$chosen")
+    if [[ $device ]]; then device_menu "$device"; fi
+    ;;
+  esac
+}
+
+get_status() {
+  if [ "$(bluetoothctl show | grep "Powered: yes" | wc -c)" -eq 0 ]; then
+    echo "OFF"
+  else
+    if [ "$(echo info | bluetoothctl | grep 'Device' | wc -c)" -eq 0 ]; then
+      echo "ON"
+    fi
+    echo "ON"
+  fi
+}
+
+if [ $# == 0 ]; then
+  show_menu
+  exit 0
+fi
+
+case $1 in
+-s | --status)
+  get_status
+  ;;
+-m | --menu)
+  show_menu
+  ;;
+-t | --toggle)
+  if is_power_on; then
+    power_off
+  else
+    power_on
+  fi
+  ;;
+--off)
+  power_off
+  ;;
+--on)
+  power_on
+  ;;
+-h | --help)
+  print_help
+  ;;
+*)
+  print_err "Invalid option $1"
+  ;;
+esac

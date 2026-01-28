@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+
+MUSIC_DIR="$HOME/music"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Usage: $(basename "$0") <album_directory>"
+  echo ""
+  echo "This script edits music tags for all mp3 or flac files in the given album directory."
+  echo ""
+  echo "Steps performed:"
+  echo "  1. Checks that all files are mp3 or flac."
+  echo "  2. Extracts default metadata from the first file."
+  echo "  3. Prompts for artist, album, and year (defaults prefilled)."
+  echo "  4. Updates metadata using ffmpeg."
+  echo "  5. Moves processed files to a new organized directory."
+  echo ""
+  echo "Example:"
+  echo "  $(basename "$0") /path/to/album_folder"
+  echo ""
+}
+
+declare -A musicExtensions=([mp3]=1 [flac]=1)
+
+edit_music_tags() {
+  oldDirectory=$1
+  newDirectory=$2
+  filename=$3
+  artist=$4
+  album=$5
+  year=$6
+
+  ## FIX : Performer tag doesn't work
+  ffmpeg -i "$oldDirectory/$filename" \
+    -codec copy \
+    -metadata performer="" \
+    -metadata composer="" \
+    -metadata genre="" \
+    -metadata description="" \
+    -metadata disc="0" \
+    -metadata publisher="" \
+    -metadata copyright="" \
+    -metadata comment="" \
+    -metadata publisher="" \
+    -metadata author="$artist" \
+    -metadata artist="$artist" \
+    -metadata album_artist="$artist" \
+    -metadata album="$album" \
+    -metadata date="$year" \
+    -y "$newDirectory/$filename"
+}
+
+inputAlbumDirectory=$1
+
+# Checking that every file within the folder is music
+for file in "$inputAlbumDirectory"/*; do
+  ext="${file##*.}"
+  if ! [[ ${musicExtensions["$ext"]} ]]; then
+    print_err "The folder has unwanted files, please make sure that every file inside the folder are mp3 or flac"
+  fi
+done
+
+firstFilePath=$(find "$inputAlbumDirectory" -maxdepth 1 -type f | head -n 1)
+
+defaultAlbumArtist=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=album_artist -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultAlbum=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=album -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultArtist=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=artist -of default=noprint_wrappers=1:nokey=1 "$firstFilePath")
+defaultYear=$(ffprobe -v error -select_streams a:0 -show_entries format_tags=date -of default=noprint_wrappers=1:nokey=1 "$firstFilePath" | sed 's/-.*//')
+
+read -e -p "Please enter the artist name : (Current: artist -> $defaultArtist | album artist -> $defaultAlbumArtist) " -i "" artist
+read -e -p "Please enter the album name : (Current: $defaultAlbum) " -i "" album
+read -e -p "Please enter the year : (Current: $defaultYear) " -i "" year
+
+if ! [ -n "$artist" ]; then
+  if [ -n "$defaultAlbumArtist" ]; then
+    artist=$defaultAlbumArtist
+  else
+    artist=$defaultArtist
+  fi
+fi
+
+if ! [ -n "$album" ]; then
+  album=$defaultAlbum
+fi
+
+if ! [ -n "$year" ]; then
+  year=$defaultYear
+fi
+
+newAlbumDirectory="$MUSIC_DIR/$artist-($year)-$album"
+
+mkdir "$newAlbumDirectory"
+
+for file in "$inputAlbumDirectory"/*; do
+  edit_music_tags "$inputAlbumDirectory" "$newAlbumDirectory" "${file##*/}" "$artist" "$album" "$year"
+done
+
+mv "$inputAlbumDirectory" "$inputAlbumDirectory (done)"

@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+
+SIMCARD_MODULE="cdc-wdm0"
+TERMINAL="${TERMINAL:-alacritty}"
+TERMINAL_FLOAT_CLASS="${TERMINAL_FLOAT_CLASS:-"Alacritty-float"}"
+DMENU_CMD="rofi -dmenu -i -p"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Network Manager Script"
+  echo ""
+  echo "Usage: $(basename "$0") [option]"
+  echo ""
+  echo "Options:"
+  echo "  -s, --status              Show Wi-Fi status (ON/OFF)"
+  echo "  -t, --toggle              Toggle Wi-Fi ON/OFF"
+  echo "  -m, --menu                Launch network menu (Rofi)"
+  echo "  --on                      Enable Wi-Fi"
+  echo "  --off                     Disable Wi-Fi"
+  echo ""
+  echo "  --cellular-toggle         Toggle mobile broadband"
+  echo "  --cellular-on             Enable mobile broadband"
+  echo "  --cellular-off            Disable mobile broadband"
+  echo ""
+  echo "  -h, --help                Show this help message"
+}
+
+is_wifi_on() {
+  nmcli -t -f WIFI g | grep -q "enabled"
+}
+
+wifi_on() {
+  is_wifi_on || nmcli radio wifi on
+}
+
+wifi_off() {
+  is_wifi_on && nmcli radio wifi off
+}
+
+toggle_wifi() {
+  if is_wifi_on; then
+    wifi_off
+    notify-send -t 2000 "Wi-Fi disabled"
+  else
+    wifi_on
+    notify-send -t 2000 "Wi-Fi enabled"
+  fi
+}
+
+wifi_status() {
+  is_wifi_on && echo "ON" || echo "OFF"
+}
+
+has_simcard() {
+  nmcli -t -f DEVICE device status | grep -q "^$SIMCARD_MODULE$"
+}
+
+simcard_status() {
+  nmcli -t -f DEVICE,STATE device status |
+    grep "^$SIMCARD_MODULE" |
+    cut -d: -f2
+}
+
+simcard_on() {
+  nmcli device up "$SIMCARD_MODULE" &&
+    notify-send -t 2000 "Mobile broadband connected"
+}
+
+simcard_off() {
+  nmcli device down "$SIMCARD_MODULE" &&
+    notify-send -t 2000 "Mobile broadband disconnected"
+}
+
+toggle_simcard() {
+  case "$(simcard_status)" in
+  connected) simcard_off ;;
+  disconnected) simcard_on ;;
+  esac
+}
+
+show_menu() {
+  PASSWORD_FILE=$(mktemp)
+
+  notify-send -t 2000 "Scanning Wi-Fi networks..."
+
+  wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list |
+    sed 1d | sed 's/  */ /g' |
+    sed -E "s/WPA*.?\S/ /g" |
+    sed "s/^--/ /g" |
+    sed "s/  //g" |
+    sed "/--/d")
+
+  wifi_bssid_list=$(nmcli --fields "BSSID,SSID" device wifi list | sed 1d)
+
+  if is_wifi_on; then
+    toggle_wifi_label="󰖪  Disable Wi-Fi"
+  else
+    toggle_wifi_label="󰖩  Enable Wi-Fi"
+  fi
+
+  menu_entries="$toggle_wifi_label"
+
+  if has_simcard; then
+    case "$(simcard_status)" in
+    connected)
+      toggle_simcard_label="󰱟  Disable Mobile Network"
+      ;;
+    disconnected)
+      toggle_simcard_label="󰱔  Enable Mobile Network"
+      ;;
+    esac
+    menu_entries="$toggle_simcard_label\n$menu_entries"
+  fi
+
+  menu_entries="$menu_entries\n$wifi_list"
+
+  chosen=$(echo -e "$menu_entries" | uniq -u | $DMENU_CMD "Network")
+
+  [[ -z "$chosen" ]] && exit 0
+
+  case "$chosen" in
+  "$toggle_wifi_label")
+    toggle_wifi
+    ;;
+  "$toggle_simcard_label")
+    toggle_simcard
+    ;;
+  *)
+    read -r ssid <<<"${chosen:3}"
+    bssid=$(echo "$wifi_bssid_list" | grep " $ssid" | awk '{print $1}' | head -n1)
+
+    [[ -z "$bssid" ]] && exit 0
+
+    success_msg="You are now connected to the Wi-Fi network \"$ssid\"."
+    err_msg="Could not connect to \"$ssid\"."
+
+    saved=$(nmcli connection show | grep wifi)
+    found=$(echo "$saved" | grep "$ssid")
+
+    if [[ -n "$found" ]]; then
+      uuid=$(echo "$found" | grep -oE '[0-9a-fA-F-]{8,}')
+      nmcli connection up "$uuid" && notify-send "$success_msg"
+    else
+      if [[ "$chosen" =~ "" ]]; then
+        $TERMINAL --class $TERMINAL_FLOAT_CLASS -e bash -c "
+          echo 'Enter password: '
+          read -s password
+          echo \$password > \"$PASSWORD_FILE\"
+        "
+        wifi_password=$(cat "$PASSWORD_FILE")
+
+        rm -f "$PASSWORD_FILE"
+      fi
+
+      nmcli device wifi connect "$bssid" password "$wifi_password" >/dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        notify-send "$success_msg"
+      else
+        notify-send -u critical "$err_msg"
+        nmcli connection delete id "$ssid" >/dev/null 2>&1
+      fi
+    fi
+    ;;
+  esac
+}
+
+if [[ $# -eq 0 ]]; then
+  show_menu
+  exit 0
+fi
+
+case "$1" in
+-s | --status)
+  wifi_status
+  ;;
+-t | --toggle)
+  toggle_wifi
+  ;;
+-m | --menu)
+  show_menu
+  ;;
+--on)
+  wifi_on
+  ;;
+--off)
+  wifi_off
+  ;;
+--cellular-toggle)
+  has_simcard && toggle_simcard
+  ;;
+--cellular-on)
+  has_simcard && simcard_on
+  ;;
+--cellular-off)
+  has_simcard && simcard_off
+  ;;
+-h | --help)
+  print_help
+  ;;
+*)
+  print_err "Invalid option: $1"
+  ;;
+esac

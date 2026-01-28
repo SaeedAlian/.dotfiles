@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+case $1 in
+-m | --mute)
+  pactl set-source-mute @DEFAULT_SOURCE@ 1
+  ;;
+-u | --unmute)
+  pactl set-source-mute @DEFAULT_SOURCE@ 0
+  ;;
+-t | --toggle)
+  pactl set-source-mute @DEFAULT_SOURCE@ toggle
+  ;;
+-s | --status)
+  s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')
+  if [ "$s" == "yes" ]; then
+    echo "OFF"
+  else
+    echo "ON"
+  fi
+  ;;
+*)
+  echo "Invalid option" >&2
+  exit 1
+  ;;
+esac

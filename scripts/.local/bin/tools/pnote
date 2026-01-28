@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+NOTES_DIR="$HOME/documents/notes"
+PRIMARY_NOTE_FILENAME="primary"
+ED="${EDITOR:-vim}"
+TERMINAL="${TERMINAL:-alacritty}"
+TERMINAL_FLOAT_CLASS="${TERMINAL_FLOAT_CLASS:-"Alacritty-float"}"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Primary Note Manager"
+  echo ""
+  echo "A lightweight command-line tool to create and manage your primary personal note."
+  echo "By default, it keeps a note at:"
+  echo "  $NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0") [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help"
+  echo "      Show this help message and exit."
+  echo ""
+  echo "Behavior:"
+  echo "  - If the primary note does not exist, it will be created with a predefined template."
+  echo "  - If a floating terminal session with the note already exists, it will be closed."
+  echo "  - Otherwise, it opens the primary note in your editor."
+  echo ""
+  echo "Environment Variables:"
+  echo "  EDITOR"
+  echo "      Default editor for opening notes (default: vim)"
+  echo "  TERMINAL"
+  echo "      Terminal emulator to open the note (default: alacritty)"
+  echo "  TERMINAL_FLOAT_CLASS"
+  echo "      Window class for floating terminal (default: 'Alacritty-float')"
+  echo ""
+}
+
+primary_note_template() {
+  echo "# Personal Notes
+
+## Work
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Study
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---
+
+## Personal
+
+> [!DANGER] IMPORTANT
+
+### Tasks
+
+- [ ] Task 1
+
+### Ideas
+
+- **Idea 1:**  
+  Description or sketch
+
+---"
+}
+
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+if [[ $# -gt 0 ]]; then
+  print_err "Invalid options"
+fi
+
+mkdir -p "$NOTES_DIR"
+note_path="$NOTES_DIR/$PRIMARY_NOTE_FILENAME.md"
+
+if [ ! -f "$note_path" ]; then
+  touch $fullpath
+  primary_note_template >$fullpath
+fi
+
+list_str=$(pgrep "$TERMINAL" --list-full | grep -E "$TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$note_path"" | awk '{print $1}')
+pids=()
+
+IFS=$'\n'
+while read -r line; do
+  pids+=("$line")
+done <<<"$list_str"
+
+pids_len=${#pids[@]}
+
+if [ -n "$list_str" ] && [ $pids_len -gt 0 ]; then
+  for pid in ${pids[@]}; do
+    kill "$pid"
+  done
+
+  exit 0
+fi
+
+$TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e $ED "$note_path"

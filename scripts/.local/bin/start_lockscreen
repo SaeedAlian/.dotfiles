@@ -1,6 +1,0 @@
-#!/bin/sh
-
-export LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
-export BGNAME="black_1"
-
-i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"

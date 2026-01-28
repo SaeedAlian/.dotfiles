@@ -1,7 +1,0 @@
-#!/bin/sh
-
-xset -dpms && pkill xss-lock
-
-if [ $? == 0 ]; then
-	DISPLAY=:0.0 notify-send --expire-time=2000 "DPMS turned off"
-fi

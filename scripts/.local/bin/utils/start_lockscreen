@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+export LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
+export BGNAME="ascii_1"
+
+i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"

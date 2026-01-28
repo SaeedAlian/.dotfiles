@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Containerize Directories Script"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0") [directory_path]"
+  echo ""
+  echo "This script moves all subdirectories of the specified directory into"
+  echo "\"container-<first_letter>\" directories, grouped by the first letter (uppercase)."
+  echo "Existing \"container-*\" directories are skipped."
+  echo ""
+  echo "Options:"
+  echo "  -h, --help     Show this help message"
+  echo ""
+  echo "Example:"
+  echo "  $(basename "$0") /home/user/projects"
+}
+
+if [[ $# -eq 0 ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+entered_path="$1"
+
+if [ -z "$entered_path" ]; then
+  print_err "No directory received!"
+fi
+
+count=0
+
+for dir in "$entered_path"/*; do
+  if [ -d "$dir" ]; then
+    fullpath=$(realpath "$dir")
+    dirpath="$(dirname "$fullpath")"
+
+    base="${dir##*/}"
+    case "$base" in
+    container-*)
+      continue
+      ;;
+    esac
+    count=$(($count + 1))
+  fi
+done
+
+if [[ $count -eq 0 ]]; then
+  print_err "No directories to containerize in '$entered_path'."
+fi
+
+echo ""
+read -e -p "There is $count directories in the $entered_path, are you sure you want to containerize? (Y/N) " -i "" prmpt
+
+if [ "$prmpt" != "Y" ]; then
+  exit 0
+fi
+
+for dir in "$entered_path"/*; do
+  if [ -d "$dir" ]; then
+    fullpath=$(realpath "$dir")
+    dirpath="$(dirname "$fullpath")"
+
+    base="${dir##*/}"
+    case "$base" in
+    container-*)
+      continue
+      ;;
+    esac
+
+    first_char="${base:0:1}"
+    upper_cased_first_char=$(echo "$first_char" | tr '[:lower:]' '[:upper:]')
+
+    container_dir_name="container-$upper_cased_first_char"
+    container_fullpath="$dirpath/$container_dir_name"
+
+    if ! [ -d "$container_fullpath" ]; then
+      mkdir "$container_fullpath"
+    fi
+
+    mv "$fullpath" "$container_fullpath"
+  fi
+done
+
+echo "Containerization complete!"

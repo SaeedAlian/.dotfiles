@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+MOUNT_DIR="$HOME/mount"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  help="A command-line tool for safely unmounting Android MTP devices from $MOUNT_DIR/<mountpoint>.
+
+Usage:
+    $(basename "$0") <mountpoint>
+
+Arguments:
+    mountpoint     The name of the mount directory inside $MOUNT_DIR (e.g., myphone).
+
+Options:
+    --help         Show this help message and exit.
+
+Examples:
+    • Unmount an Android device mounted at $MOUNT_DIR/phone:
+        $(basename "$0") phone
+
+Notes:
+    • This script verifies that the given path is an active mountpoint before unmounting.
+    • Uses recursive unmount (-R) to handle cases with nested mounts.
+    • Requires sudo access to perform the unmount operation.
+"
+
+  if type "less" >/dev/null; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+if [ "$1" = "--help" ]; then
+  print_help
+  exit 0
+fi
+
+mountpoint=$1
+
+if [ -z "$mountpoint" ]; then
+  print_err "Mountpoint is empty"
+fi
+
+mountpoint="$MOUNT_DIR/$mountpoint"
+
+if ! mountpoint -q "$mountpoint"; then
+  print_err "$mountpoint is not a mountpoint!!"
+fi
+
+sudo umount -R "$mountpoint"

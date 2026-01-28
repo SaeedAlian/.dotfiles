@@ -1,9 +1,0 @@
-#!/bin/sh
-
-docker_cmd() {
-  if groups "$USER" | grep -q "\bdocker\b"; then
-    docker "$@"
-  else
-    sudo docker "$@"
-  fi
-}

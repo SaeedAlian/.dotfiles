@@ -1,6 +1,0 @@
-#!/bin/sh
-
-INPUT_FILE="/usr/share/applications/org.telegram.desktop.desktop"
-
-sudo sed -i 's/Exec=Telegram -- %u/Exec=env QT_QPA_PLATFORMTHEME="gtk3" Telegram -- %u/g' "$INPUT_FILE"
-sudo sed -i 's/DBusActivatable=true/#DBusActivatable=true/g' "$INPUT_FILE"

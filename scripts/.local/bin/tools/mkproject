@@ -1,0 +1,238 @@
+#!/usr/bin/env bash
+
+GITHUB_USERNAME="SaeedAlian"
+PROJECTS_DIR="$HOME/documents/projects"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Project Generator Script"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0") [options]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help       Show this help message"
+  echo ""
+  echo "This script allows you to create projects in:"
+  echo "  react, react-ts, nextjs, rust-bin, c, cpp, go, python, empty"
+  echo "It also initializes git and optionally starts a tmux session for the project."
+}
+
+check_dirname() {
+  dirname="$1"
+
+  if [ -z "$dirname" ]; then
+    print_err "Directory name is empty"
+  fi
+
+  if grep -q '[\\/:*?"<>|;]' <<<"$dirname"; then
+    print_err "Invalid directory name, it contains illegal characters"
+  fi
+
+  if [[ "$dirname" =~ ^[-_] ]]; then
+    print_err "Directory name must not start with '-' or '_'"
+  fi
+
+  if [[ "$dirname" == "." ]] || [[ "$dirname" == ".." ]]; then
+    print_err "Directory name must not be '.' or '..'"
+  fi
+
+  dirname="${dirname%% }"
+  dirname="${dirname## }"
+
+  if [[ "$dirname" == *"$'\0'"* ]]; then
+    print_err "Directory name contains null bytes"
+  fi
+
+  if [[ ${#dirname} -gt 255 ]]; then
+    print_err "Directory name exceeds 255 characters"
+  fi
+}
+
+read -e -p "Enter the project name: " -i "" project_name
+check_dirname "$project_name"
+
+cd $PROJECTS_DIR
+
+if [ -d "$PROJECTS_DIR/$project_name" ]; then
+  print_err "Another directory with this name already exists!"
+fi
+
+question="What is the project type ??"
+options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
+
+select project_type in "${options[@]}"; do
+  case $project_type in
+
+  "react")
+    yarn create vite $project_name --template react
+    break
+    ;;
+
+  "react-ts")
+    yarn create vite $project_name --template react-ts
+    break
+    ;;
+
+  "go")
+    mkdir $project_name
+    cd $project_name
+    go mod init github.com/$GITHUB_USERNAME/$project_name
+    touch .gitignore
+    touch main.go
+    touch Makefile
+
+    echo "package main
+
+import (
+	\"fmt\"
+)
+
+func main() {
+  fmt.Println(\"Hello world\")
+}" >main.go
+
+    echo "build:
+	@go build -o bin/$project_name main.go
+
+test:
+	@go test -v ./...
+	
+run: build
+	@./bin/$project_name" >Makefile
+
+    echo ".env
+bin/" >.gitignore
+
+    git init
+    break
+    ;;
+
+  "nextjs")
+    npx create-next-app@latest $project_name
+    break
+    ;;
+
+  "rust-bin")
+    cargo init $project_name --bin
+    break
+    ;;
+
+  "c")
+    mkdir $project_name
+    cd $project_name
+    mkdir src
+    touch src/main.c
+    touch .gitignore
+    touch Makefile
+
+    echo "#include <stdio.h>
+
+int main() {
+  printf(\"Hello world\");
+  return 0;
+}" >src/main.c
+
+    echo "build:
+	@g++ -o main.out src/main.c
+
+debug:
+	@g++ -g -o main.out src/main.c && gdb ./main.out
+
+run:
+	@./main.out
+
+valgrind: build
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
+" >Makefile
+
+    echo "main.out" >.gitignore
+
+    git init
+    break
+    ;;
+
+  "cpp")
+    mkdir $project_name
+    cd $project_name
+    mkdir src
+    touch src/main.cpp
+    touch .gitignore
+    touch Makefile
+
+    echo "#include <iostream>
+
+int main() {
+  std::cout << \"Hello world\" << std::endl;
+  return 0;
+}" >src/main.cpp
+
+    echo "build:
+	@g++ -o main.out src/main.cpp
+
+debug:
+	@g++ -g -o main.out src/main.cpp && gdb ./main.out
+
+run:
+	@./main.out
+
+valgrind: build
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
+" >Makefile
+
+    echo "main.out" >.gitignore
+
+    git init
+    break
+    ;;
+
+  "python")
+    mkdir $project_name
+    cd $project_name
+    touch main.py
+    touch .gitignore
+
+    echo ".venv
+/**/**/__pycache__" >.gitignore
+
+    python3 -m venv .venv
+    git init
+    break
+    ;;
+
+  "empty")
+    mkdir $project_name
+    cd $project_name
+    touch .gitignore
+    git init
+    break
+    ;;
+
+  "cancel")
+    break
+    exit 0
+    ;;
+
+  *)
+    print_err "Invalid option!"
+    ;;
+  esac
+done
+
+cd $HOME
+
+if ! tmux has-session -t="proj--$project_name" 2>/dev/null; then
+  tmux new-session -ds "proj--$project_name" -c "$PROJECTS_DIR/$project_name"
+fi
+
+if [ -z "$TMUX" ]; then
+  tmux attach -t "proj--$project_name"
+else
+  tmux switch-client -t "proj--$project_name"
+fi

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+xset +dpms dpms 0 $DPMS_TIME $DPMS_TIME
+pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/utils/start_lockscreen &
+
+if [ $? == 0 ]; then
+  DISPLAY=:0.0 notify-send --expire-time=2000 "DPMS turned on"
+fi

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+source $HOME/.local/bin/dc-docker/dc-docker-cmd
+
+cmd="$1"
+shift
+
+case "$cmd" in
+pandoc)
+  docker_cmd run --rm -v "$(pwd):/workspace" -w /workspace dc-pandoc pandoc "$@"
+  ;;
+md2pdf)
+  if [ -z "$1" ]; then
+    echo "Error: No input file specified" >&2
+    echo "Usage: $(basename "$0") md2pdf <input.md> [output.pdf]"
+    exit 1
+  fi
+  INPUT="$1"
+  OUTPUT="${2:-${INPUT%.md}.pdf}"
+  docker_cmd run --rm -v "$(pwd):/workspace" -w /workspace dc-pandoc \
+    pandoc "$INPUT" -o "$OUTPUT" --pdf-engine=pdflatex
+  ;;
+md2pdf-toc)
+  if [ -z "$1" ]; then
+    echo "Error: No input file specified" >&2
+    echo "Usage: $(basename "$0") md2pdf-toc <input.md> [output.pdf]"
+    exit 1
+  fi
+  INPUT="$1"
+  OUTPUT="${2:-${INPUT%.md}.pdf}"
+  docker_cmd run --rm -v "$(pwd):/workspace" -w /workspace dc-pandoc \
+    pandoc "$INPUT" -o "$OUTPUT" --pdf-engine=pdflatex --toc --number-sections
+  ;;
+md2html)
+  if [ -z "$1" ]; then
+    echo "Error: No input file specified" >&2
+    echo "Usage: $(basename "$0") md2html <input.md> [output.html]"
+    exit 1
+  fi
+  INPUT="$1"
+  OUTPUT="${2:-${INPUT%.md}.html}"
+  docker_cmd run --rm -v "$(pwd):/workspace" -w /workspace dc-pandoc \
+    pandoc "$INPUT" -o "$OUTPUT" --standalone
+  ;;
+md2docx)
+  if [ -z "$1" ]; then
+    echo "Error: No input file specified" >&2
+    echo "Usage: $(basename "$0") md2docx <input.md> [output.docx]"
+    exit 1
+  fi
+  INPUT="$1"
+  OUTPUT="${2:-${INPUT%.md}.docx}"
+  docker_cmd run --rm -v "$(pwd):/workspace" -w /workspace dc-pandoc \
+    pandoc "$INPUT" -o "$OUTPUT"
+  ;;
+shell)
+  docker_cmd run --rm -it -v "$(pwd):/workspace" -w /workspace dc-pandoc /bin/sh
+  ;;
+*)
+  echo "Usage: $(basename "$0") {pandoc|md2pdf|md2pdf-toc|md2html|md2docx|shell} [args]"
+  echo ""
+  echo "Commands:"
+  echo "  pandoc          - Run pandoc with custom arguments"
+  echo "  md2pdf          - Convert markdown to PDF"
+  echo "  md2pdf-toc      - Convert markdown to PDF with table of contents"
+  echo "  md2html         - Convert markdown to HTML"
+  echo "  md2docx         - Convert markdown to DOCX"
+  echo "  shell           - Open interactive shell in container"
+  echo ""
+  echo "Examples:"
+  echo "  $(basename "$0") md2pdf input.md"
+  echo "  $(basename "$0") md2pdf input.md output.pdf"
+  echo "  $(basename "$0") md2pdf-toc document.md"
+  echo "  $(basename "$0") pandoc input.md -o output.pdf --toc"
+  exit 1
+  ;;
+esac

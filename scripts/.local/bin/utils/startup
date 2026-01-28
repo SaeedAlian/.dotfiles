@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+run() {
+  bluetooth_menu --off
+  toggle_touchscreen --off
+  touchpad_setup
+}
+
+if [ "$1" == "--force" ]; then
+  run
+  exit 0
+fi
+
+if [ ! -f "/tmp/startuplock" ]; then
+  run
+  touch "/tmp/startuplock"
+fi

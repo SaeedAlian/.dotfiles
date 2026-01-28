@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+
+USERNAME="SaeedAlian"
+TOKEN="$GITHUB_PAT"
+API_URL="https://api.github.com/user/repos"
+SSH_ID="id_ed25519_github"
+
+print_err() {
+  err=$1
+  echo "Error: $1" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "GitHub Repository Cloner"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0") --directory /path/to/dir [options]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help           Show this help message"
+  echo "  -i, --include-mode   Prompt to include only selected repos"
+  echo "  -e, --exclude-mode   Prompt to exclude selected repos"
+  echo "  -a, --all            Include all repos without prompt"
+  echo "  -d, --directory DIR  Directory to clone repositories into"
+  echo ""
+  echo "Example:"
+  echo "  $(basename "$0") -d ~/projects -i"
+}
+
+if ! ssh-add -l >/dev/null; then
+  eval $(ssh-agent -s)
+  ssh-add "~/.ssh/$SSH_ID"
+fi
+
+check_dirname() {
+  local dirname="$1"
+
+  if [ -z $dirname ]; then
+    print_err "Directory name is empty"
+  fi
+
+  dirname="${dirname%% }"
+  dirname="${dirname## }"
+
+  if [[ "$dirname" == *"$'\0'"* ]]; then
+    print_err "Directory name contains null bytes"
+  fi
+
+  if ! [[ "$dirname" =~ ^(/?[^<>:;,?*|]+)+$ ]]; then
+    print_err "Invalid directory name '$dirname'"
+  fi
+}
+
+get_all_repos() {
+  local response=$(curl -s -u "$USERNAME:$TOKEN" "$API_URL?per_page=100")
+
+  if [[ $? -ne 0 ]]; then
+    print_err "Failed to fetch repositories"
+  fi
+
+  echo "$response" | jq -r '.[].full_name'
+}
+
+include_all=0
+include_mode=0
+exclude_mode=0
+
+selected_dir=""
+
+while [ $# -gt 0 ]; do
+  case $1 in
+  --help | -h)
+    print_help
+    exit 0
+    ;;
+  --include-mode | -i)
+    include_mode=1
+    ;;
+  --exclude-mode | -e)
+    exclude_mode=1
+    ;;
+  --all | -a)
+    include_all=1
+    ;;
+  --directory | -d)
+    shift 1
+    selected_dir=$1
+    check_dirname $selected_dir
+    ;;
+  *)
+    echo "Invalid option $1" >&2
+    exit 1
+    ;;
+  esac
+  shift 1
+done
+
+if [ -z "$selected_dir" ]; then
+  print_err "You must specify a directory"
+fi
+
+if [ $exclude_mode == 0 ] && [ $include_all == 0 ] && [ $include_mode == 0 ]; then
+  include_mode=1
+fi
+
+if [ $exclude_mode == 1 ] && [ $include_all == 1 ]; then
+  print_err "You cannot use the 'include all' option and 'exclude mode' option at the same time"
+fi
+
+if [ $include_mode == 1 ] && [ $include_all == 1 ]; then
+  print_err "You cannot use the 'include all' option and 'include mode' option at the same time"
+fi
+
+if [ $include_mode == 1 ] && [ $exclude_mode == 1 ]; then
+  print_err "You cannot use the 'include mode' option and 'exclude mode' option at the same time"
+fi
+
+repos_res=$(get_all_repos)
+repos=($repos_res)
+selected_repos=()
+
+echo "Repo list:"
+
+for i in ${!repos[@]}; do
+  echo "$((i + 1)) - ${repos[$i]}"
+done
+
+if [ $include_mode == 1 ]; then
+  read -e -p "Enter the repo numbers that you want to include with space between them: " -i "" ans
+
+  for i in $ans; do
+    if [ $i -gt ${#repos[@]} ] || [ $i -lt 1 ]; then
+      print_err "Index out of range"
+    fi
+
+    selected_repos+=(${repos[$((i - 1))]})
+  done
+fi
+
+if [ $exclude_mode == 1 ]; then
+  read -e -p "Enter the repo numbers that you want to exclude with space between them: " -i "" ans
+
+  for i in $ans; do
+    if [ $i -gt ${#repos[@]} ] || [ $i -lt 1 ]; then
+      print_err "Index out of range"
+    fi
+  done
+
+  founded=false
+
+  for i in ${!repos[@]}; do
+    for j in $ans; do
+      if [ $((j - 1)) == $i ]; then
+        founded=true
+      fi
+    done
+
+    if $founded; then
+      founded=false
+      continue
+    fi
+
+    selected_repos+=(${repos[$i]})
+  done
+fi
+
+echo "Selected repos:"
+
+for s in ${selected_repos[@]}; do
+  echo $s
+done
+
+read -e -p "Is this OK? [y/N] " -i "" ans
+
+if [ "$ans" != "y" ] && [ "$ans" != "Y" ]; then
+  exit 0
+fi
+
+echo "Cloning repositories into $selected_dir..."
+mkdir -p "$selected_dir"
+
+urls=()
+
+for r in ${selected_repos[@]}; do
+  url="git@github.com:$r.git"
+  name=$(basename "$url" .git)
+
+  if [[ -d "$selected_dir/$name" ]]; then
+    echo "Skipping $name (already cloned)"
+  else
+    echo "Cloning $name..."
+    git clone "$url" "$selected_dir/$name"
+  fi
+done
+
+echo "Cloning completed"

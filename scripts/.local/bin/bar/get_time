@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+TIME="$(date +"%I:%M %p")"
+echo "$TIME"

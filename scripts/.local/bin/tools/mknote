@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+NOTES_DIR="$HOME/documents/notes"
+
+print_err() {
+  err=$1
+  echo "Error: $err" >&2
+  echo "Enter [$(basename "$0") --help] for help"
+  exit 1
+}
+
+print_help() {
+  echo "Note Directory Creator"
+  echo ""
+  echo "Usage:"
+  echo "  $(basename "$0") [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  -h, --help       Show this help message and exit"
+  echo ""
+  echo "Description:"
+  echo "  This script creates a new note directory inside:"
+  echo "    $NOTES_DIR"
+  echo ""
+  echo "  After creating the directory, it will optionally initialize it as a git repository"
+  echo "  and start or attach a tmux session for the note directory."
+  echo ""
+  echo "Behavior:"
+  echo "  1. Prompts for the note directory name and validates it."
+  echo "  2. Creates the directory if it does not exist."
+  echo "  3. Optionally initializes a git repository."
+  echo "  4. Starts a tmux session named 'note--<directory>' or attaches to it if it exists."
+  echo ""
+}
+
+check_dirname() {
+  dirname="$1"
+
+  if [ -z "$dirname" ]; then
+    print_err "Directory name is empty"
+  fi
+
+  if grep -q '[\\/:*?"<>|;]' <<<"$dirname"; then
+    print_err "Invalid directory name, it contains illegal characters"
+  fi
+
+  if [[ "$dirname" =~ ^[-_] ]]; then
+    print_err "Directory name must not start with '-' or '_'"
+  fi
+
+  if [[ "$dirname" == "." ]] || [[ "$dirname" == ".." ]]; then
+    print_err "Directory name must not be '.' or '..'"
+  fi
+
+  dirname="${dirname%% }"
+  dirname="${dirname## }"
+
+  if [[ "$dirname" == *"$'\0'"* ]]; then
+    print_err "Directory name contains null bytes"
+  fi
+
+  if [[ ${#dirname} -gt 255 ]]; then
+    print_err "Directory name exceeds 255 characters"
+  fi
+}
+
+if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+  print_help
+  exit 0
+fi
+
+read -e -p "Enter the note directory name: " note_dir
+check_dirname "$note_dir"
+
+mkdir -p "$NOTES_DIR/$note_dir"
+echo "Created directory: $NOTES_DIR/$note_dir"
+
+read -e -p "Do you want to initialize git in this directory? [y/N]: " ans
+if [[ "$ans" == "y" ]] || [[ "$ans" == "Y" ]]; then
+  cd "$NOTES_DIR/$note_dir"
+  git init
+  echo "Initialized empty git repository in $NOTES_DIR/$note_dir"
+fi
+
+cd $HOME
+
+if ! tmux has-session -t="note--$note_dir" 2>/dev/null; then
+  tmux new-session -ds "note--$note_dir" -c "$NOTES_DIR/$note_dir"
+fi
+
+if [ -z "$TMUX" ]; then
+  tmux attach -t "note--$note_dir"
+else
+  tmux switch-client -t "note--$note_dir"
+fi

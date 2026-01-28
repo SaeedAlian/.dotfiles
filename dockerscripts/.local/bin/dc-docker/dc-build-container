@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+source $HOME/.local/bin/dc-docker/dc-docker-cmd
+
+if [ -z "$CUSTOM_DOCKER_CONTAINERS_PATH" ]; then
+  echo "CUSTOM_DOCKER_CONTAINERS_PATH variable is not set" >&2
+  exit 1
+fi
+
+CONT_PATH="$CUSTOM_DOCKER_CONTAINERS_PATH"
+container=$1
+
+fullpath="$CONT_PATH/$container"
+
+if ! [ -f "$fullpath/Dockerfile" ]; then
+  echo "Container does not exist" >&2
+  exit 1
+fi
+
+docker_cmd buildx build --network=host -t "dc-$container" "$fullpath"
