@@ -10,6 +10,23 @@ return {
 
 		telescope.setup({
 			defaults = {
+				vimgrep_arguments = {
+					"rg",
+					"--follow",
+					"--hidden",
+					"--no-heading",
+					"--with-filename",
+					"--line-number",
+					"--column",
+					"--smart-case",
+					"--glob=!**/.git/*",
+					"--glob=!**/.idea/*",
+					"--glob=!**/.vscode/*",
+					"--glob=!**/build/*",
+					"--glob=!**/dist/*",
+					"--glob=!**/yarn.lock",
+					"--glob=!**/package-lock.json",
+				},
 				file_ignore_patterns = {
 					".git/",
 					".venv/",
