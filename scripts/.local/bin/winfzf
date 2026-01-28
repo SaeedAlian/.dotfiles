@@ -12,6 +12,7 @@ while read -r wid; do
   [[ "$wid" == "$focused" ]] && continue
 
   title=$(xprop -id "$wid" WM_NAME | sed -E 's/.*= "(.*)"/\1/')
+  title=$(basename "$title")
   [[ -z "$title" ]] && continue
 
   pam="$ICON_DIR/$wid.pam"
