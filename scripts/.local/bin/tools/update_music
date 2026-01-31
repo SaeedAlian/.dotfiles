@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -e
 
-MUSIC_DIR="$HOME/music"
+require_vars MUSICS_DIR
 
 print_err() {
   err=$1
@@ -93,7 +94,7 @@ if ! [ -n "$year" ]; then
   year=$defaultYear
 fi
 
-newAlbumDirectory="$MUSIC_DIR/$artist-($year)-$album"
+newAlbumDirectory="$MUSICS_DIR/$artist-($year)-$album"
 
 mkdir "$newAlbumDirectory"
 

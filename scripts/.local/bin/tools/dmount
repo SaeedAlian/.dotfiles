@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+set -e
 
-MOUNT_DIR="$HOME/mount"
+require_vars MOUNT_DIR
+
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 

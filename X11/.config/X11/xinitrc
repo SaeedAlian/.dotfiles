@@ -1,8 +1,58 @@
 #!/bin/sh
 
-export XDG_CURRENT_DESKTOP="bspwm"
+set -a
+. "$HOME/.dotfiles/coreconfig/require_vars.sh"
+. "$HOME/.dotfiles/coreconfig/load.sh"
+set +a
 
-xrdb -load ~/.config/X11/Xresources
+load_init_vars_conf
+load_shell_vars_conf
+load_xresources_colors
+
+require_vars \
+  XDG_CURRENT_DESKTOP \
+  XDG_CONFIG_HOME \
+  XDG_DATA_HOME \
+  XDG_STATE_HOME \
+  XDG_CACHE_HOME \
+  XINITRC \
+  YAZI_CONFIG_HOME \
+  npm_config_prefix \
+  DOTFILES_DIR \
+  CORECONFIG_DIR \
+  SCRIPTS_DIR \
+  MOUNT_DIR \
+  NOTES_DIR \
+  PROJECTS_DIR \
+  SCREEN_CAST_DIR \
+  MUSICS_DIR \
+  WALLPAPERS_DIR \
+  LOCKSCREENS_DIR \
+  SCREENSHOTS_DIR \
+  START_LOCKSCREEN_SCRIPT_PATH \
+  PICOM_CONF_PATH \
+  CUSTOM_DOCKER_CONTAINERS_PATH \
+  POLYBAR_VISIBILITY_SCRIPT_PATH \
+  BACKGROUND_SCRIPT_PATH \
+  XDG_CURRENT_DESKTOP \
+  XDG_CONFIG_HOME \
+  XDG_DATA_HOME \
+  XDG_STATE_HOME \
+  XDG_CACHE_HOME \
+  XINITRC \
+  DOTFILES_DIR \
+  SCRIPTS_DIR \
+  XRESOURCES_COLOR_BG \
+  XRESOURCES_COLOR_FG \
+  XRESOURCES_COLOR_RED \
+  XRESOURCES_COLOR_GREEN \
+  XRESOURCES_COLOR_YELLOW \
+  XRESOURCES_COLOR_BLUE \
+  XRESOURCES_COLOR_MAGENTA \
+  XRESOURCES_COLOR_CYAN \
+  XRESOURCES_COLOR_GRAY
+
+xrdb -load $XDG_CONFIG_HOME/X11/Xresources
 
 rm -f /tmp/startuplock
 

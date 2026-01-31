@@ -3,16 +3,16 @@
 # if not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-# source env vars
-source $HOME/.config/env/env_vars
+######## source env functions ########
 
-# source private env vars
-source $HOME/.config/env/private_env_vars
+set -a
+. "$CORECONFIG_DIR/load.sh"
+. "$CORECONFIG_DIR/require_vars.sh"
+set +a
 
-######## vars ########
-export TERM="xterm-256color" # getting proper colors
-export MANPAGER="nvim +Man!" # set the manpager to nvim
-export LC_ALL="en_US.UTF-8"  # encoding
+# load all
+load_all_env_conf
+load_all_colors
 
 ######## options ########
 set -o vi               # vi mode
@@ -26,9 +26,6 @@ shopt -s histappend                                # append to history file
 shopt -s cmdhist                                   # save multi-line commands in history as single line
 export HISTCONTROL="ignoredups:erasedups"          # no duplicate entries
 export PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # makes history immediately write the current/new lines to the history file
-export HISTFILE="$HOME/.cache/.bash_history"       # history file location
-export HISTSIZE=10000                              # history file size
-export HISTFILESIZE=10000                          # history file size
 
 ######## launch x server ########
 if [[ "$(tty)" = "/dev/tty1" ]]; then
@@ -93,11 +90,10 @@ alias bashsrc="source $HOME/.bashrc"
 
 alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
 
-alias v="nvim"
-alias v.="nvim ."
-alias z="zathura"
 alias h="htop"
-alias fm="$FILEMANAGER"
+alias v="${EDITOR:-vim}"
+alias v.="${EDITOR:-vim} ."
+alias fm="${FILEMANAGER:-thunar}"
 
 alias ex="arextract"
 alias bcd="bettercd"
@@ -109,12 +105,12 @@ alias mknt="mknote"
 alias upmu="update_music"
 alias hs="bash_hsearch max"
 
-alias fastfetch="fastfetch -l artix_small"
+alias fastfetch="fastfetch -l ${FAST_FETCH_LOGO:-artix_small}"
 alias neofetch="fastfetch"
 
 alias pac="sudo pacman"
 
-alias rv="sudo bash -c '$VPN &'"
+alias rv="sudo bash -c '${VPN:?VPN is not set} &'"
 
 alias pandoc="dc-pandoc pandoc"
 alias md2pdf="dc-pandoc md2pdf"

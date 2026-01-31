@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 
+load_bar_colors
+
+require_vars BAR_COLOR_RED BAR_COLOR_BLUE
+
 if [ "$(bluetoothctl show | grep "Powered: yes" | wc -c)" -eq 0 ]; then
-  echo "%{F#E06C75}󰂲"
+  echo "%{F$BAR_COLOR_RED}󰂲"
 else
   if [ "$(echo info | bluetoothctl | grep 'Device' | wc -c)" -eq 0 ]; then
-    echo "%{F#7AA2F7}󰂱"
+    echo "%{F$BAR_COLOR_BLUE}󰂱"
   fi
-  echo "%{F#7AA2F7}󰂱"
+  echo "%{F$BAR_COLOR_BLUE}󰂱"
 fi

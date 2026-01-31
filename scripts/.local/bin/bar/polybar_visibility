@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+set -e
 
-source $HOME/.config/bspwm/bsp_vars
+BSPWM_TOP_PADDING=${BSPWM_TOP_PADDING:-37}
+BSPWM_BOTTOM_PADDING=${BSPWM_BOTTOM_PADDING:-0}
 
 help() {
   echo "Usage: $0 [option]"
@@ -17,8 +19,8 @@ help() {
 
 show() {
   polybar-msg cmd show >/dev/null
-  bspc config top_padding $TOP_PADDING
-  bspc config bottom_padding $BOTTOM_PADDING
+  bspc config top_padding $BSPWM_TOP_PADDING
+  bspc config bottom_padding $BSPWM_BOTTOM_PADDING
   touch /tmp/polybarshow 2>/dev/null
 }
 

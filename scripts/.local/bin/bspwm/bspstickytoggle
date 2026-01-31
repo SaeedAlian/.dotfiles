@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+if $(bspc query -T -n | jq -r '.sticky'); then
+  bspc node -g sticky=off
+else
+  bspc node -g sticky=on
+fi

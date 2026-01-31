@@ -1,2 +1,22 @@
-Sxiv.background: #111111
-Sxiv.foreground: #7190D3
+#define bg      #111111
+#define fg      #cdd6f4
+
+#define red     #e06c75
+#define green   #a8f989
+#define yellow  #d5916e
+#define blue    #7aa2f7
+#define magenta #dd9cf0
+#define cyan    #5da3ac
+#define gray    #404143
+
+*.background: bg
+*.foreground: fg
+*.color1: red
+*.color2: green
+*.color3: yellow
+*.color4: blue
+*.color5: magenta
+*.color6: cyan
+*.color8: gray
+Sxiv.background: bg
+Sxiv.foreground: blue

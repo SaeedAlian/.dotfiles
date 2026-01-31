@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 INPUT_FILE="/usr/share/applications/org.telegram.desktop.desktop"
 

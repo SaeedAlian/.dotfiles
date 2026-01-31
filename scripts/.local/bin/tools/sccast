@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
+set -e
 
-DEFAULT_DIR="$HOME/videos/casts"
+require_vars SCREEN_CAST_DIR XDG_CACHE_HOME
+
+DEFAULT_DIR="$SCREEN_CAST_DIR"
 SCRIPT_NAME="$(basename "$0")"
 VIDPID_FILE="/tmp/$SCRIPT_NAME-vidpid"
 AUDPID_FILE="/tmp/$SCRIPT_NAME-audpid"
 MICPID_FILE="/tmp/$SCRIPT_NAME-micpid"
 FILENAME_FILE="/tmp/$SCRIPT_NAME-filename"
-TEMP_DIR="$HOME/.cache/$SCRIPT_NAME"
+TEMP_DIR="$XDG_CACHE_HOME/$SCRIPT_NAME"
 
 mkdir -p $DEFAULT_DIR
 mkdir -p $TEMP_DIR

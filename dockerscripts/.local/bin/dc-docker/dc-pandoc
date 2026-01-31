@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -e
 
-source $HOME/.local/bin/dc-docker/dc-docker-cmd
+source "$SCRIPTS_DIR/dc-docker/dc-docker-cmd"
 
 cmd="$1"
 shift

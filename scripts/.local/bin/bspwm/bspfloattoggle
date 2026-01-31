@@ -1,9 +1,10 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 
 state=$(bspc query -T -n | jq -r '.client.state')
 
 if [ "$state" == "floating" ]; then
-	bspc node -t tiled
+  bspc node -t tiled
 else
-	bspc node -t floating
+  bspc node -t floating
 fi

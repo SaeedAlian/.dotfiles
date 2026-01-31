@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
-HISTORY_FILE="${HISTFILE:-"~/.cache/.bash_history"}"
+require_vars XDG_CACHE_HOME
+
+HISTORY_FILE="${HISTFILE:-"$XDG_CACHE_HOME/.bash_history"}"
 
 count=$1
 

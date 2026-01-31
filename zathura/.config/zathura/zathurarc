@@ -1,5 +1,8 @@
 # zathura configuration file
 
+# include colors
+include colors.conf
+
 # open document in fit-width mode by default
 set adjust-open "best-fit"
 
@@ -25,32 +28,10 @@ set zoom-min 10
 # gui
 set guioptions "sv"
 
-# colors and font
+# color options and font
 set font "JetBrainsMono Nerd Font 14"
-set default-bg "#222222"
-set default-fg "#F7F7F6"
-
-set statusbar-fg "#B0B0B0"
-set statusbar-bg "#202020"
-
-set inputbar-bg "#151515"
-set inputbar-fg "#FFFFFF"
-
-set notification-error-bg "#AC4142"
-set notification-error-fg "#151515"
-
-set notification-warning-bg "#AC4142"
-set notification-warning-fg "#151515"
-
-set completion-bg "#303030"
-set completion-fg "#E0E0E0"
-
-set notification-bg "#90A959"
-set notification-fg "#151515"
 
 set recolor "false"
-set recolor-lightcolor "#222222" 
-set recolor-darkcolor "#E0E0E0" 
 set recolor-reverse-video "true"
 set recolor-keephue "true"
 

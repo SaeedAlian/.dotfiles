@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
-ICON_DIR="$HOME/.cache/winfzf-icons"
+require_vars XDG_CACHE_HOME
+
+ICON_DIR="$XDG_CACHE_HOME/winfzf-icons"
 
 print_help() {
   echo "Usage: $(basename "$0")"

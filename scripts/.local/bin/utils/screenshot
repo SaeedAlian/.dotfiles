@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
-SCREENSHOT_PATH="$HOME/pictures/screenshots"
+require_vars SCREENSHOTS_DIR
+
+SCREENSHOT_PATH="$SCREENSHOTS_DIR"
 
 if ! [ -d "$SCREENSHOT_PATH" ]; then
   mkdir -p "$SCREENSHOT_PATH"
@@ -23,8 +26,8 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ $use_select == 1 ]; then
-  maim -u --select "$HOME/pictures/screenshots/screenshot-$(date +%s%3N)-$(date +%F).jpg"
+  maim -u --select "$SCREENSHOTS_DIR/screenshot-$(date +%s%3N)-$(date +%F).jpg"
   exit 0
 fi
 
-maim -u "$HOME/pictures/screenshots/screenshot-$(date +%s%3N)-$(date +%F).jpg"
+maim -u "$SCREENSHOTS_DIR/screenshot-$(date +%s%3N)-$(date +%F).jpg"

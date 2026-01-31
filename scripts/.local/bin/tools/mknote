@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
-NOTES_DIR="$HOME/documents/notes"
+require_vars NOTES_DIR
+
+PREFIX="${TMUX_FZF_SESSION_NOTES_PREFIX:-note}"
 
 print_err() {
   err=$1
@@ -29,7 +32,7 @@ print_help() {
   echo "  1. Prompts for the note directory name and validates it."
   echo "  2. Creates the directory if it does not exist."
   echo "  3. Optionally initializes a git repository."
-  echo "  4. Starts a tmux session named 'note--<directory>' or attaches to it if it exists."
+  echo "  4. Starts a tmux session named '$PREFIX--<directory>' or attaches to it if it exists."
   echo ""
 }
 
@@ -84,12 +87,14 @@ fi
 
 cd $HOME
 
-if ! tmux has-session -t="note--$note_dir" 2>/dev/null; then
-  tmux new-session -ds "note--$note_dir" -c "$NOTES_DIR/$note_dir"
+session_name="$PREFIX--$note_dir"
+
+if ! tmux has-session -t="$session_name" 2>/dev/null; then
+  tmux new-session -ds "$session_name" -c "$NOTES_DIR/$note_dir"
 fi
 
 if [ -z "$TMUX" ]; then
-  tmux attach -t "note--$note_dir"
+  tmux attach -t "$session_name"
 else
-  tmux switch-client -t "note--$note_dir"
+  tmux switch-client -t "$session_name"
 fi

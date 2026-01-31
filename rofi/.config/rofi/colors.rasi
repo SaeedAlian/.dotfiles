@@ -1,0 +1,9 @@
+* {
+  bg-norm: #111111;
+  bg-sel: #7190d3;
+  bg-label: #11111b;
+  fg-norm: #ced1d9;
+  fg-sel: #14151b;
+  fg-label: #ced1d9;
+  border-color: #7190d3;
+}

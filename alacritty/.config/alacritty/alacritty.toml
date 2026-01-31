@@ -1,61 +1,7 @@
-[colors]
-draw_bold_text_with_bright_colors = true
+[general]
+import = ["colors.toml"]
 
-[colors.primary]
-background = "#111111"
-foreground = "#CED1D9"
-bright_foreground = "#D7DAE7"
-dim_foreground = "#BEC0CB"
-
-[colors.normal]
-black   = "#212329"
-red     = "#D27078"
-green   = "#98C379"
-yellow  = "#D5916E"
-blue    = "#7190D3"
-magenta = "#DD9CF0"
-cyan    = "#5DA3AC"
-white   = "#CED1D9"
-
-[colors.bright]
-black   = "#262A2F"
-red     = "#E5946A"
-green   = "#A6E391"
-yellow  = "#EBC97A"
-blue    = "#8CB4FF"
-magenta = "#E2B2F5"
-cyan    = "#569FC9"
-white   = "#D7DAE7"
-
-[colors.dim]
-black   = "#131115"
-red     = "#C75A64"
-green   = "#7FA766"
-yellow  = "#C0A760"
-blue    = "#6A8ED0"
-magenta = "#B785C7"
-cyan    = "#569FC9"
-white   = "#BEC0CB"
-
-[colors.search.matches]
-background = "#201F25"
-foreground = "#E2E2F0"
-
-[colors.search.focused_match]
-background = "#201F25"
-foreground = "#E2E2F0"
-
-[colors.selection]
-background = "#9AA9CB"
-text = "#24262B"
-
-[colors.hints.start]
-background = "#1F2025"
-foreground = "#D3D5E2"
-
-[colors.hints.end]
-background = "#1F2025"
-foreground = "#D3D5E2"
+live_config_reload = true
 
 [debug]
 log_level = "OFF"

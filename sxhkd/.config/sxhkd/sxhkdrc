@@ -35,7 +35,7 @@ super + t
 
 # vpn
 super + shift + v
-  $TERMINAL --class "Alacritty-float" -e sudo bash -c "$VPN &"
+  $TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e sudo bash -c "$VPN &"
 
 # webcam
 super + shift + control + w
@@ -43,7 +43,7 @@ super + shift + control + w
 
 # sxiv in wallpapers
 super + shift + z
-  sxiv $HOME/pictures/wallpapers/walls
+  sxiv $WALLPAPERS_DIR
 
 ######### menus #########
 
@@ -57,11 +57,11 @@ super + n
 
 # bluetooth menu
 super + p
-	/bin/bash -c bluetooth_menu
+	bluetooth_menu
 
 # power menu
 super + x
-	/bin/bash -c power_menu
+	power_menu
 
 # tmux session menu
 super + s
@@ -175,11 +175,11 @@ super + shift + r
 
 # reload sxhkdrc
 super + shift + control + r
-    pkill sxhkd 2>/dev/null; sxhkd; notify-send 'sxhkd' 'Reloaded config'
+  pkill sxhkd 2>/dev/null; sxhkd; notify-send 'sxhkd' 'Reloaded config'
 
 # centerize floating node
 super + slash
-  $HOME/.config/bspwm/bspfloatcenterize
+  bspfloatcenterize
 
 # close
 super + c
@@ -191,15 +191,15 @@ super + shift + c
 
 # alternate between the tiled and monocle layout
 super + f
-	$HOME/.config/bspwm/bspfullscreen 
+	bspfullscreen 
 
 # fullscreen the focused node
 super + shift + f
-	$HOME/.config/bspwm/bspfullscreen -f
+	bspfullscreen -f
 
 # set the window state
 super + space
-  $HOME/.config/bspwm/bspfloattoggle
+  bspfloattoggle
 
 # move the node in the given direction
 super + shift + {h,j,k,l}
@@ -211,7 +211,7 @@ super + {bracketleft,bracketright,backslash}
 
 # toggle sticky flag
 super + shift + s
-	$HOME/.config/bspwm/bspstickytoggle
+	bspstickytoggle
 
 # focus the next/previous node in the current desktop
 super + {j,k,grave}

@@ -1,12 +1,4 @@
-* {
-  bg-norm: #111111;
-  bg-sel: #7190D3;
-  bg-label: #11111B;
-  border-color: #7190D3;
-  fg-norm: #CED1D9;
-  fg-sel: #14151B;
-  fg-label: #CED1D9;
-}
+@import "colors.rasi"
 
 window {
   background-color: @bg-norm;

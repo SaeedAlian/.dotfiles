@@ -1,0 +1,9 @@
+* {
+  bg-norm: ${ROFI_COLOR_BG_NORM};
+  bg-sel: ${ROFI_COLOR_BG_SEL};
+  bg-label: ${ROFI_COLOR_BG_LABEL};
+  fg-norm: ${ROFI_COLOR_FG_NORM};
+  fg-sel: ${ROFI_COLOR_FG_SEL};
+  fg-label: ${ROFI_COLOR_FG_LABEL};
+  border-color: ${ROFI_COLOR_BORDER};
+}

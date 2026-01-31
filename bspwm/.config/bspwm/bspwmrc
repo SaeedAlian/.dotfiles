@@ -1,29 +1,49 @@
-#!/usr/bin/sh
+#!/bin/sh
 
-source $HOME/.config/bspwm/bsp_vars
+set -a
+. "$HOME/.dotfiles/coreconfig/load.sh"
+. "$HOME/.dotfiles/coreconfig/require_vars.sh"
+set +a
+
+load_init_vars_conf
+load_desktop_vars_conf
+load_window_classes_conf
+load_bspwm_colors
+
+DPMS_TIME=${DPMS_TIME:-600}
+XSET_DELAY=${XSET_DELAY:-400}
+XSET_RATE=${XSET_RATE:-35}
+BSPWM_TOP_PADDING=${BSPWM_TOP_PADDING:-37}
+BSPWM_BOTTOM_PADDING=${BSPWM_BOTTOM_PADDING:-0}
+BSPWM_WINDOW_GAPS=${BSPWM_WINDOW_GAPS:-0}
+BSPWM_SPLIT_RATIO=${BSPWM_SPLIT_RATIO:-0.5}
+BSPWM_COLOR_BORDER_NORMAL=${BSPWM_COLOR_BORDER_NORMAL:-"#333333"}
+BSPWM_COLOR_BORDER_FOCUSED=${BSPWM_COLOR_BORDER_FOCUSED:-"#333377"}
 
 ###### remove all rules ######
 bspc rule -r "*"
 
 ###### autostarts ######
 background &
-$HOME/.config/polybar/launch.sh &
+launch_polybar &
 
 xset +dpms dpms 0 $DPMS_TIME $DPMS_TIME
-xset r rate 400 35
+xset r rate $XSET_DELAY $XSET_RATE
 
 pkill sxhkd &
 sxhkd &
 pgrep -x nm-applet >/dev/null || nm-applet &
-pgrep -x xss-lock >/dev/null || xss-lock -l -- $HOME/.local/bin/utils/start_lockscreen &
 pgrep -x light >/dev/null || light -I &
+pgrep -x dunst >/dev/null || dunst &
 pgrep -x xfce-polkit >/dev/null || /usr/lib/xfce-polkit/xfce-polkit &
-pgrep -x picom >/dev/null || picom -b --config $HOME/.config/picom/picom.conf &
+pgrep -x picom >/dev/null || picom -b ${PICOM_CONF_PATH:+--config "$PICOM_CONF_PATH"} &
+
+[[ -n "$START_LOCKSCREEN_SCRIPT_PATH" ]] &&
+  pgrep -x xss-lock >/dev/null || xss-lock -l -- "$START_LOCKSCREEN_SCRIPT_PATH" &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
 setxkbmap -option caps:none &
 
-###### startups ######
 startup &
 
 ###### desktops ######
@@ -36,14 +56,14 @@ bspc desktop 2 -l monocle
 xsetroot -cursor_name left_ptr
 
 bspc config border_width 2
-bspc config top_padding $TOP_PADDING
-bspc config bottom_padding $BOTTOM_PADDING
+bspc config top_padding $BSPWM_TOP_PADDING
+bspc config bottom_padding $BSPWM_BOTTOM_PADDING
 bspc config window_gap $BSPWM_WINDOW_GAPS
-bspc config split_ratio $SPLIT_RATIO
+bspc config split_ratio $BSPWM_SPLIT_RATIO
 bspc config borderless_monocle false
 bspc config gapless_monocle false
-bspc config normal_border_color $NORMAL_BORDER_COLOR
-bspc config focused_border_color $FOCUSED_BORDER_COLOR
+bspc config normal_border_color $BSPWM_COLOR_BORDER_NORMAL
+bspc config focused_border_color $BSPWM_COLOR_BORDER_FOCUSED
 bspc config single_monocle true
 bspc config ignore_ewmh_focus true
 bspc config swallow_first_click false
@@ -63,13 +83,12 @@ bspc rule -a 'VirtualBox Manager' desktop='^7' state=tiled
 bspc rule -a Clementine desktop='^5' split_ratio=0.6 split_dir=east
 bspc rule -a TelegramDesktop desktop='^5' split_ratio=0.4 split_dir=west
 bspc rule -a Alacritty rectangle=950x650+0+0
-bspc rule -a 'Alacritty-float' state=floating rectangle=1200x800+360+140 focus=on
 bspc rule -a Yad state=floating rectangle=400x200+760+40 focus=on
 bspc rule -a qalculate-qt state=floating rectangle=850x650+535+215 focus=on
 bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=off sticky=on
 
-###### scripts ######
+[[ -n "$TERMINAL_FLOAT_CLASS" ]] &&
+  bspc rule -a "$TERMINAL_FLOAT_CLASS" state=floating rectangle=1200x800+360+140 focus=on
 
-if [ -z $(pgrep bspfloatpos --list-full | grep -E "bspfloatpos") ]; then
-  $HOME/.config/bspwm/bspfloatpos &
-fi
+###### scripts ######
+pgrep -f bspfloatpos >/dev/null || bspfloatpos &

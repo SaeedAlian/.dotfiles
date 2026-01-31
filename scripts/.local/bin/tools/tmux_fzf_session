@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -eu
 
+require_vars PROJECTS_DIR NOTES_DIR XDG_CACHE_HOME
+
 print_help() {
   echo "Usage: $(basename "$0") [OPTIONS] [DIRECTORY]"
   echo ""
@@ -21,8 +23,8 @@ print_help() {
 }
 
 DIRS=(
-  "$HOME/documents/notes"
-  "$HOME/documents/projects"
+  "$NOTES_DIR"
+  "$PROJECTS_DIR"
 )
 
 PREFS=(
@@ -41,7 +43,7 @@ EXTRA_DIRS=(
   "default"
 )
 
-CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/tmux-sessionizer"
+CACHE_DIR="${XDG_CACHE_HOME}/tmux-sessionizer"
 CACHE_FILE="$CACHE_DIR/sessions.cache"
 META_FILE="$CACHE_DIR/meta.cache"
 

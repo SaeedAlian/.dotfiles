@@ -1,0 +1,23 @@
+set default-bg "${ZATHURA_COLOR_BG}"
+set default-fg "${ZATHURA_COLOR_FG}"
+
+set statusbar-bg "${ZATHURA_COLOR_STATUS_BAR_BG}"
+set statusbar-fg "${ZATHURA_COLOR_STATUS_BAR_FG}"
+
+set inputbar-bg "${ZATHURA_COLOR_INPUT_BAR_BG}"
+set inputbar-fg "${ZATHURA_COLOR_INPUT_BAR_FG}"
+
+set notification-error-bg "${ZATHURA_COLOR_NOTIF_ERR_BG}"
+set notification-error-fg "${ZATHURA_COLOR_NOTIF_ERR_FG}"
+
+set notification-warning-bg "${ZATHURA_COLOR_NOTIF_WARN_BG}"
+set notification-warning-fg "${ZATHURA_COLOR_NOTIF_WARN_FG}"
+
+set completion-bg "${ZATHURA_COLOR_COMPLETION_BG}"
+set completion-fg "${ZATHURA_COLOR_COMPLETION_FG}"
+
+set notification-bg "${ZATHURA_COLOR_NOTIF_BG}"
+set notification-fg "${ZATHURA_COLOR_NOTIF_FG}"
+
+set recolor-lightcolor "${ZATHURA_COLOR_RECOLOR_LIGHT}" 
+set recolor-darkcolor "${ZATHURA_COLOR_RECOLOR_DARK}" 

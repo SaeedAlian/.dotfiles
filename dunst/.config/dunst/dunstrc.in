@@ -1,0 +1,82 @@
+[global]
+    monitor = 0
+    follow = mouse
+    origin = top-right
+
+    progress_bar = true
+    progress_bar_height = 10
+    progress_bar_frame_width = 1
+    progress_bar_min_width = 150
+    progress_bar_max_width = 300
+
+    indicate_hidden = yes
+
+    shrink = no
+
+    transparency = 0
+
+    separator_height = 2
+    padding = 8
+    horizontal_padding = 12
+    text_icon_padding = 12
+
+    frame_width = 2
+    frame_color = "${DUNST_COLOR_FRAME}"
+
+    separator_color = auto
+
+    sort = yes
+    idle_threshold = 120
+    show_age_threshold = 60
+
+    font = JetBrainsMono Nerd Font 16
+
+    line_height = 2
+
+    markup = full
+
+    format = "<b>%s</b>\n%b"
+
+    alignment = left
+    vertical_alignment = top
+
+    word_wrap = yes
+    ellipsize = middle
+    ignore_newline = no
+
+    stack_duplicates = true
+    hide_duplicate_count = false
+
+    show_indicators = yes
+
+    icon_position = left
+
+    min_icon_size = 0
+    max_icon_size = 64
+
+    icon_path = /usr/share/icons/Adwaita/16x16/devices
+
+    sticky_history = yes
+
+    history_length = 20
+
+    corner_radius = 0
+
+    mouse_right_click = do_action, close_current
+    mouse_left_click = close_current
+
+[urgency_low]
+    background = "${DUNST_COLOR_URG_LOW_BG}"
+    foreground = "${DUNST_COLOR_URG_LOW_FG}"
+    timeout = 2
+
+[urgency_normal]
+    background = "${DUNST_COLOR_URG_NORMAL_BG}"
+    foreground = "${DUNST_COLOR_URG_NORMAL_FG}"
+    timeout = 2
+
+[urgency_critical]
+    background = "${DUNST_COLOR_URG_CRIT_BG}"
+    foreground = "${DUNST_COLOR_URG_CRIT_FG}"
+    frame_color = "${DUNST_COLOR_URG_CRIT_FRAME}"
+    timeout = 5

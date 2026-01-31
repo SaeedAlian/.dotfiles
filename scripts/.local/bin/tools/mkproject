@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+set -e
 
-GITHUB_USERNAME="SaeedAlian"
-PROJECTS_DIR="$HOME/documents/projects"
+require_vars GITHUB_USERNAME PROJECTS_DIR
+
+PREFIX="${TMUX_FZF_SESSION_PROJECTS_PREFIX:-proj}"
 
 print_err() {
   err=$1
@@ -22,6 +24,7 @@ print_help() {
   echo "This script allows you to create projects in:"
   echo "  react, react-ts, nextjs, rust-bin, c, cpp, go, python, empty"
   echo "It also initializes git and optionally starts a tmux session for the project."
+  echo "Starts a tmux session named '$PREFIX--<directory>' or attaches to it if it exists."
 }
 
 check_dirname() {
@@ -227,12 +230,14 @@ done
 
 cd $HOME
 
-if ! tmux has-session -t="proj--$project_name" 2>/dev/null; then
-  tmux new-session -ds "proj--$project_name" -c "$PROJECTS_DIR/$project_name"
+session_name="$PREFIX--$project_name"
+
+if ! tmux has-session -t="$session_name" 2>/dev/null; then
+  tmux new-session -ds "$session_name" -c "$PROJECTS_DIR/$project_name"
 fi
 
 if [ -z "$TMUX" ]; then
-  tmux attach -t "proj--$project_name"
+  tmux attach -t "$session_name"
 else
-  tmux switch-client -t "proj--$project_name"
+  tmux switch-client -t "$session_name"
 fi

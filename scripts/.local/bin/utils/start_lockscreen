@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
+set -e
 
-export LOCKSCREEN_WALLS_DIR="$HOME/pictures/wallpapers/lockscreens"
-export BGNAME="ascii_1"
+load_background_conf
+require_vars BACKGROUND_PIC_NAME LOCKSCREENS_DIR
+
+export LOCKSCREEN_WALLS_DIR="$LOCKSCREENS_DIR"
+export BGNAME="$BACKGROUND_PIC_NAME"
 
 i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 TOUCHSCREEN_ID=$(xinput list | grep -i Touchscreen | sed 's/.*id=\(.*\) *\[.*/\1/')
 TOUCHSCREEN_ENABLED=$(xinput list-props $TOUCHSCREEN_ID | grep -i "Device Enabled" | sed 's/.*\(.\)$/\1/')

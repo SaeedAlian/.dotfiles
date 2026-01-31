@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+load_desktop_vars_conf
+
+RESTRICTED_NODES=()
+if [ -n "$BSPWM_FLOAT_POS_RESTRICTED_NODES" ]; then
+  if [ "${#BSPWM_FLOAT_POS_RESTRICTED_NODES[@]}" -gt 0 ]; then
+    RESTRICTED_NODES=("${BSPWM_FLOAT_POS_RESTRICTED_NODES[@]}")
+  fi
+fi
+
+SCREEN_W=${BSPWM_SCREEN_W:-1920}
+SCREEN_H=${BSPWM_SCREEN_H:-1080}
+
+floatrules_str=$(bspc rule -l | grep "state=floating")
+
+floatrules_names=()
+floatrules_rect_widths=()
+floatrules_rect_heights=()
+
+while IFS= read -r line; do
+  if echo "$line" | grep -q "rectangle"; then
+    name=$(echo "$line" | sed "s/\(.*:\).*/\1/" | sed 's/://')
+    rectangle=$(echo "$line" | grep -oP "rectangle=\K[0-9x+]+")
+
+    rect_w=$(echo "$rectangle" | awk -F'x|+' '{print $1}')
+    rect_h=$(echo "$rectangle" | awk -F'x|+' '{print $2}')
+
+    floatrules_names+=("$name")
+    floatrules_rect_widths+=("$rect_w")
+    floatrules_rect_heights+=("$rect_h")
+  fi
+done <<<"$floatrules_str"
+
+bspc subscribe node_state | while read -a msg; do
+  current_state=$(bspc query -T -n | jq -r '.client.state')
+  winclasses_str=$(xprop -id ${msg[3]} WM_CLASS 2>/dev/null | sed 's/.*= //' | sed 's/\"//g')
+  winclasses=()
+
+  IFS=$', '
+  while read -r line; do
+    winclasses+=("$line")
+  done <<<"$winclasses_str"
+
+  is_restricted=false
+  has_floatrule=false
+
+  for r in ${RESTRICTED_NODES[@]}; do
+    for c in ${winclasses[@]}; do
+      if [ "$r" == "$c" ]; then
+        is_restricted=true
+        break
+      fi
+    done
+  done
+
+  if $is_restricted; then
+    continue
+  fi
+
+  rule_width=0
+  rule_height=0
+
+  for i in ${#floatrules_names[@]}; do
+    n=${floatrules_names[$i]}
+    w=${floatrules_rect_widths[$i]}
+    h=${floatrules_rect_heights[$i]}
+    for c in ${winclasses[@]}; do
+      if [ "$n" == "$c" ]; then
+        has_floatrule=true
+        rule_width=$w
+        rule_height=$h
+        break
+      fi
+    done
+  done
+
+  if [[ "$current_state" == "floating" ]]; then
+    if ! $has_floatrule; then
+      geometry=$(xdotool getactivewindow getwindowgeometry --shell)
+      rule_width=$(echo "$geometry" | grep "WIDTH=" | cut -d '=' -f 2)
+      rule_height=$(echo "$geometry" | grep "HEIGHT=" | cut -d '=' -f 2)
+    fi
+
+    X=$(((SCREEN_W / 2) - (rule_width / 2)))
+    Y=$(((SCREEN_H / 2) - (rule_height / 2)))
+    xdotool windowsize "${msg[3]}" "$rule_width" "$rule_height"
+    xdotool windowmove "${msg[3]}" "$X" "$Y"
+  fi
+done

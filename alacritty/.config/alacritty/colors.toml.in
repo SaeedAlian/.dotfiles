@@ -1,0 +1,58 @@
+[colors]
+draw_bold_text_with_bright_colors = true
+
+[colors.primary]
+background = "${ALACRITTY_COLOR_BG}"
+foreground = "${ALACRITTY_COLOR_FG}"
+bright_foreground = "${ALACRITTY_COLOR_BRIGHT_FG}"
+dim_foreground = "${ALACRITTY_COLOR_DIM_FG}"
+
+[colors.normal]
+black   = "${ALACRITTY_COLOR_NORMAL_BLACK}"
+red     = "${ALACRITTY_COLOR_NORMAL_RED}"
+green   = "${ALACRITTY_COLOR_NORMAL_GREEN}"
+yellow  = "${ALACRITTY_COLOR_NORMAL_YELLOW}"
+blue    = "${ALACRITTY_COLOR_NORMAL_BLUE}"
+magenta = "${ALACRITTY_COLOR_NORMAL_MAGENTA}"
+cyan    = "${ALACRITTY_COLOR_NORMAL_CYAN}"
+white   = "${ALACRITTY_COLOR_NORMAL_WHITE}"
+
+[colors.bright]
+black   = "${ALACRITTY_COLOR_BRIGHT_BLACK}"
+red     = "${ALACRITTY_COLOR_BRIGHT_RED}"
+green   = "${ALACRITTY_COLOR_BRIGHT_GREEN}"
+yellow  = "${ALACRITTY_COLOR_BRIGHT_YELLOW}"
+blue    = "${ALACRITTY_COLOR_BRIGHT_BLUE}"
+magenta = "${ALACRITTY_COLOR_BRIGHT_MAGENTA}"
+cyan    = "${ALACRITTY_COLOR_BRIGHT_CYAN}"
+white   = "${ALACRITTY_COLOR_BRIGHT_WHITE}"
+
+[colors.dim]
+black   = "${ALACRITTY_COLOR_DIM_BLACK}"
+red     = "${ALACRITTY_COLOR_DIM_RED}"
+green   = "${ALACRITTY_COLOR_DIM_GREEN}"
+yellow  = "${ALACRITTY_COLOR_DIM_YELLOW}"
+blue    = "${ALACRITTY_COLOR_DIM_BLUE}"
+magenta = "${ALACRITTY_COLOR_DIM_MAGENTA}"
+cyan    = "${ALACRITTY_COLOR_DIM_CYAN}"
+white   = "${ALACRITTY_COLOR_DIM_WHITE}"
+
+[colors.search.matches]
+background = "${ALACRITTY_COLOR_SEARCH_MATCHES_BG}"
+foreground = "${ALACRITTY_COLOR_SEARCH_MATCHES_FG}"
+
+[colors.search.focused_match]
+background = "${ALACRITTY_COLOR_SEARCH_FOCUSED_MATCH_BG}"
+foreground = "${ALACRITTY_COLOR_SEARCH_FOCUSED_MATCH_FG}"
+
+[colors.selection]
+background = "${ALACRITTY_COLOR_SELECTION_BG}"
+text = "${ALACRITTY_COLOR_SELECTION_TEXT}"
+
+[colors.hints.start]
+background = "${ALACRITTY_COLOR_HINTS_START_BG}"
+foreground = "${ALACRITTY_COLOR_HINTS_START_FG}"
+
+[colors.hints.end]
+background = "${ALACRITTY_COLOR_HINTS_END_BG}"
+foreground = "${ALACRITTY_COLOR_HINTS_END_FG}"

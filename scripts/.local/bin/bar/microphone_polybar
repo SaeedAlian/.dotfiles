@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
+load_bar_colors
+
+require_vars BAR_COLOR_RED BAR_COLOR_BLUE
+
 s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')
 if [ "$s" == "yes" ]; then
-  echo "%{F#E06C75}󰍭"
+  echo "%{F$BAR_COLOR_RED}󰍭"
 else
-  echo "%{F#7AA2F7}󰍬"
+  echo "%{F$BAR_COLOR_BLUE}󰍬"
 fi

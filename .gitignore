@@ -1,4 +1,1 @@
-zsh/.config/zsh/.zcompdum*
-fonts/.local/share/fonts/.uuid
-fonts/.local/share/fonts/**/.uuid
-userconf/.config/env/private_env_vars
+coreconfig/private_vars.conf

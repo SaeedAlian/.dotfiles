@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
+set -e
 
 ffplay -window_title webcam -fflags nobuffer -flags low_delay -framerate 30 -fast /dev/video0

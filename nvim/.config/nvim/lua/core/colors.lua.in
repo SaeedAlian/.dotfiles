@@ -1,0 +1,48 @@
+local status_line_colors = {
+	normal = {
+		bg = "${NVIM_COLOR_STATUS_LINE_NORMAL_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_NORMAL_FG}",
+	},
+
+	insert = {
+		bg = "${NVIM_COLOR_STATUS_LINE_INSERT_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_INSERT_FG}",
+	},
+
+	visual = {
+		bg = "${NVIM_COLOR_STATUS_LINE_VISUAL_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_VISUAL_FG}",
+	},
+
+	visual_line = {
+		bg = "${NVIM_COLOR_STATUS_LINE_VISUAL_LINE_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_VISUAL_LINE_FG}",
+	},
+
+	visual_block = {
+		bg = "${NVIM_COLOR_STATUS_LINE_VISUAL_BLOCK_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_VISUAL_BLOCK_FG}",
+	},
+
+	command = {
+		bg = "${NVIM_COLOR_STATUS_LINE_COMMAND_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_COMMAND_FG}",
+	},
+
+	replace = {
+		bg = "${NVIM_COLOR_STATUS_LINE_REPLACE_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_REPLACE_FG}",
+	},
+
+	terminal = {
+		bg = "${NVIM_COLOR_STATUS_LINE_TERMINAL_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_TERMINAL_FG}",
+	},
+
+	dim = {
+		bg = "${NVIM_COLOR_STATUS_LINE_DIM_BG}",
+		fg = "${NVIM_COLOR_STATUS_LINE_DIM_FG}",
+	},
+}
+
+return { status_line_colors = status_line_colors }

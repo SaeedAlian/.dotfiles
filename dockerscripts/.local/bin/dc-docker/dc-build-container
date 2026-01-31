@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
+set -e
 
-source $HOME/.local/bin/dc-docker/dc-docker-cmd
+source "$SCRIPTS_DIR/dc-docker/dc-docker-cmd"
 
-if [ -z "$CUSTOM_DOCKER_CONTAINERS_PATH" ]; then
-  echo "CUSTOM_DOCKER_CONTAINERS_PATH variable is not set" >&2
-  exit 1
-fi
+require_vars CUSTOM_DOCKER_CONTAINERS_PATH
 
-CONT_PATH="$CUSTOM_DOCKER_CONTAINERS_PATH"
 container=$1
 
-fullpath="$CONT_PATH/$container"
+fullpath="$CUSTOM_DOCKER_CONTAINERS_PATH/$container"
+
+if ! [ -d "$fullpath" ]; then
+  echo "Container does not exist" >&2
+  exit 1
+fi
 
 if ! [ -f "$fullpath/Dockerfile" ]; then
   echo "Container does not exist" >&2

@@ -1,0 +1,22 @@
+#define bg      ${COLOR_BG}
+#define fg      ${COLOR_FG}
+
+#define red     ${COLOR_RED}
+#define green   ${COLOR_GREEN}
+#define yellow  ${COLOR_YELLOW}
+#define blue    ${COLOR_BLUE}
+#define magenta ${COLOR_MAGENTA}
+#define cyan    ${COLOR_CYAN}
+#define gray    ${COLOR_GRAY}
+
+*.background: bg
+*.foreground: fg
+*.color1: red
+*.color2: green
+*.color3: yellow
+*.color4: blue
+*.color5: magenta
+*.color6: cyan
+*.color8: gray
+Sxiv.background: bg
+Sxiv.foreground: blue

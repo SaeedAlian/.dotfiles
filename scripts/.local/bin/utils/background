@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
+set -e
 
-export WALLS_DIR="$HOME/pictures/wallpapers/walls"
-export BGNAME="ascii_1"
-export BGMODE="--bg-fill"
+load_background_conf
+require_vars BACKGROUND_PIC_NAME BACKGROUND_PIC_MODE WALLPAPERS_DIR
+
+export WALLS_DIR="$WALLPAPERS_DIR"
+export BGNAME="$BACKGROUND_PIC_NAME"
+export BGMODE="$BACKGROUND_PIC_MODE"
 
 feh --no-fehbg $BGMODE "$WALLS_DIR/$BGNAME.jpg"

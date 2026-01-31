@@ -1,4 +1,5 @@
 local map = require("utils.keymapper").map
+local status_line_colors = require("core.colors").status_line_colors
 
 -- -- -- -- start config -- -- -- --
 
@@ -197,7 +198,7 @@ map({ "n", "v" }, "C", [["_c$]], "Delete to the end of line and go to insert mod
 
 -- tmux session fuzzy finder
 -- only works when tmux is attached
-map("n", "<C-f>", "<cmd>silent !tmux neww ~/.local/bin/tools/tmux_fzf_session<CR>", "Start tmux session fzf")
+map("n", "<C-f>", "<cmd>silent !tmux neww tmux_fzf_session<CR>", "Start tmux session fzf")
 
 -- move the visually selected lines up and down
 map("v", "J", ":m '>+1<CR>gv=gv", "Move the visually selected lines down")
@@ -417,14 +418,46 @@ _G.file_name = file_name
 vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "ModeChanged" }, {
 	group = statusline_group,
 	callback = function()
-		vim.api.nvim_set_hl(0, "StatusLineNormal", { fg = "#14151B", bg = "#7190D3", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineInsert", { fg = "#14151B", bg = "#98C379", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineVisual", { fg = "#14151B", bg = "#DD9CF0", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineVisualLine", { fg = "#CED1D9", bg = "#8800B0", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineVisualBlock", { fg = "#14151B", bg = "#C100F9", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineCommand", { fg = "#14151B", bg = "#D5916E", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineReplace", { fg = "#14151B", bg = "#D27078", bold = true })
-		vim.api.nvim_set_hl(0, "StatusLineTerminal", { fg = "#14151B", bg = "#CED1D9", bold = true })
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineNormal",
+			{ fg = status_line_colors.normal.fg, bg = status_line_colors.normal.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineInsert",
+			{ fg = status_line_colors.insert.fg, bg = status_line_colors.insert.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineVisual",
+			{ fg = status_line_colors.visual.fg, bg = status_line_colors.visual.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineVisualLine",
+			{ fg = status_line_colors.visual_line.fg, bg = status_line_colors.visual_line.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineVisualBlock",
+			{ fg = status_line_colors.visual_block.fg, bg = status_line_colors.visual_block.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineCommand",
+			{ fg = status_line_colors.command.fg, bg = status_line_colors.command.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineReplace",
+			{ fg = status_line_colors.replace.fg, bg = status_line_colors.replace.bg, bold = true }
+		)
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineTerminal",
+			{ fg = status_line_colors.terminal.fg, bg = status_line_colors.terminal.bg, bold = true }
+		)
 
 		vim.opt_local.statusline = table.concat({
 			mode_color() .. " %{v:lua.mode_icon()} ",
@@ -443,7 +476,11 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "ModeChanged" }, {
 vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
 	group = statusline_group,
 	callback = function()
-		vim.api.nvim_set_hl(0, "StatusLineDim", { fg = "#82838C", bg = "#212329", bold = true })
+		vim.api.nvim_set_hl(
+			0,
+			"StatusLineDim",
+			{ fg = status_line_colors.dim.fg, bg = status_line_colors.dim.bg, bold = true }
+		)
 
 		vim.opt_local.statusline = "%#StatusLineDim# %{v:lua.file_name()} │ %{v:lua.file_type()} %= Ln %l, Col %c "
 	end,

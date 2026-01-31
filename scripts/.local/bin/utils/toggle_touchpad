@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 TOUCHPAD_ID=$(xinput list | grep -i Touchpad | sed 's/.*id=\(.*\) *\[.*/\1/')
 TRACKPOINT_ID=$(xinput list | grep -i TrackPoint | sed 's/.*id=\(.*\) *\[.*/\1/')

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+
+SCREEN_W=${BSPWM_SCREEN_W:-1920}
+SCREEN_H=${BSPWM_SCREEN_H:-1080}
+
+q=$(bspc query -T -n)
+id=$(echo "$q" | jq -r '.id')
+current_state=$(echo "$q" | jq -r '.client.state')
+
+if [[ "$current_state" == "floating" ]]; then
+  geometry=$(xdotool getactivewindow getwindowgeometry --shell)
+  rule_width=$(echo "$geometry" | grep "WIDTH=" | cut -d '=' -f 2)
+  rule_height=$(echo "$geometry" | grep "HEIGHT=" | cut -d '=' -f 2)
+
+  X=$(((SCREEN_W / 2) - (rule_width / 2)))
+  Y=$(((SCREEN_H / 2) - (rule_height / 2)))
+  xdotool windowmove "$id" "$X" "$Y"
+fi

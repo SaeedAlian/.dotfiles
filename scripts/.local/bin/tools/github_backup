@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
+set -e
 
-USERNAME="SaeedAlian"
+load_private_vars_conf
+
+require_vars GITHUB_USERNAME GITHUB_PAT
+
+USERNAME="$GITHUB_USERNAME"
 TOKEN="$GITHUB_PAT"
 API_URL="https://api.github.com/user/repos"
 SSH_ID="id_ed25519_github"

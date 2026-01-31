@@ -1,0 +1,17 @@
+[colors]
+
+background = ${BAR_COLOR_BG}
+background-alt = ${BAR_COLOR_BG_ALT}
+foreground = ${BAR_COLOR_FG}
+foreground-dim = ${BAR_COLOR_FG_DIM}
+sep = ${BAR_COLOR_SEP}
+disabled = ${BAR_COLOR_DISABLED}
+border = ${BAR_COLOR_BORDER}
+
+blue = ${BAR_COLOR_BLUE}
+yellow = ${BAR_COLOR_YELLOW}
+green = ${BAR_COLOR_GREEN}
+magenta = ${BAR_COLOR_MAGENTA}
+red = ${BAR_COLOR_RED}
+cyan = ${BAR_COLOR_CYAN}
+gray = ${BAR_COLOR_GRAY}

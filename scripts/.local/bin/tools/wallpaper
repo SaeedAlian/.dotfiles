@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
+set -e
 
-MAIN_DIR="$HOME/pictures/wallpapers"
-WALLPAPERS_DIR="$MAIN_DIR/walls"
-LOCKSCREENS_DIR="$MAIN_DIR/lockscreens"
-BACKGROUND_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/utils/background"
-LOCKSCREEN_SCRIPT_PATH="$HOME/.dotfiles/scripts/.local/bin/utils/start_lockscreen"
+require_vars \
+  WALLPAPERS_DIR \
+  LOCKSCREENS_DIR \
+  START_LOCKSCREEN_SCRIPT_PATH \
+  BACKGROUND_SCRIPT_PATH \
+  DOTFILES_DIR \
+  CORECONFIG_DIR
+
+mkdir -p $WALLPAPERS_DIR
+mkdir -p $LOCKSCREENS_DIR
 
 TEMP_DIR="/tmp/wallpaper_script_tmp_dir"
 WALLPAPERS_TEMP_DIR="$TEMP_DIR/walls"
@@ -186,13 +192,12 @@ set_background() {
     print_err "Selected file $image_name is not an image or is not jpg."
   fi
 
-  sed -i "s/BGNAME=.*/\BGNAME=\"$image_name\"/" "$BACKGROUND_SCRIPT_PATH"
-  sed -i "s/BGNAME=.*/\BGNAME=\"$image_name\"/" "$LOCKSCREEN_SCRIPT_PATH"
+  sed -i "s/BACKGROUND_PIC_NAME=.*/\BACKGROUND_PIC_NAME=\"$image_name\"/" "$CORECONFIG_DIR/background.conf"
 
   echo "Scripts updated."
   $BACKGROUND_SCRIPT_PATH &
   pkill xss-lock
-  xss-lock -l -- "$LOCKSCREEN_SCRIPT_PATH" &
+  xss-lock -l -- "$START_LOCKSCREEN_SCRIPT_PATH" &
   echo "Wallpaper updated successfully."
 }
 
@@ -204,10 +209,10 @@ set_background_mode() {
     print_err "Wrong option"
   fi
 
-  sed -i "s/BGMODE=.*/\BGMODE=\"--bg-$image_bg_mode\"/" "$BACKGROUND_SCRIPT_PATH"
+  sed -i "s/BACKGROUND_PIC_MODE=.*/\BACKGROUND_PIC_MODE=\"--bg-$image_bg_mode\"/" "$CORECONFIG_DIR/background.conf"
 
   echo "Scripts updated."
-  $BACKGROUND_SCRIPT_PATH
+  $BACKGROUND_SCRIPT_PATH &
   echo "Wallpaper updated successfully."
 }
 

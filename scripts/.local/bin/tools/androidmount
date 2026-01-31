@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+set -e
 
-MOUNT_DIR="$HOME/mount"
+require_vars MOUNT_DIR
 
 print_err() {
   err=$1
