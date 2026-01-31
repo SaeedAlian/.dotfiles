@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 pids_str=$(pidof -x redshift)
 IFS=' ' read -a pids <<<"$pids_str"
