@@ -53,7 +53,7 @@ super + d
 
 # network menu
 super + n
-	/bin/bash -c network_menu
+	network_menu
 
 # bluetooth menu
 super + p
