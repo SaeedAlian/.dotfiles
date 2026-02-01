@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
 # put XDG_RUNTIME_DIR=/run/user/$(id -u) in the env vars for the cronjob
-PERCENT=$(acpi -b | grep Discharging | sed 's/.*Discharging, \([0-9]*\).*/\1/')
 
-if [[ -n $PERCENT && $PERCENT -lt 30 ]]; then
+WARN_PERCENT=30
+BAT_DIR="/sys/class/power_supply/BAT0"
+
+PERCENT="$(cat "$BAT_DIR/capacity")"
+STATUS="$(cat "$BAT_DIR/status")"
+
+if [[ "$STATUS" == "Discharging" && -n $PERCENT && $PERCENT -lt $WARN_PERCENT ]]; then
   DISPLAY=:0.0 notify-send -u critical "Low Battery!!"
 fi
