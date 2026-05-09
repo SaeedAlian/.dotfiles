@@ -3,9 +3,10 @@ set -e
 
 require_vars START_LOCKSCREEN_SCRIPT_PATH
 
-DPMS_TIME=${DPMS_TIME:-600}
+SCREEN_TIMEOUT=${SCREEN_TIMEOUT:-600}
 
-xset +dpms dpms 0 $DPMS_TIME $DPMS_TIME
+xset s $SCREEN_TIMEOUT $SCREEN_TIMEOUT
+xset +dpms dpms 0 0 $SCREEN_TIMEOUT
 pgrep -x xss-lock >/dev/null || xss-lock -l -- $START_LOCKSCREEN_SCRIPT_PATH &
 
 if [ $? == 0 ]; then
