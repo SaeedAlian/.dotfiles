@@ -298,6 +298,20 @@ map({ "n", "v" }, "<leader>f", function()
 	end
 end, "Format buffer")
 
+-- treesitter text objects
+map({ "n", "x", "o" }, "]f", function()
+	require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
+end)
+map({ "n", "x", "o" }, "[f", function()
+	require("nvim-treesitter-textobjects.move").goto_previous_start("@function.outer", "textobjects")
+end)
+map({ "n", "x", "o" }, "]c", function()
+	require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
+end)
+map({ "n", "x", "o" }, "[c", function()
+	require("nvim-treesitter-textobjects.move").goto_previous_start("@class.outer", "textobjects")
+end)
+
 -- -- statusline -- --
 
 local function git_branch()
@@ -483,6 +497,13 @@ vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
 		)
 
 		vim.opt_local.statusline = "%#StatusLineDim# %{v:lua.file_name()} │ %{v:lua.file_type()} %= Ln %l, Col %c "
+	end,
+})
+
+-- treesitter start
+vim.api.nvim_create_autocmd("FileType", {
+	callback = function()
+		pcall(vim.treesitter.start)
 	end,
 })
 

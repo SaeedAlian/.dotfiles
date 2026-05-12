@@ -45,4 +45,25 @@ local status_line_colors = {
 	},
 }
 
-return { status_line_colors = status_line_colors }
+local theme_colors = {
+	bg0 = "${NVIM_COLOR_THEME_BG0}",
+	bg1 = "${NVIM_COLOR_THEME_BG1}",
+	bg2 = "${NVIM_COLOR_THEME_BG2}",
+	bg3 = "${NVIM_COLOR_THEME_BG3}",
+	fg = "${NVIM_COLOR_THEME_FG}",
+	fg_dark = "${NVIM_COLOR_THEME_FG_DARK}",
+	fg_light = "${NVIM_COLOR_THEME_FG_LIGHT}",
+
+	red = "${NVIM_COLOR_THEME_FG_RED}",
+	orange = "${NVIM_COLOR_THEME_FG_ORANGE}",
+	yellow = "${NVIM_COLOR_THEME_FG_YELLOW}",
+	green = "${NVIM_COLOR_THEME_FG_GREEN}",
+	cyan = "${NVIM_COLOR_THEME_FG_CYAN}",
+	blue = "${NVIM_COLOR_THEME_FG_BLUE}",
+	purple = "${NVIM_COLOR_THEME_FG_PURPLE}",
+}
+
+return {
+	status_line_colors = status_line_colors,
+	theme_colors = theme_colors,
+}

@@ -45,4 +45,25 @@ local status_line_colors = {
 	},
 }
 
-return { status_line_colors = status_line_colors }
+local theme_colors = {
+	bg0 = "#14151B",
+	bg1 = "#1B1B20",
+	bg2 = "#20232F",
+	bg3 = "#36373C",
+	fg = "#CED1D9",
+	fg_dark = "#BEC0CB",
+	fg_light = "#D7DAE7",
+
+	red = "#D27078",
+	orange = "#D5916E",
+	yellow = "#D2BA4F",
+	green = "#98C379",
+	cyan = "#5DA3AC",
+	blue = "#7E9FE5",
+	purple = "#B282C0",
+}
+
+return {
+	status_line_colors = status_line_colors,
+	theme_colors = theme_colors,
+}
