@@ -48,4 +48,4 @@ $HOME/.local/node/bin\
 "
 
 [[ -f $HOME/.bashrc ]] && . $HOME/.bashrc
-[[ -d $HOME/.cargo ]] && . "$HOME/.cargo/env"
+[[ -d $HOME/.cargo ]] && [[ -d $HOME/.cargo/env ]] && . "$HOME/.cargo/env"
