@@ -20,3 +20,8 @@
 *.color8: gray
 Sxiv.background: bg
 Sxiv.foreground: blue
+
+Xft.antialias:          1
+Xft.hinting:            1
+Xft.rgba:               none
+Xft.hintstyle:          hintfull
