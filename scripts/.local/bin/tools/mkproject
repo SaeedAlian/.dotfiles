@@ -23,7 +23,7 @@ print_help() {
   echo ""
   echo "This script allows you to create projects in:"
   echo "  react, react-ts, nextjs, rust-bin, c, cpp, go, python, empty"
-  echo "It also initializes git and optionally starts a tmux session for the project."
+  echo "It also optionally starts a tmux session for the project."
   echo "Starts a tmux session named '$PREFIX--<directory>' or attaches to it if it exists."
 }
 
@@ -113,7 +113,6 @@ run: build
     echo ".env
 bin/" >.gitignore
 
-    git init
     break
     ;;
 
@@ -157,7 +156,6 @@ valgrind: build
 
     echo "main.out" >.gitignore
 
-    git init
     break
     ;;
 
@@ -191,7 +189,6 @@ valgrind: build
 
     echo "main.out" >.gitignore
 
-    git init
     break
     ;;
 
@@ -205,7 +202,6 @@ valgrind: build
 /**/**/__pycache__" >.gitignore
 
     python3 -m venv .venv
-    git init
     break
     ;;
 
@@ -213,7 +209,6 @@ valgrind: build
     mkdir $project_name
     cd $project_name
     touch .gitignore
-    git init
     break
     ;;
 
