@@ -22,6 +22,8 @@ mkdir -p $XDG_CONFIG_HOME/bspwm
 mkdir -p $XDG_CONFIG_HOME/dunst
 mkdir -p $XDG_CONFIG_HOME/fastfetch
 mkdir -p $XDG_CONFIG_HOME/git
+mkdir -p $XDG_CONFIG_HOME/gtk-3.0
+mkdir -p $XDG_CONFIG_HOME/gtk-4.0
 mkdir -p $XDG_CONFIG_HOME/mpv
 mkdir -p $XDG_CONFIG_HOME/nvim
 mkdir -p $XDG_CONFIG_HOME/picom
