@@ -19,7 +19,7 @@ set selection-clipboard clipboard
 set scroll-page-aware "true"
 set scroll-full-overlap 0.01
 set scroll-step 100
-set render-loading "false"
+set render-loading "true"
 set scroll-step 100
 
 # zoom settings
@@ -31,7 +31,7 @@ set guioptions "sv"
 # color options and font
 set font "JetBrainsMono Nerd Font 14"
 
-set recolor "false"
+set recolor "true"
 set recolor-reverse-video "true"
 set recolor-keephue "true"
 
@@ -55,3 +55,9 @@ map + zoom best-fit
 map [fullscreen] + zoom best-fit
 map [presentation] + zoom best-fit
 map [index] + zoom best-fit
+
+unmap x
+map x zoom full-down
+map [fullscreen] x zoom full-down
+map [presentation] x zoom full-down
+map [index] x zoom full-down
