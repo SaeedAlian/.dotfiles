@@ -19,6 +19,7 @@ mkdir -p $XDG_CONFIG_HOME/fontconfig
 mkdir -p $XDG_CONFIG_HOME/X11
 mkdir -p $XDG_CONFIG_HOME/alacritty
 mkdir -p $XDG_CONFIG_HOME/bspwm
+mkdir -p $XDG_CONFIG_HOME/dconf
 mkdir -p $XDG_CONFIG_HOME/dunst
 mkdir -p $XDG_CONFIG_HOME/fastfetch
 mkdir -p $XDG_CONFIG_HOME/git
