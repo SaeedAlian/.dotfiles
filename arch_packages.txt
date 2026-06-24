@@ -1,7 +1,6 @@
 neovim
 ttf-jetbrains-mono-nerd
-vazir-code-fonts
-vazirmatn-fonts
+light
 exiftool
 vim
 fzf
@@ -16,6 +15,7 @@ sxhkd
 curl
 wget
 dunst
+libnotify
 docker
 docker-compose
 docker-buildx

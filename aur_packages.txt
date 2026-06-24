@@ -1,4 +1,5 @@
 hiddify-next-bin
 brave-bin
-light
 xfce-polkit
+vazir-code-fonts
+vazirmatn-fonts
