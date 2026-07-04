@@ -1,5 +1,12 @@
 #!/bin/sh
 
+set -a
+. "$HOME/.dotfiles/coreconfig/load.sh"
+. "$HOME/.dotfiles/coreconfig/require_vars.sh"
+set +a
+
+load_init_vars_conf
+
 require_vars \
   DOTFILES_DIR \
   XDG_CONFIG_HOME \
