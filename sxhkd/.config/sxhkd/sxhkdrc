@@ -64,11 +64,11 @@ super + x
 	power_menu
 
 # tmux session menu
-super + s
+super + q
   tmux_fzf_session
 
 # tmux session menu with new terminal instance
-super + control + s
+super + control + q
   tmux_fzf_session -n
 
 
