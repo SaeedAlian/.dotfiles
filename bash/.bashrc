@@ -16,6 +16,7 @@ load_all_colors
 
 ######## options ########
 set -o vi               # vi mode
+set -o ignoreeof        # force use exit
 shopt -s autocd         # change to named directory
 shopt -s cdspell        # autocorrects cd misspellings
 shopt -s expand_aliases # expand aliases
