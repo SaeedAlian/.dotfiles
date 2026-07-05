@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -e
+
+load_trackpoint_conf
+
+TRACKPOINT_ID=$(xinput list | grep -i TrackPoint | sed 's/.*id=\(.*\) *\[.*/\1/')
+
+ACCEL_PROFILE_VALUE="${TRACKPOINT_ACCEL_PROFILE_VALUE:-0 1 0}"
+ACCEL_SPEED_VALUE="${TRACKPOINT_ACCEL_SPEED_VALUE:--0.100000}"
+NATURAL_SCROLLING_VALUE="${TRACKPOINT_NATURAL_SCROLLING_VALUE:-0}"
+
+xinput set-prop $TRACKPOINT_ID "libinput Accel Profile Enabled" $ACCEL_PROFILE_VALUE
+xinput set-prop $TRACKPOINT_ID "libinput Accel Speed" $ACCEL_SPEED_VALUE
+xinput set-prop $TRACKPOINT_ID "libinput Natural Scrolling Enabled" $NATURAL_SCROLLING_VALUE
+
+notify-send -u normal -t 1500 "TrackPoint settings updated"

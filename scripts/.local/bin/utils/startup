@@ -4,6 +4,7 @@ run() {
   bluetooth_menu --off
   toggle_touchscreen --off
   touchpad_setup
+  trackpad_setup
 }
 
 if [ "$1" == "--force" ]; then

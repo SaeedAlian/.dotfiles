@@ -39,6 +39,12 @@ load_touchpad_conf() {
   set +a
 }
 
+load_trackpoint_conf() {
+  set -a
+  . "$CORECONFIG_DIR/trackpoint.conf"
+  set +a
+}
+
 load_user_vars_conf() {
   set -a
   . "$CORECONFIG_DIR/user_vars.conf"
@@ -120,6 +126,7 @@ load_all_env_conf() {
   load_background_conf
   load_user_vars_conf
   load_touchpad_conf
+  load_trackpoint_conf
   load_window_classes_conf
   load_tmux_vars_conf
 }
