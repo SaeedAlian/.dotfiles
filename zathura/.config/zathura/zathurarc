@@ -18,9 +18,8 @@ set selection-clipboard clipboard
 # scroll settings
 set scroll-page-aware "true"
 set scroll-full-overlap 0.01
-set scroll-step 100
+set scroll-step 5
 set render-loading "true"
-set scroll-step 100
 
 # zoom settings
 set zoom-min 10
@@ -40,6 +39,7 @@ set recolor-keephue "true"
 unmap f
 unmap =
 unmap +
+unmap d
 
 map f toggle_fullscreen
 map [fullscreen] f toggle_fullscreen
@@ -61,3 +61,8 @@ map x zoom full-down
 map [fullscreen] x zoom full-down
 map [presentation] x zoom full-down
 map [index] x zoom full-down
+
+map k feedkeys "20<Up>"
+map j feedkeys "20<Down>"
+map l feedkeys "5<Right>"
+map h feedkeys "5<Left>"
