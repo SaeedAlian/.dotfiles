@@ -124,58 +124,46 @@ alias typcomp="dc-typst typst compile"
 ######## prompt ########
 
 parse_git_dirty() {
-  STATUS="$(git status 2>/dev/null)"
-
-  if [[ $? -ne 0 ]]; then
+  STATUS="$(git status 2>/dev/null)" || {
     printf ""
     return
-  elif echo ${STATUS} | grep -c "tree clean" &>/dev/null; then
+  }
+  echo "$STATUS" | grep -q "tree clean" && {
     printf ""
     return
-  else
-    printf " ("
-  fi
+  }
 
-  if echo ${STATUS} | grep -c "renamed:" &>/dev/null; then printf " r"; else printf ""; fi
-  if echo ${STATUS} | grep -c "branch is ahead:" &>/dev/null; then printf " !"; else printf ""; fi
-  if echo ${STATUS} | grep -c "new file::" &>/dev/null; then printf " n"; else printf ""; fi
-  if echo ${STATUS} | grep -c "Untracked files:" &>/dev/null; then printf " u"; else printf ""; fi
-  if echo ${STATUS} | grep -c "modified:" &>/dev/null; then printf " m"; else printf ""; fi
-  if echo ${STATUS} | grep -c "deleted:" &>/dev/null; then printf " d"; else printf ""; fi
-  printf " )"
+  flags=""
+  echo "$STATUS" | grep -q "renamed:" && flags="${flags}r"
+  echo "$STATUS" | grep -q "branch is ahead:" && flags="${flags}!"
+  echo "$STATUS" | grep -q "new file:" && flags="${flags}n"
+  echo "$STATUS" | grep -q "Untracked files:" && flags="${flags}u"
+  echo "$STATUS" | grep -q "modified:" && flags="${flags}m"
+  echo "$STATUS" | grep -q "deleted:" && flags="${flags}d"
+
+  [ -n "$flags" ] && printf " (%s)" "$flags"
 }
 
 parse_git_branch() {
   BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
-
-  if [[ -z $BRANCH ]]; then
-    printf ""
-    return
-  else
-    printf "($BRANCH)"
-  fi
+  [ -n "$BRANCH" ] && printf " (%s)" "$BRANCH"
 }
 
 parse_logo() {
-  OS="$(cat /etc/os-release | grep "NAME=" | head -n 1 | sed 's/.*=//' | sed 's/\"//g')"
+  OS="$(sed -n 's/^NAME="\?\([^"]*\)"\?$/\1/p' /etc/os-release | head -n1)"
 
   case "$OS" in
-  *Fedora*)
-    echo "󰣛"
-    ;;
-  *Artix*)
-    echo ""
-    ;;
-  *Arch*)
-    echo "󰣇"
-    ;;
-  *Void*)
-    echo ""
-    ;;
-  *)
-    echo "󰌽"
-    ;;
+  *Fedora*) printf " 󰣛 " ;;
+  *Artix*) printf "  " ;;
+  *Devuan*) printf "  " ;;
+  *Arch*) printf " 󰣇 " ;;
+  *Void*) printf "  " ;;
+  *) printf " 󰌽 " ;;
   esac
 }
 
-PS1="\[\033[1;34m\] \$(parse_logo) \[\e[1;37m\] \W \[\e[1;32m\]\$(parse_git_branch)\[\033[31m\]\$(parse_git_dirty) \[\e[1;34m\] \[\033[00m\]"
+parse_container_flag() {
+  in_container && printf "(cont)"
+}
+
+PS1="\[\033[1;34m\]\$(parse_logo)\[\e[1;34m\]\$(parse_container_flag)\[\e[1;37m\] \W\[\e[1;32m\]\$(parse_git_branch)\[\033[31m\]\$(parse_git_dirty)\[\e[1;34m\] \[\e[1;34m\] \[\033[00m\]"
