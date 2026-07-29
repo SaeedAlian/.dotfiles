@@ -74,6 +74,8 @@ bspc rule -a Zathura desktop='^2' state=tiled
 bspc rule -a "org.pwmt.zathura" desktop='^2' state=tiled
 bspc rule -a "app.hiddify.com" split_ratio=0.6 desktop='^6' state=tiled split_dir=east
 bspc rule -a "App.hiddify.com" split_ratio=0.6 desktop='^6' state=tiled split_dir=east
+bspc rule -a "Throne" split_ratio=0.6 desktop='^6' state=tiled split_dir=east
+bspc rule -a "throne" split_ratio=0.6 desktop='^6' state=tiled split_dir=east
 bspc rule -a TelegramDesktop desktop='^6' split_ratio=0.4 split_dir=west
 bspc rule -a 'VirtualBox Manager' desktop='^7' state=tiled
 bspc rule -a Alacritty rectangle=950x650+0+0
