@@ -87,7 +87,10 @@ toggle_simcard() {
 show_menu() {
   PASSWORD_FILE=$(mktemp)
 
-  notify-send -t 2000 "Scanning Wi-Fi networks..."
+  notify-send -t 3000 "Scanning Wi-Fi networks..."
+
+  nmcli device wifi rescan
+  sleep 3
 
   wifi_list=$(nmcli --fields "SECURITY,SSID" device wifi list |
     sed 1d | sed 's/  */ /g' |
