@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-load_bar_colors
-
 require_vars BAR_COLOR_RED BAR_COLOR_BLUE
 
 s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')

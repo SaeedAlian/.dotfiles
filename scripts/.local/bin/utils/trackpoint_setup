@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-load_trackpoint_conf
+load_desktop_env -e
 
 TRACKPOINT_ID=$(xinput list | grep -i TrackPoint | sed 's/.*id=\(.*\) *\[.*/\1/')
 

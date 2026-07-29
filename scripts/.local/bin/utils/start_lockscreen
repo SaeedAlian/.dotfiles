@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-load_background_conf
+load_desktop_env
 require_vars BACKGROUND_PIC_NAME LOCKSCREENS_DIR
 
 export LOCKSCREEN_WALLS_DIR="$LOCKSCREENS_DIR"

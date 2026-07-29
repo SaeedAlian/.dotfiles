@@ -1,14 +1,6 @@
 #!/bin/sh
 
-set -a
-. "$HOME/.dotfiles/coreconfig/load.sh"
-. "$HOME/.dotfiles/coreconfig/require_vars.sh"
-set +a
-
-load_init_vars_conf
-load_desktop_vars_conf
-load_window_classes_conf
-load_bspwm_colors
+require_vars_group init desktop colors
 
 SCREEN_TIMEOUT=${SCREEN_TIMEOUT:-600}
 XSET_DELAY=${XSET_DELAY:-400}

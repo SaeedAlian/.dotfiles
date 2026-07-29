@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-load_desktop_vars_conf
+RESTRICTED_NODES=(
+  "Yad"
+  "ffplay"
+)
 
-RESTRICTED_NODES=()
-if [ -n "$BSPWM_FLOAT_POS_RESTRICTED_NODES" ]; then
-  if [ "${#BSPWM_FLOAT_POS_RESTRICTED_NODES[@]}" -gt 0 ]; then
-    RESTRICTED_NODES=("${BSPWM_FLOAT_POS_RESTRICTED_NODES[@]}")
-  fi
+if [[ -n "$TERMINAL_FLOAT_CLASS" ]]; then
+  RESTRICTED_NODES+=("$TERMINAL_FLOAT_CLASS")
 fi
 
-SCREEN_W=${BSPWM_SCREEN_W:-1920}
-SCREEN_H=${BSPWM_SCREEN_H:-1080}
+SCREEN_W=$(xdpyinfo 2>/dev/null | grep dimension | awk '{print $2}' | sed 's/\(.*\)x.*/\1/')
+SCREEN_H=$(xdpyinfo 2>/dev/null | grep dimension | awk '{print $2}' | sed 's/.*x\(.*\)/\1/')
 
 floatrules_str=$(bspc rule -l | grep "state=floating")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-load_private_vars_conf
+load_private_env
 
 require_vars GITHUB_USERNAME GITHUB_PAT
 

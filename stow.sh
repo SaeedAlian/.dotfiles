@@ -1,20 +1,17 @@
 #!/bin/sh
 
-set -a
 . "$HOME/.dotfiles/coreconfig/load.sh"
 . "$HOME/.dotfiles/coreconfig/require_vars.sh"
-set +a
 
-load_init_vars_conf
+load_init_env
 
 require_vars \
-  DOTFILES_DIR \
   XDG_CONFIG_HOME \
   SCRIPTS_DIR \
   CUSTOM_DOCKER_CONTAINERS_PATH \
   XDG_DATA_HOME
 
-cd "$DOTFILES_DIR"
+cd "$HOME/.dotfiles"
 STOW_FLAGS=""
 
 mkdir -p $HOME/.themes

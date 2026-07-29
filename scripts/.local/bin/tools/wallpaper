@@ -6,7 +6,6 @@ require_vars \
   LOCKSCREENS_DIR \
   START_LOCKSCREEN_SCRIPT_PATH \
   BACKGROUND_SCRIPT_PATH \
-  DOTFILES_DIR \
   CORECONFIG_DIR
 
 mkdir -p $WALLPAPERS_DIR
@@ -192,7 +191,7 @@ set_background() {
     print_err "Selected file $image_name is not an image or is not jpg."
   fi
 
-  sed -i "s/BACKGROUND_PIC_NAME=.*/\BACKGROUND_PIC_NAME=\"$image_name\"/" "$CORECONFIG_DIR/background.conf"
+  sed -i "s/BACKGROUND_PIC_NAME=.*/\BACKGROUND_PIC_NAME=\"$image_name\"/" "$CORECONFIG_DIR/vars/background.conf"
 
   echo "Scripts updated."
   $BACKGROUND_SCRIPT_PATH &
@@ -209,7 +208,7 @@ set_background_mode() {
     print_err "Wrong option"
   fi
 
-  sed -i "s/BACKGROUND_PIC_MODE=.*/\BACKGROUND_PIC_MODE=\"--bg-$image_bg_mode\"/" "$CORECONFIG_DIR/background.conf"
+  sed -i "s/BACKGROUND_PIC_MODE=.*/\BACKGROUND_PIC_MODE=\"--bg-$image_bg_mode\"/" "$CORECONFIG_DIR/vars/background.conf"
 
   echo "Scripts updated."
   $BACKGROUND_SCRIPT_PATH &

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-SCREEN_W=${BSPWM_SCREEN_W:-1920}
-SCREEN_H=${BSPWM_SCREEN_H:-1080}
+SCREEN_W=$(xdpyinfo 2>/dev/null | grep dimension | awk '{print $2}' | sed 's/\(.*\)x.*/\1/')
+SCREEN_H=$(xdpyinfo 2>/dev/null | grep dimension | awk '{print $2}' | sed 's/.*x\(.*\)/\1/')
 
 q=$(bspc query -T -n)
 id=$(echo "$q" | jq -r '.id')

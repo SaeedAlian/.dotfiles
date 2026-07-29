@@ -5,14 +5,15 @@
 
 ######## source env functions ########
 
-set -a
-. "$CORECONFIG_DIR/load.sh"
-. "$CORECONFIG_DIR/require_vars.sh"
-set +a
+. "$HOME/.dotfiles/coreconfig/check_container.sh"
 
-# load all
-load_all_env_conf
-load_all_colors
+if in_container; then
+  set -a
+  . "$HOME/.dotfiles/coreconfig/load_all_and_require.sh"
+  set +a
+
+  load_all_and_require true
+fi
 
 ######## options ########
 set -o vi               # vi mode
@@ -29,10 +30,8 @@ export HISTCONTROL="ignoredups:erasedups"          # no duplicate entries
 export PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # makes history immediately write the current/new lines to the history file
 
 ######## launch x server ########
-if [[ "$(tty)" = "/dev/tty1" ]]; then
-  startx "$XDG_CONFIG_HOME/X11/xinitrc"
-  setxkbmap -layout us,ir -option 'grp:alt_shift_toggle'
-  setxkbmap -option caps:none
+if ! in_container && [[ "$(tty)" = "/dev/tty1" ]]; then
+  startx "$XINITRC"
 fi
 
 ######## functions ########

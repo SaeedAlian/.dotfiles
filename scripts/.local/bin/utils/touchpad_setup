@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-load_touchpad_conf
+load_desktop_env -e
 
 TOUCHPAD_ID=$(xinput list | grep -i Touchpad | sed 's/.*id=\(.*\) *\[.*/\1/')
 
