@@ -33,10 +33,6 @@ super + shift + q
 super + t
   yad_calendar
 
-# vpn
-super + shift + v
-  $TERMINAL --class "$TERMINAL_FLOAT_CLASS" -e sudo bash -c "$VPN &"
-
 # webcam
 super + shift + control + w
   webcam
