@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
 require_vars BAR_COLOR_RED BAR_COLOR_BLUE
 
 s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')

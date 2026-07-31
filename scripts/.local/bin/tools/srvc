@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
-SV_DIR="/etc/runit/sv"
-ACTIVE_DIR="/etc/runit/runsvdir/default"
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_DATA_HOME
+
+SV_DIRS=(
+  "/etc/sv"
+  "$XDG_DATA_HOME/sv"
+  "/usr/share/runit/sv.now"
+)
+ACTIVE_DIR="/etc/runit/runsvdir/default"
 
 print_help() {
   help="A simple command-line tool for managing runit services.
@@ -16,33 +20,20 @@ print_help() {
 Usage: $(basename "$0") [options] [service]
 
 Options:
-  -l, --list             List all available services and their status (active/inactive).
+  -l, --list                List all available services and their status.
 
-  -a, --activate <name>  Activate (enable) the specified service by linking it
-                         into the runsvdir default directory.
+  -a, --activate <name>     Activate the specified service.
 
-  -d, --deactivate <name>  Deactivate (disable) the specified service by removing
-                           its symlink from the runsvdir default directory.
+  -d, --deactivate <name>   Deactivate the specified service.
 
-  -h, --help             Show this help message and exit.
-
-Arguments:
-  service                The name of the service (must exist in $SV_DIR).
-
-Examples:
- • List all services with their status:
-   $(basename "$0") -l
-
- • Activate the service 'nginx':
-   $(basename "$0") -a nginx
-
- • Deactivate the service 'nginx':
-   $(basename "$0") -d nginx
+  -h, --help                Show this help message and exit.
 
 Notes:
- • Services are defined in: $SV_DIR
- • Active services are symlinked into: $ACTIVE_DIR
- • This script may require sudo privileges to activate or deactivate services.
+ • Services are searched in:
+$(printf "   - %s\n" "${SV_DIRS[@]}")
+
+ • Active services are linked into:
+   $ACTIVE_DIR
 "
 
   if command -v less >/dev/null 2>&1; then
@@ -52,93 +43,97 @@ Notes:
   fi
 }
 
+find_service() {
+  local srv="$1"
+
+  for dir in "${SV_DIRS[@]}"; do
+    if [ -e "$dir/$srv" ]; then
+      echo "$dir/$srv"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
 list_services() {
   printf "%-30s | %-10s\n" "Service" "Status"
   printf "%-30s-+-%-10s\n" "------------------------------" "----------"
 
-  for service in "$SV_DIR"/*; do
-    name=$(basename "$service")
-    if [ -L "$ACTIVE_DIR/$name" ]; then
-      status="active"
-    else
-      status="inactive"
-    fi
-    printf "%-30s | %-10s\n" "$name" "$status"
+  declare -A seen
+
+  for dir in "${SV_DIRS[@]}"; do
+    [ -d "$dir" ] || continue
+
+    for service in "$dir"/*; do
+      [ -e "$service" ] || continue
+      name=$(basename "$service")
+
+      if [[ ${seen[$name]} ]]; then
+        continue
+      fi
+
+      seen[$name]=1
+
+      if [ -L "$ACTIVE_DIR/$name" ]; then
+        status="active"
+      else
+        status="inactive"
+      fi
+
+      printf "%-30s | %-10s\n" "$name" "$status"
+    done
   done
 }
 
 activate_service() {
-  srv=$1
-  found=0
+  local srv="$1"
+  service_path=$(find_service "$srv")
 
-  for service in "$SV_DIR"/*; do
-    name=$(basename "$service")
-    if [ "$name" == "$srv" ]; then
-      found=1
-
-      if [ -L "$ACTIVE_DIR/$name" ]; then
-        print_err "Service is already active"
-      fi
-    fi
-  done
-
-  if [ $found != 1 ]; then
+  if [ $? -ne 0 ]; then
     print_err "Service not found"
   fi
 
-  sudo ln -s "$SV_DIR/$srv" "$ACTIVE_DIR"
+  if [ -L "$ACTIVE_DIR/$srv" ]; then
+    print_err "Service is already active"
+  fi
+
+  sudo ln -s "$service_path" "$ACTIVE_DIR"
+
   echo "Service $srv activated"
 }
 
 deactivate_service() {
-  srv=$1
-  found=0
+  local srv="$1"
 
-  for service in "$SV_DIR"/*; do
-    name=$(basename "$service")
-    if [ "$name" == "$srv" ]; then
-      found=1
-
-      if ! [ -L "$ACTIVE_DIR/$name" ]; then
-        print_err "Service is already deactive"
-      fi
-    fi
-  done
-
-  if [ $found != 1 ]; then
-    print_err "Service not found"
+  if ! [ -L "$ACTIVE_DIR/$srv" ]; then
+    print_err "Service is already deactive"
   fi
 
   sudo rm -rf "$ACTIVE_DIR/$srv"
   echo "Service $srv deactivated"
 }
 
-arg=$1
-
-case $arg in
+case "$1" in
 --list | -l)
   list_services
   ;;
-
 --activate | -a)
-  srv=$2
-  if [ -z "$srv" ]; then
+  if [ -z "$2" ]; then
     print_err "Service is empty"
   fi
-
-  activate_service "$srv"
+  activate_service "$2"
   ;;
-
 --deactivate | -d)
-  srv=$2
-  if [ -z "$srv" ]; then
+  if [ -z "$2" ]; then
     print_err "Service is empty"
   fi
-
-  deactivate_service "$srv"
+  deactivate_service "$2"
   ;;
 --help | -h)
   print_help
-  exit 0
+  ;;
+*)
+  print_help
   ;;
 esac

@@ -1,69 +1,155 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-. "$HOME/.dotfiles/coreconfig/load.sh"
-. "$HOME/.dotfiles/coreconfig/require_vars.sh"
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
 
 load_init_env
 
 require_vars \
   XDG_CONFIG_HOME \
   SCRIPTS_DIR \
-  CUSTOM_DOCKER_CONTAINERS_PATH \
   XDG_DATA_HOME
 
-cd "$HOME/.dotfiles"
+cd "$DOTFILES_DIR"
 STOW_FLAGS=""
+TARGET_HOME="$USER_HOME"
 
-mkdir -p $HOME/.themes
-mkdir -p $SCRIPTS_DIR
-mkdir -p $CUSTOM_DOCKER_CONTAINERS_PATH
-mkdir -p $XDG_DATA_HOME/applications
-mkdir -p $XDG_CONFIG_HOME/fontconfig
+CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
+SCRIPTS="scripts"
+RUNIT_SERVICES="thinkfan"
+DESKTOP_PACKAGES="X11 alacritty bspwm dconf dunst fonts mpv picom polybar redshift rofi sxhkd sxiv yazi zathura"
 
-mkdir -p $XDG_CONFIG_HOME/X11
-mkdir -p $XDG_CONFIG_HOME/alacritty
-mkdir -p $XDG_CONFIG_HOME/bspwm
-mkdir -p $XDG_CONFIG_HOME/dconf
-mkdir -p $XDG_CONFIG_HOME/dunst
-mkdir -p $XDG_CONFIG_HOME/fastfetch
-mkdir -p $XDG_CONFIG_HOME/git
-mkdir -p $XDG_CONFIG_HOME/gtk-3.0
-mkdir -p $XDG_CONFIG_HOME/gtk-4.0
-mkdir -p $XDG_CONFIG_HOME/mpv
-mkdir -p $XDG_CONFIG_HOME/nvim
-mkdir -p $XDG_CONFIG_HOME/picom
-mkdir -p $XDG_CONFIG_HOME/polybar
-mkdir -p $XDG_CONFIG_HOME/redshift
-mkdir -p $XDG_CONFIG_HOME/rofi
-mkdir -p $XDG_CONFIG_HOME/sxhkd
-mkdir -p $XDG_CONFIG_HOME/sxiv
-mkdir -p $XDG_CONFIG_HOME/tmux
-mkdir -p $XDG_CONFIG_HOME/yazi
-mkdir -p $XDG_CONFIG_HOME/zathura
-mkdir -p $XDG_CONFIG_HOME/qt5ct/colors
-mkdir -p $XDG_CONFIG_HOME/qt6ct/colors
+usage() {
+  echo "Usage: $0 [--home=/path/to/target/home] group [group ...]"
+  echo "Available groups: core desktop scripts runit"
+}
 
-# stow defaults
-stow $STOW_FLAGS X11
-stow $STOW_FLAGS alacritty
-stow $STOW_FLAGS bash
-stow $STOW_FLAGS bspwm
-stow $STOW_FLAGS dconf
-stow $STOW_FLAGS dockerscripts
-stow $STOW_FLAGS dunst
-stow $STOW_FLAGS fastfetch
-stow $STOW_FLAGS fonts
-stow $STOW_FLAGS git
-stow $STOW_FLAGS mpv
-stow $STOW_FLAGS nvim
-stow $STOW_FLAGS picom
-stow $STOW_FLAGS polybar
-stow $STOW_FLAGS redshift
-stow $STOW_FLAGS rofi
-stow $STOW_FLAGS scripts
-stow $STOW_FLAGS sxhkd
-stow $STOW_FLAGS sxiv
-stow $STOW_FLAGS tmux
-stow $STOW_FLAGS userconf
-stow $STOW_FLAGS yazi
-stow $STOW_FLAGS zathura
+case $1 in
+-h | --help)
+  usage
+  exit 0
+  ;;
+esac
+
+set -- "$@"
+GROUP_ARGS=""
+group_count=0
+
+for arg in "$@"; do
+  case "$arg" in
+  --home=*)
+      TARGET_HOME="${arg#--home=}"
+      ;;
+  core | desktop | scripts | runit)
+    GROUP_ARGS="${GROUP_ARGS}${arg} "
+    group_count=$((group_count + 1))
+    ;;
+  *)
+    print_err "Unknown group: $arg"
+    ;;
+  esac
+done
+
+if [ "$group_count" -eq 0 ]; then
+  print_err "Groups are empty, please specify at least one group"
+fi
+
+if [ ! -d "$TARGET_HOME" ]; then
+  print_err "Target home does not exist: $TARGET_HOME"
+fi
+
+set -- $GROUP_ARGS
+
+STOW_FLAGS="$STOW_FLAGS -t $TARGET_HOME"
+
+if [ "$TARGET_HOME" != "$HOME" ]; then
+  XDG_CONFIG_HOME="$TARGET_HOME/.config"
+  XDG_DATA_HOME="$TARGET_HOME/.local/share"
+  SCRIPTS_DIR="$TARGET_HOME/.local/scripts"
+fi
+
+setup_core_dirs() {
+  mkdir -p "$TARGET_HOME/.themes"
+  mkdir -p "$XDG_DATA_HOME/applications"
+
+  mkdir -p "$XDG_CONFIG_HOME/fastfetch"
+  mkdir -p "$XDG_CONFIG_HOME/git"
+  mkdir -p "$XDG_CONFIG_HOME/gtk-3.0"
+  mkdir -p "$XDG_CONFIG_HOME/gtk-4.0"
+  mkdir -p "$XDG_CONFIG_HOME/nvim"
+  mkdir -p "$XDG_CONFIG_HOME/qt5ct/colors"
+  mkdir -p "$XDG_CONFIG_HOME/qt6ct/colors"
+  mkdir -p "$XDG_CONFIG_HOME/tmux"
+}
+
+setup_scripts_dirs() {
+  mkdir -p "$SCRIPTS_DIR"
+}
+
+setup_runit_services_dirs() {
+  mkdir -p "$XDG_CONFIG_HOME/thinkfan"
+  mkdir -p "$XDG_DATA_HOME/sv/thinkfan"
+}
+
+setup_desktop_dirs() {
+  mkdir -p "$XDG_CONFIG_HOME/X11"
+  mkdir -p "$XDG_CONFIG_HOME/alacritty"
+  mkdir -p "$XDG_CONFIG_HOME/bspwm"
+  mkdir -p "$XDG_CONFIG_HOME/dconf"
+  mkdir -p "$XDG_CONFIG_HOME/dunst"
+  mkdir -p "$XDG_CONFIG_HOME/fontconfig"
+  mkdir -p "$XDG_CONFIG_HOME/mpv"
+  mkdir -p "$XDG_CONFIG_HOME/picom"
+  mkdir -p "$XDG_CONFIG_HOME/polybar"
+  mkdir -p "$XDG_CONFIG_HOME/redshift"
+  mkdir -p "$XDG_CONFIG_HOME/rofi"
+  mkdir -p "$XDG_CONFIG_HOME/sxhkd"
+  mkdir -p "$XDG_CONFIG_HOME/sxiv"
+  mkdir -p "$XDG_CONFIG_HOME/yazi"
+  mkdir -p "$XDG_CONFIG_HOME/zathura"
+}
+
+stow_core() {
+  setup_core_dirs
+  for pkg in $CORE_PACKAGES; do
+    stow $STOW_FLAGS "$pkg"
+  done
+}
+
+stow_desktop() {
+  setup_desktop_dirs
+  for pkg in $DESKTOP_PACKAGES; do
+    stow $STOW_FLAGS "$pkg"
+  done
+}
+
+stow_runit_services() {
+  setup_runit_services_dirs
+  for srv in $RUNIT_SERVICES; do
+    stow $STOW_FLAGS "$srv"
+  done
+}
+
+stow_scripts() {
+  setup_scripts_dirs
+  stow $STOW_FLAGS scripts
+}
+
+for group in "$@"; do
+  case "$group" in
+  core)
+    stow_core
+    ;;
+  desktop)
+    stow_desktop
+    ;;
+  runit)
+    stow_runit_services
+    ;;
+  scripts)
+    stow_scripts
+    ;;
+  esac
+done

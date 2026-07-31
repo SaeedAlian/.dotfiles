@@ -1,16 +1,14 @@
 #!/usr/bin/env bash
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
 SIMCARD_MODULE="cdc-wdm0"
 TERMINAL="${TERMINAL:-alacritty}"
 TERMINAL_FLOAT_CLASS="${TERMINAL_FLOAT_CLASS:-"Alacritty-float"}"
 DMENU_CMD="rofi -dmenu -i -p"
-
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
 
 print_help() {
   echo "Network Manager Script"

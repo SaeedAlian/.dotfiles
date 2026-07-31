@@ -1,8 +1,11 @@
 #!/bin/sh
 
 set -a
-. "$HOME/.dotfiles/coreconfig/load_all_and_require.sh"
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="$HOME/.dotfiles"
 set +a
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
 
 load_all_and_require true
 

@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-require_vars MUSICS_DIR
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars MUSICS_DIR
 
 print_help() {
   echo "Usage: $(basename "$0") <album_directory>"

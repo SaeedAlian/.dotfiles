@@ -23,8 +23,8 @@ while IFS= read -r line; do
     name=$(echo "$line" | sed "s/\(.*:\).*/\1/" | sed 's/://')
     rectangle=$(echo "$line" | grep -oP "rectangle=\K[0-9x+]+")
 
-    rect_w=$(echo "$rectangle" | awk -F'x|+' '{print $1}')
-    rect_h=$(echo "$rectangle" | awk -F'x|+' '{print $2}')
+    rect_w=$(echo "$rectangle" | awk -F'[x+]' '{print $1}')
+    rect_h=$(echo "$rectangle" | awk -F'[x+]' '{print $2}')
 
     floatrules_names+=("$name")
     floatrules_rect_widths+=("$rect_w")

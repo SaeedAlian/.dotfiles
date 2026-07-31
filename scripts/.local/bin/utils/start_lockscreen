@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-load_desktop_env
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+load_desktop_env -e
 require_vars BACKGROUND_PIC_NAME LOCKSCREENS_DIR
 
-export LOCKSCREEN_WALLS_DIR="$LOCKSCREENS_DIR"
-export BGNAME="$BACKGROUND_PIC_NAME"
-
-i3lock -k -f -e -i "$LOCKSCREEN_WALLS_DIR/$BGNAME.png"
+i3lock -k -f -e -i "$LOCKSCREENS_DIR/$BACKGROUND_PIC_NAME.png"

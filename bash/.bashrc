@@ -3,16 +3,17 @@
 # if not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-######## source env functions ########
+######## source env ########
 
-. "$HOME/.dotfiles/coreconfig/check_container.sh"
+set -a
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="$USER_HOME/.dotfiles"
+set +a
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
 
 if in_container; then
-  set -a
-  . "$HOME/.dotfiles/coreconfig/load_all_and_require.sh"
-  set +a
-
-  load_all_and_require true
+  load_all_and_require_for_distrobox true
 fi
 
 ######## options ########
@@ -77,6 +78,7 @@ bind 'set echo-control-characters off'
 bind '"\t":menu-complete'
 bind '"\e[Z":menu-complete-backward'
 bind '"\C-r":"bettercd\n"'
+bind '"\C-e":"dbxctl enter\n"'
 bind '"\C-f":"tmux_fzf_session\n"'
 bind '"\C-l":"clear\n"'
 bind '"\C-a":"bash_hsearch 3000\n"'
@@ -95,11 +97,12 @@ alias v="${EDITOR:-vim}"
 alias v.="${EDITOR:-vim} ."
 alias fm="${FILEMANAGER:-thunar}"
 
-alias ex="arextract"
 alias bcd="bettercd"
 alias wlp="wallpaper"
-alias orgtel="file_organizer $HOME/downloads/telegram"
-alias orgdown="file_organizer $HOME/downloads"
+alias box="dbxctl"
+alias dbx="distrobox"
+alias orgtel="file_organizer $USER_HOME/downloads/telegram"
+alias orgdown="file_organizer $USER_HOME/downloads"
 alias mkpj="mkdoc project"
 alias mknt="mkdoc note"
 alias mkwrk="mkdoc work"
@@ -111,15 +114,7 @@ alias fastfetch="fastfetch -l ${FAST_FETCH_LOGO:-artix_small}"
 alias neofetch="fastfetch"
 
 alias pac="sudo pacman"
-
-alias rv="sudo bash -c '${VPN:?VPN is not set} &'"
-
-alias pandoc="dc-pandoc pandoc"
-alias md2pdf="dc-pandoc md2pdf"
-alias pdflatex="dc-texlive pdflatex"
-alias xelatex="dc-texlive xelatex"
-alias typst="dc-typst typst"
-alias typcomp="dc-typst typst compile"
+alias apt="sudo apt"
 
 ######## prompt ########
 

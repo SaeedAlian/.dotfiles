@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
 require_vars \
   WALLPAPERS_DIR \
   LOCKSCREENS_DIR \
@@ -8,19 +13,12 @@ require_vars \
   BACKGROUND_SCRIPT_PATH \
   CORECONFIG_DIR
 
-mkdir -p $WALLPAPERS_DIR
-mkdir -p $LOCKSCREENS_DIR
+mkdir -p "$WALLPAPERS_DIR"
+mkdir -p "$LOCKSCREENS_DIR"
 
 TEMP_DIR="/tmp/wallpaper_script_tmp_dir"
 WALLPAPERS_TEMP_DIR="$TEMP_DIR/walls"
 LOCKSCREENS_TEMP_DIR="$TEMP_DIR/lockscreens"
-
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
 
 print_help() {
   help="A command-line tool to manage wallpapers and lockscreen images.
@@ -89,24 +87,24 @@ Notes:
 
 # selects an image inside WALLPAPERS directory and creates a lockscreen image based on it
 create_lockscreen_image() {
-  image_name=$1
-  silent_flag=$2
+  image_name="$1"
+  silent_flag="$2"
   image_path="$WALLPAPERS_DIR/$image_name.jpg"
 
   if [ ! -f "$image_path" ]; then
     print_err "Wallpaper with name: $image_name doesn't exist inside wallpapers directory."
   fi
 
-  extension=${image_path##*.}
-  mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+  extension="${image_path##*.}"
+  mimetype="$(file -b --mime-type "$image_path" | sed 's/\/.*//g')"
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
     print_err "Selected file $image_name is not an image or is not jpg."
   fi
 
-  image_basename=${image_name%.*}
+  image_basename="${image_name%.*}"
 
-  lockscreen_path=$LOCKSCREENS_DIR/$image_basename.png
+  lockscreen_path="$LOCKSCREENS_DIR/$image_basename.png"
 
   if [ -f "$lockscreen_path" ]; then
     [ "$silent_flag" -eq 0 ] && echo "Lockscreen of image $image_name already exists."
@@ -135,15 +133,15 @@ set_all_lockscreens() {
 
 # converts an image to jpg and moves it into WALLPAPERS directory
 add_wall_image() {
-  image_path=$1
-  new_image_prefix=$2
+  image_path="$1"
+  new_image_prefix="$2"
 
   if [ ! -f "$image_path" ]; then
     print_err "File doesn't exist."
   fi
 
-  extension=${image_path##*.}
-  mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+  extension="${image_path##*.}"
+  mimetype="$(file -b --mime-type "$image_path" | sed 's/\/.*//g')"
 
   if [ "$mimetype" != "image" ]; then
     print_err "Selected file is not an image."
@@ -152,8 +150,8 @@ add_wall_image() {
   index=0
   for f in "$WALLPAPERS_DIR"/*.jpg; do
     [ -f "$f" ] || continue
-    fname=$(basename "$f")
-    prefix=${fname%_*}
+    fname="$(basename "$f")"
+    prefix="${fname%_*}"
 
     if [ "$prefix" == "$new_image_prefix" ]; then
       index=$((index + 1))
@@ -177,15 +175,15 @@ add_wall_image() {
 
 # sets the background variable name
 set_background() {
-  image_name=$1
-  image_path=$WALLPAPERS_DIR/$image_name.jpg
+  image_name="$1"
+  image_path="$WALLPAPERS_DIR/$image_name.jpg"
 
   if [ ! -f "$image_path" ]; then
     print_err "Wallpaper with name: $image_name.jpg doesn't exist inside wallpapers directory."
   fi
 
-  extension=${image_path##*.}
-  mimetype=$(file -b --mime-type "$image_path" | sed 's/\/.*//g')
+  extension="${image_path##*.}"
+  mimetype="$(file -b --mime-type "$image_path" | sed 's/\/.*//g')"
 
   if [ "$mimetype" != "image" ] || [ "$extension" != "jpg" ]; then
     print_err "Selected file $image_name is not an image or is not jpg."
@@ -194,7 +192,7 @@ set_background() {
   sed -i "s/BACKGROUND_PIC_NAME=.*/\BACKGROUND_PIC_NAME=\"$image_name\"/" "$CORECONFIG_DIR/vars/background.conf"
 
   echo "Scripts updated."
-  $BACKGROUND_SCRIPT_PATH &
+  "$BACKGROUND_SCRIPT_PATH" &
   pkill xss-lock
   xss-lock -l -- "$START_LOCKSCREEN_SCRIPT_PATH" &
   echo "Wallpaper updated successfully."
@@ -202,7 +200,7 @@ set_background() {
 
 # sets the background mode
 set_background_mode() {
-  image_bg_mode=$1
+  image_bg_mode="$1"
 
   if [ "$image_bg_mode" != "center" ] && [ $image_bg_mode != "max" ] && [ $image_bg_mode != "tile" ] && [ $image_bg_mode != "fill" ]; then
     print_err "Wrong option"
@@ -211,15 +209,15 @@ set_background_mode() {
   sed -i "s/BACKGROUND_PIC_MODE=.*/\BACKGROUND_PIC_MODE=\"--bg-$image_bg_mode\"/" "$CORECONFIG_DIR/vars/background.conf"
 
   echo "Scripts updated."
-  $BACKGROUND_SCRIPT_PATH &
+  "$BACKGROUND_SCRIPT_PATH" &
   echo "Wallpaper updated successfully."
 }
 
 # remove the lockscreens which there is no wallpaper of them in the wallpapers directory
 cleanup_lockscreens() {
   for f in "$LOCKSCREENS_DIR"/*; do
-    filename=$(basename "$f")
-    wallfilename=$(echo "$filename" | sed "s/\.png/\.jpg/")
+    filename="$(basename "$f")"
+    wallfilename="$(echo "$filename" | sed "s/\.png/\.jpg/")"
     if ! [ -f "$WALLPAPERS_DIR/$wallfilename" ]; then
       rm "$f"
     fi
@@ -253,8 +251,8 @@ reset_wallpaper_numbers() {
   declare -A index
   for f in "$WALLPAPERS_DIR"/*.jpg; do
     [ -f "$f" ] || continue
-    fname=$(basename "$f")
-    prefix=${fname%_*}
+    fname="$(basename "$f")"
+    prefix="${fname%_*}"
 
     i=${index["$prefix"]}
     [ -z "$i" ] && i=0
@@ -307,8 +305,8 @@ case $cmd in
   ;;
 "add")
   shift 1
-  file_path=$1
-  wall_prefix=$2
+  file_path="$1"
+  wall_prefix="$2"
 
   [ -z "$wall_prefix" ] && print_err "Wallpaper prefix not specified"
   [ -z "$file_path" ] && print_err "File path not specified"
@@ -317,7 +315,7 @@ case $cmd in
   ;;
 "create-lockscreen")
   shift 1
-  wall_name=$1
+  wall_name="$1"
 
   [ -z "$wall_name" ] && print_err "Wallpaper name not specified"
 
@@ -336,7 +334,7 @@ case $cmd in
   ;;
 "set")
   shift 1
-  wall_name=$1
+  wall_name="$1"
 
   [ -z "$wall_name" ] && print_err "Wallpaper name not specified"
 
@@ -344,7 +342,7 @@ case $cmd in
   ;;
 "mode")
   shift 1
-  wall_mode=$1
+  wall_mode="$1"
 
   [ -z "$wall_mode" ] && print_err "Wallpaper mode not specified"
 

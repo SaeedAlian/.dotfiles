@@ -1,19 +1,17 @@
 #!/usr/bin/env bash
 set -e
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
 require_vars NOTES_DIR
 
 PRIMARY_NOTE_FILENAME="primary"
 ED="${EDITOR:-vim}"
 TERMINAL="${TERMINAL:-alacritty}"
 TERMINAL_FLOAT_CLASS="${TERMINAL_FLOAT_CLASS:-"Alacritty-float"}"
-
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
 
 print_help() {
   echo "Primary Note Manager"

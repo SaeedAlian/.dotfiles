@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -e
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+need_bin yad
+
 if [ $(pgrep -f "yad --calendar") ]; then
   pkill yad
   exit 0

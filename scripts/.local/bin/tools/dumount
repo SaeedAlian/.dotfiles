@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-require_vars MOUNT_DIR
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
-print_err() {
-  err=$1
-  echo "Error: $1" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars MOUNT_DIR
 
 print_help() {
   help="A command-line tool for safely unmounting mounted devices from $MOUNT_DIR/<mountpoint>.

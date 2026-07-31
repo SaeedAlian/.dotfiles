@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 set -e
 
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
 require_vars GITHUB_USERNAME \
   PROJECTS_DIR \
   NOTES_DIR \
   WORK_DIR \
   STUDY_DIR
 
+need_bin tmux
+
 NOTES_PREFIX="${TMUX_FZF_SESSION_NOTES_PREFIX:-note}"
 WORK_PREFIX="${TMUX_FZF_SESSION_WORK_PREFIX:-work}"
 STUDY_PREFIX="${TMUX_FZF_SESSION_STUDY_PREFIX:-study}"
 PROJECTS_PREFIX="${TMUX_FZF_SESSION_PROJECTS_PREFIX:-proj}"
-
-print_err() {
-  err=$1
-  echo "Error: $err" >&2
-  echo "Enter [$(basename "$0") --help] for help"
-  exit 1
-}
 
 print_help() {
   echo "Document Creator"
@@ -91,7 +91,7 @@ ask_and_create_project_files() {
   base_dirname="$1"
   project_name="$2"
 
-  cd "$base_dirname"
+  cd "$base_dirname" || exit 1
 
   question="What is the project type ??"
   options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
@@ -100,17 +100,20 @@ ask_and_create_project_files() {
     case $project_type in
 
     "react")
+      need_bin yarn
       yarn create vite $project_name --template react
       break
       ;;
 
     "react-ts")
+      need_bin yarn
       yarn create vite $project_name --template react-ts
       break
       ;;
 
     "go")
-      cd "$project_name"
+      need_bin go
+      cd "$project_name" || exit 1
       go mod init github.com/$GITHUB_USERNAME/$project_name
       touch .gitignore
       touch main.go
@@ -142,17 +145,19 @@ bin/" >.gitignore
       ;;
 
     "nextjs")
+      need_bin npx
       npx create-next-app@latest $project_name
       break
       ;;
 
     "rust-bin")
+      need_bin cargo
       cargo init $project_name --bin
       break
       ;;
 
     "c")
-      cd "$project_name"
+      cd "$project_name" || exit 1
       mkdir src
       touch src/main.c
       touch .gitignore
@@ -184,7 +189,7 @@ valgrind: build
       ;;
 
     "cpp")
-      cd "$project_name"
+      cd "$project_name" || exit 1
       mkdir src
       touch src/main.cpp
       touch .gitignore
@@ -216,7 +221,8 @@ valgrind: build
       ;;
 
     "python")
-      cd "$project_name"
+      need_bin python3
+      cd "$project_name" || exit 1
       touch main.py
       touch .gitignore
 
@@ -229,7 +235,7 @@ valgrind: build
 
     "empty")
       mkdir $project_name
-      cd $project_name
+      cd $project_name || exit 1
       touch .gitignore
       break
       ;;
@@ -244,7 +250,7 @@ valgrind: build
     esac
   done
 
-  cd $HOME
+  cd $HOME || exit 1
 }
 
 if [[ "$1" == "-h" ]] ||
