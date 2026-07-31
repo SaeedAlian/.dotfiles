@@ -6,10 +6,11 @@ window {
   border: 1;
   border-radius: 0.0em;
   border-color: @border-color;
-  width: 30%;
+  width: 35%;
+  height: 37%;
   location: center;
   anchor: north;
-  y-offset: -320px;
+  y-offset: -25%;
 }
 
 element {
