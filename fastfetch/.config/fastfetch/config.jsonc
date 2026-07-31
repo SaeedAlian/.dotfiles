@@ -9,7 +9,6 @@
     "separator": "  ",
   },
   "modules": [
-    "title",
     {
       "type": "os",
       "key": "os    ",
