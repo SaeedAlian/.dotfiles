@@ -103,16 +103,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
--- autoformat on save
-vim.api.nvim_create_autocmd("BufWritePre", {
-	pattern = "*",
-	callback = function(args)
-		if vim.g.autoformat then
-			require("conform").format({ bufnr = args.buf, timeout_ms = 5000 })
-		end
-	end,
-})
-
 -- -- options -- --
 
 -- tabs and indentation
@@ -196,10 +186,6 @@ map({ "n", "v" }, "D", [["_d$]], "Delete to the end of line without yanking")
 map({ "n", "v" }, "c", [["_c]], "Delete and got to insert mode without yanking")
 map({ "n", "v" }, "C", [["_c$]], "Delete to the end of line and go to insert mode without yanking")
 
--- tmux session fuzzy finder
--- only works when tmux is attached
-map("n", "<C-f>", "<cmd>silent !tmux neww tmux_fzf_session<CR>", "Start tmux session fzf")
-
 -- move the visually selected lines up and down
 map("v", "J", ":m '>+1<CR>gv=gv", "Move the visually selected lines down")
 map("v", "K", ":m '<-2<CR>gv=gv", "Move the visually selected lines up")
@@ -254,11 +240,6 @@ map("v", ">", ">gv", "Indent left", { silent = true })
 -- toggle wrap
 map("n", "<leader>wt", ":set wrap!<Return>", "Toggle wrap line")
 
--- git
-map("n", "<leader>gs", ":Git<CR>", "Git status")
-map("n", "<leader>gc", ":Git commit<CR>", "Git commit")
-map("n", "<leader>gp", ":Git push<CR>", "Git push")
-
 -- undotree
 map("n", "<leader>uf", ":UndotreeFocus<CR>", "Undo tree focus")
 map("n", "<leader>u", function()
@@ -269,48 +250,12 @@ end, "Undo tree toggle")
 -- fzf picker
 map("n", "<leader>pf", ":Telescope find_files<CR>", "Search through files with telescope")
 map("n", "<leader>lg", ":Telescope live_grep<CR>", "Search with live grep in telescope")
-map("n", "<leader>pt", function()
-	local builtin = require("telescope.builtin")
-	builtin.treesitter()
-end, "Search through variables, functions etc. in a code buffer which has treesitter with telescope")
 
 -- vim maximizer
 map("n", "sm", "<cmd>MaximizerToggle<CR>", "Maximize/Minimize a split buffer")
 
 -- file explorer
 map("n", "<leader>pd", ":ToggleNetRW<CR>", "Toggle file explorer")
-
--- toggle autoformat on save
-map("n", "<leader>af", function()
-	if vim.g.autoformat then
-		vim.g.autoformat = false
-		print("Autoformat turned off")
-	else
-		vim.g.autoformat = true
-		print("Autoformat turned on")
-	end
-end, "Toggle auto format")
-
--- format buffer
-map({ "n", "v" }, "<leader>f", function()
-	if vim.g.autoformat then
-		require("conform").format({ timeout_ms = 10000, async = true })
-	end
-end, "Format buffer")
-
--- treesitter text objects
-map({ "n", "x", "o" }, "]f", function()
-	require("nvim-treesitter-textobjects.move").goto_next_start("@function.outer", "textobjects")
-end)
-map({ "n", "x", "o" }, "[f", function()
-	require("nvim-treesitter-textobjects.move").goto_previous_start("@function.outer", "textobjects")
-end)
-map({ "n", "x", "o" }, "]c", function()
-	require("nvim-treesitter-textobjects.move").goto_next_start("@class.outer", "textobjects")
-end)
-map({ "n", "x", "o" }, "[c", function()
-	require("nvim-treesitter-textobjects.move").goto_previous_start("@class.outer", "textobjects")
-end)
 
 -- -- statusline -- --
 
@@ -497,13 +442,6 @@ vim.api.nvim_create_autocmd({ "WinLeave", "BufLeave" }, {
 		)
 
 		vim.opt_local.statusline = "%#StatusLineDim# %{v:lua.file_name()} │ %{v:lua.file_type()} %= Ln %l, Col %c "
-	end,
-})
-
--- treesitter start
-vim.api.nvim_create_autocmd("FileType", {
-	callback = function()
-		pcall(vim.treesitter.start)
 	end,
 })
 
