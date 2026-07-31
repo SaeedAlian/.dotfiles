@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# add this to /etc/default/grub to work:
+#   GRUB_CMDLINE_LINUX_DEFAULT="loglevel=1 nowatchdog quiet udev.log_level=1 thinkpad_acpi.fan_control=1"
+#
+# then run "grub-mkconfig -o /boot/grub/grub.cfg"
+
+exec /usr/sbin/thinkfan -n -c /home/entropy/.config/thinkfan/thinkfan.conf
