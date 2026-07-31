@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+need_bin docker
+
+docker_cmd_exec "$@"

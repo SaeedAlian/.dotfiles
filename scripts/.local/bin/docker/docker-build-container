@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+need_bin docker
+
+print_help() {
+  help="""
+Usage:
+  $(basename "$0") <container_name> <dockerfile_path>
+
+Arguments:
+  container_name    Docker image name/tag
+  dockerfile_path   Path to the Dockerfile
+"""
+
+  echo "$help"
+}
+
+check_container_name() {
+  local name="$1"
+
+  if [[ ! "$name" =~ ^[a-z0-9][a-z0-9._/-]*$ ]]; then
+    print_err "Invalid container name '$name'. Use only lowercase letters, numbers, '.', '-', '_', '/'."
+  fi
+}
+
+[[ $# -eq 2 ]] || print_help
+
+container_name="$1"
+dockerfile_path="$2"
+
+if [[ ! -f "$dockerfile_path" ]]; then
+  print_err "Dockerfile does not exist: $dockerfile_path"
+fi
+
+check_container_name "$container_name"
+
+docker_cmd_exec buildx build \
+  --network=host \
+  -t "$container_name" \
+  "$dockerfile_path"
