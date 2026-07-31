@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_DATA_HOME
+
+DISTRO_BOX_HOME_BASE_PATH="$HOME/.distrobox"
+
+need_bin distrobox
+
+STOW_SCRIPT_PATH="$DOTFILES_DIR/stow.sh"
+
+DBX_NAME="${1:-}"
+if [ -z "$DBX_NAME" ]; then
+  print_err "No distrobox name provided"
+fi
+
+if ! distrobox list --no-color 2>/dev/null |
+  awk -F'|' 'NR>1{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}' |
+  grep -qx "$DBX_NAME"; then
+  print_err "No distrobox named '$DBX_NAME' found"
+fi
+
+echo "Target distrobox: $DBX_NAME"
+
+detect_runtime() {
+  if command -v podman >/dev/null 2>&1; then
+    echo podman
+  elif command -v docker >/dev/null 2>&1; then
+    echo docker
+  else
+    print_err "Neither podman nor docker found on host."
+  fi
+}
+
+RUNTIME=$(detect_runtime)
+
+DBX_HOME=$("$RUNTIME" inspect "$DBX_NAME" \
+  --format '{{range .Config.Env}}{{println .}}{{end}}' 2>/dev/null |
+  awk -F= '$1=="HOME"{print $2; exit}')
+
+if [ -z "$DBX_HOME" ]; then
+  DBX_HOME="$DISTRO_BOX_HOME_BASE_PATH/$DBX_NAME"
+  echo "Could not read HOME from container env, falling back to conventional path:"
+  echo "  $DBX_HOME"
+fi
+
+echo "Distrobox home: $DBX_HOME"
+
+if [ ! -d "$DBX_HOME" ]; then
+  print_err "Home directory does not exist on host: $DBX_HOME"
+fi
+
+echo "Running stow.sh (core group) inside '$DBX_NAME'..."
+
+distrobox enter "$DBX_NAME" -- bash -lc "
+  set -e
+
+  if ! command -v stow >/dev/null 2>&1; then
+    echo 'stow not found, installing stow...'
+    sudo pacman -Sy stow
+  fi
+
+  if [ ! -x \"$STOW_SCRIPT_PATH\" ]; then
+    echo 'stow.sh not found or not executable at $STOW_SCRIPT_PATH' >&2
+    exit 1
+  fi
+  \"$STOW_SCRIPT_PATH\" core --home=\"$DBX_HOME\"
+"
+
+echo "Core packages stowed in '$DBX_NAME'"
+
+if [ -f "$USER_HOME/.gitconfig" ]; then
+  echo "Create symlink for $USER_HOME/.gitconfig"
+  ln -sf "$USER_HOME/.gitconfig" "$DBX_HOME"
+fi
+
+echo "Done"

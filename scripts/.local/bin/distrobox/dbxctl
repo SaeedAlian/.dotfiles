@@ -1,0 +1,341 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_DATA_HOME
+
+DISTRO_BOX_HOME_BASE_PATH="$HOME/.distrobox"
+
+need_bin fzf
+need_bin distrobox
+
+mkdir -p $DISTRO_BOX_HOME_BASE_PATH
+
+declare -A GROUP_PACKAGES_ARCH
+declare -A GROUP_PACKAGES_FEDORA
+
+GROUP_PACKAGES_ARCH[develcpp]="base-devel gcc gdb cmake ninja clang lldb valgrind ccache"
+GROUP_PACKAGES_ARCH[develpython]="python python-pip python-virtualenv python-poetry python-pipx pyright"
+GROUP_PACKAGES_ARCH[develjs]="nodejs npm yarn typescript"
+GROUP_PACKAGES_ARCH[develgo]="go gopls delve"
+GROUP_PACKAGES_ARCH[develrust]="rustup rust-analyzer"
+GROUP_PACKAGES_ARCH[develc]="base-devel gdb make cmake"
+GROUP_PACKAGES_ARCH[develgraphics]="vulkan-tools mesa-utils glfw-x11 glew cmake"
+GROUP_PACKAGES_ARCH[latex]="texlive-most texlive-lang biber"
+GROUP_PACKAGES_ARCH[pandoc]="pandoc pandoc-crossref"
+GROUP_PACKAGES_ARCH[editors]="neovim vim vi nano"
+GROUP_PACKAGES_ARCH[net]="curl wget nmap openssh rsync mtr bind"
+
+GROUP_ORDER=(develcpp develc develpython develjs develgo develrust develgraphics latex pandoc editors net)
+
+CONTAINER_RUNTIME=""
+
+print_help() {
+  local help="
+Usage:
+  $(basename "$0") [command]
+
+A simple distrobox management helper.
+*Empty command will run the fzf selector*
+
+Commands:
+  enter
+        Enter an existing distrobox.
+
+  install
+        Install predefined package groups into a distrobox.
+
+  delete
+        Delete an existing distrobox.
+
+  update
+        Upgrade packages inside a distrobox.
+
+  create
+        Create a new distrobox container.
+
+  help, -h, --help
+        Show this help message.
+
+If no command is provided, an interactive fzf menu will be shown.
+
+Package groups:
+$(for group in "${GROUP_ORDER[@]}"; do
+    if [ -n "${GROUP_PACKAGES_ARCH[$group]:-}" ]; then
+      printf "  %-18s\n" "$group"
+    fi
+  done)
+
+Examples:
+  $(basename "$0")
+  $(basename "$0") create
+  $(basename "$0") install
+  $(basename "$0") enter
+"
+
+  if command -v less >/dev/null 2>&1; then
+    echo "$help" | less
+  else
+    echo "$help"
+  fi
+}
+
+list_names() {
+  distrobox list --no-color 2>/dev/null | awk -F'|' 'NR>1 {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}'
+}
+
+list_pretty() {
+  distrobox list --no-color 2>/dev/null | awk -F'|' 'NR>1 {
+        gsub(/^[ \t]+|[ \t]+$/, "", $2);
+        gsub(/^[ \t]+|[ \t]+$/, "", $3);
+        gsub(/^[ \t]+|[ \t]+$/, "", $4);
+        printf "%s\t(%s, %s)\n", $2, $3, $4
+    }'
+}
+
+fzf_pick_one() {
+  local prompt="${1:-Select distrobox> }"
+  list_pretty | fzf --with-nth=1,2 --delimiter='\t' \
+    --prompt="$prompt" --height=40% --reverse --border |
+    cut -f1
+}
+
+detect_distro_family() {
+  local name="$1"
+  local os_id
+
+  os_id=$(distrobox enter "$name" -- sh -c '. /etc/os-release 2>/dev/null; echo "$ID"' 2>/dev/null || true)
+
+  case "$os_id" in
+  arch | archarm | archlinux) echo "arch" ;;
+  *) echo "unknown" ;;
+  esac
+}
+
+confirm() {
+  local msg="$1"
+
+  read -r -p "$msg [y/N]: " reply
+
+  case "$reply" in
+  [yY] | [yY][eE][sS]) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+require_at_least_one_box() {
+  if [ -z "$(list_names)" ]; then
+    print_err "No distroboxes found"
+  fi
+}
+
+enter_box() {
+  require_at_least_one_box
+  local name
+  name=$(fzf_pick_one "Enter distrobox> ")
+  [ -z "$name" ] && {
+    echo "Aborted"
+    exit 0
+  }
+  echo "Entering '$name'..."
+  exec distrobox enter "$name"
+}
+
+install_packages_in_box() {
+  require_at_least_one_box
+
+  local name
+  name=$(fzf_pick_one "Install into which distrobox> ")
+
+  [ -z "$name" ] && {
+    echo "Aborted"
+    exit 0
+  }
+
+  local family
+  family="$(detect_distro_family "$name")"
+  echo "$family"
+
+  if [ "$family" != "arch" ]; then
+    print_err "Could not find a supported distro family for '$name'"
+  fi
+
+  echo "Detected distro family: $family"
+
+  local groups_selected
+  groups_selected=$(printf '%s\n' "${GROUP_ORDER[@]}" |
+    fzf --multi --prompt="Select package groups (tab to multi-select)> " \
+      --height=40% --reverse --border)
+
+  if [ -z "$groups_selected" ]; then
+    echo "No groups selected, Aborted"
+    exit 0
+  fi
+
+  local -a all_packages=()
+  local group
+
+  while IFS=" " read -r group; do
+    [ -z "$group" ] && continue
+    local pkgs=""
+    if [ "$family" = "arch" ]; then
+      pkgs="${GROUP_PACKAGES_ARCH[$group]:-}"
+    else
+      print_err "Could not find a supported distro family for '$name'"
+    fi
+
+    if [ -z "$pkgs" ]; then
+      echo "Group '$group' has no packages defined for '$family', skipping..." >&2
+      continue
+    fi
+
+    # shellcheck disable SC2206
+    local -a pkg_arr=($pkgs)
+    all_packages+=("${pkg_arr[@]}")
+  done <<<"$groups_selected"
+
+  if [ "${#all_packages[@]}" -eq 0 ]; then
+    print_err "No packages resolved from selected groups"
+  fi
+
+  echo
+  echo "Container : $name"
+  echo "Distro    : $family"
+  echo "Groups    : $(echo "$groups_selected" | tr '\n' ' ')"
+  echo "Packages  : ${all_packages[*]}"
+  echo
+
+  if ! confirm "Proceed with installation?"; then
+    echo "Aborted"
+    exit 0
+  fi
+
+  local install_cmd
+  case "$family" in
+  arch)
+    install_cmd="sudo pacman -Sy --needed --noconfirm ${all_packages[*]}"
+    ;;
+
+  *)
+    print_err "Unknown family detected"
+    ;;
+  esac
+
+  echo "Running inside '$name': $install_cmd"
+  distrobox enter "$name" -- sh -c "$install_cmd"
+}
+
+delete_box() {
+  require_at_least_one_box
+
+  local name
+  name=$(fzf_pick_one "Delete which distrobox> ")
+  [ -z "$name" ] && {
+    echo "Aborted"
+    exit 0
+  }
+
+  if ! confirm "DELETE distrobox '$name'? This cannot be undone"; then
+    echo "Aborted"
+    exit 0
+  fi
+
+  distrobox rm -f "$name"
+  echo "Deleted '$name'"
+}
+
+update_box() {
+  require_at_least_one_box
+
+  local name
+  name=$(fzf_pick_one "Update which distrobox> ")
+  [ -z "$name" ] && {
+    echo "Aborted"
+    exit 0
+  }
+
+  echo "Updating '$name'..."
+  distrobox upgrade "$name"
+}
+
+declare -A DISTRO_IMAGES
+
+DISTRO_IMAGES[arch]="archlinux:latest"
+
+DISTRO_ORDER=(arch)
+
+create_box() {
+  local distro
+  distro=$(printf '%s\n' "${DISTRO_ORDER[@]}" |
+    fzf --prompt="Select base distro> " --height=40% --reverse --border)
+
+  [ -z "$distro" ] && {
+    echo "Aborted"
+    exit 0
+  }
+
+  local image="${DISTRO_IMAGES[$distro]:-}"
+  if [ -z "$image" ]; then
+    print_err "No image mapping for '$distro'"
+  fi
+
+  local cname
+  read -r -p "Container name for this ${distro} distrobox: " cname
+  if [ -z "$cname" ]; then
+    print_err "Name was empty"
+  fi
+
+  echo "Creating distrobox '$cname' from image '$image'..."
+  distrobox create \
+    --name "$cname" \
+    --home "$DISTRO_BOX_HOME_BASE_PATH/$cname" \
+    --image "$image" \
+    --yes
+
+  echo "Distrobox created"
+}
+
+main_menu() {
+  local choice
+  choice=$(printf '%s\n' \
+    "enter    - Enter a distrobox" \
+    "install  - Install package groups into a distrobox" \
+    "delete   - Delete a distrobox" \
+    "update   - System update a distrobox" \
+    "create   - Create a new distrobox" |
+    fzf --prompt="dbx> " --height=40% --reverse --border | awk '{print $1}')
+
+  [ -z "$choice" ] && exit 0
+  dispatch "$choice"
+}
+
+dispatch() {
+  case "$1" in
+  enter) enter_box ;;
+  install) install_packages_in_box ;;
+  delete) delete_box ;;
+  kill) kill_box ;;
+  kill-all) kill_all ;;
+  update) update_box ;;
+  create) create_box ;;
+  *)
+    print_err "Unknown command: $1"
+    ;;
+  esac
+}
+
+if [ "$#" -eq 0 ]; then
+  main_menu
+else
+  if [ "$1" == "-h" ] ||
+    [ "$1" == "--help" ]; then
+    print_help
+    exit 0
+  fi
+  dispatch "$1"
+fi
