@@ -16,6 +16,8 @@ curl
 wget
 dunst
 libnotify
+podman
+crun
 docker
 docker-compose
 docker-buildx
