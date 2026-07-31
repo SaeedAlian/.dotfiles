@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CACHE_HOME SCRIPTS_DIR
+
+. "$SCRIPTS_DIR/packages/install_helpers.sh"
+
+CACHE_DIR="$XDG_CACHE_HOME/neovim-installer"
+ARCHIVE="$CACHE_DIR/neovim.tar.gz"
+INSTALL_DIR="/opt/nvim-linux-x86_64"
+
+mkdir -p "$CACHE_DIR"
+
+echo "Downloading latest Neovim (x86_64)..."
+
+URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+
+download "$ARCHIVE" "$URL"
+
+WORKDIR=$(create_work_dir)
+
+trap 'cleanup "$WORKDIR"' EXIT
+
+echo "Extracting..."
+ex "$ARCHIVE" --outdir "$WORKDIR"
+
+if [ ! -d "$WORKDIR/nvim-linux-x86_64" ] ||
+  [ ! -x "$WORKDIR/nvim-linux-x86_64/bin/nvim" ] ||
+  [ ! -d "$WORKDIR/nvim-linux-x86_64/lib" ] ||
+  [ ! -d "$WORKDIR/nvim-linux-x86_64/share/nvim" ]; then
+  print_err "Unexpected archive layout, aborting"
+fi
+
+echo "Installing to $INSTALL_DIR..."
+
+run_root rm -rf "$INSTALL_DIR"
+run_root mv "$WORKDIR/nvim-linux-x86_64" "$INSTALL_DIR"
+
+echo "Creating symlink /usr/local/bin/nvim..."
+
+run_root ln -sf "$INSTALL_DIR/bin/nvim" /usr/local/bin/nvim
+
+if [ -f "$INSTALL_DIR/share/man/man1/nvim.1" ]; then
+  echo "Linking man page (share/man)..."
+  run_root mkdir -p /usr/local/share/man/man1
+  run_root ln -sf "$INSTALL_DIR/share/man/man1/nvim.1" /usr/local/share/man/man1/nvim.1
+fi
+
+if [ -d "$INSTALL_DIR/share/applications" ]; then
+  echo "Linking desktop entries (share/applications)..."
+  run_root mkdir -p /usr/local/share/applications
+  for f in "$INSTALL_DIR"/share/applications/*.desktop; do
+    [ -f "$f" ] && run_root ln -sf "$f" "/usr/local/share/applications/$(basename "$f")"
+  done
+fi
+
+if [ -d "$INSTALL_DIR/share/icons" ]; then
+  echo "Linking icons (share/icons)..."
+  run_root mkdir -p /usr/local/share/icons
+  for dir in "$INSTALL_DIR"/share/icons/*/; do
+    [ -d "$dir" ] || continue
+    name=$(basename "$dir")
+    find "$dir" -type f | while IFS= read -r icon; do
+      rel="${icon#"$INSTALL_DIR"/share/icons/}"
+      dest="/usr/local/share/icons/$rel"
+      run_root mkdir -p "$(dirname "$dest")"
+      run_root ln -sf "$icon" "$dest"
+    done
+    : "$name"
+  done
+fi
+
+echo "Cleaning cache..."
+rm -rf "$CACHE_DIR"
+
+echo "Done"

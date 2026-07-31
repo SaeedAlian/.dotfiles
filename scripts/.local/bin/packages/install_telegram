@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CACHE_HOME SCRIPTS_DIR
+
+. "$SCRIPTS_DIR/packages/install_helpers.sh"
+
+CACHE_DIR="$XDG_CACHE_HOME/telegram-installer"
+ARCHIVE="$CACHE_DIR/tsetup.tar.xz"
+INSTALL_DIR="/opt/Telegram"
+
+mkdir -p "$CACHE_DIR"
+
+echo "Downloading latest Telegram Desktop (x86_64)..."
+
+URL="https://telegram.org/dl/desktop/linux"
+
+download "$ARCHIVE" "$URL"
+
+WORKDIR=$(create_work_dir)
+
+trap 'cleanup "$WORKDIR"' EXIT
+
+echo "Extracting..."
+ex "$ARCHIVE" --outdir "$WORKDIR"
+
+if [ ! -d "$WORKDIR/Telegram" ]; then
+  print_err "Unexpected archive layout, aborting"
+fi
+
+echo "Installing to $INSTALL_DIR..."
+
+run_root rm -rf $INSTALL_DIR
+run_root mv "$WORKDIR/Telegram" "$INSTALL_DIR"
+
+echo "Creating symlink /usr/local/bin/telegram-desktop..."
+
+run_root ln -sf "$INSTALL_DIR/Telegram" /usr/local/bin/telegram-desktop
+
+echo "Cleaning cache..."
+rm -rf "$CACHE_DIR"
+
+echo "Done"
