@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CACHE_HOME
+
+LAST_FOCUS_FILE="/tmp/winfzf-last-focus-id"
+ICON_DIR="$XDG_CACHE_HOME/winfzf-icons"
+
+mkdir -p "$ICON_DIR"
+
+print_help() {
+  echo "Usage: $(basename "$0") [Command]"
+  echo ""
+  echo "Command:"
+  echo "  prev"
+  echo "    Focus on the previous window"
+  echo ""
+  echo "  next"
+  echo "    Focus on the next window"
+  echo ""
+  echo "  menu"
+  echo "    List the windows on the current workspace on a rofi menu"
+  echo ""
+  echo "  last"
+  echo "    Focus on the last window that was being focused"
+  echo ""
+  echo "  -h, --help"
+  echo "    Show this help message"
+  echo ""
+  echo "Requirements:"
+  echo "  - bspwm"
+  echo "  - rofi compiled with icon support"
+  echo "  - ImageMagick (for converting icons)"
+  echo ""
+}
+
+save_last_focus() {
+  local id="$1"
+  local desktop="$2"
+  echo "$id" >"$LAST_FOCUS_FILE-$desktop"
+}
+
+read_last_focus() {
+  local desktop="$1"
+  echo "$(cat "$LAST_FOCUS_FILE-$desktop")"
+}
+
+select_from_menu() {
+  entries=""
+  windows=()
+
+  focused=$(bspc query -N -n focused)
+  focused_desktop=$(bspc query -D -d)
+
+  while read -r wid; do
+    [[ "$wid" == "$focused" ]] && continue
+
+    title=$(xprop -id "$wid" WM_NAME | sed -E 's/.*= "(.*)"/\1/')
+    title=$(basename "$title")
+    [[ -z "$title" ]] && continue
+
+    pam="$ICON_DIR/$wid.pam"
+    png="$ICON_DIR/$wid.png"
+
+    if [[ ! -f "$png" ]]; then
+      xprop -id "$wid" -notype 32c _NET_WM_ICON |
+        perl -0777 -pe '@_=/\d+/g;
+        printf "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", splice@_,0,2;
+        $_=pack "N*", @_;
+        s/(.)(...)/$2$1/gs' >"$pam" 2>/dev/null
+
+      magick "$pam" -resize 32x32 "$png" 2>/dev/null
+      rm -f "$pam"
+    fi
+
+    entries+="$title\0icon\x1f$png\n"
+    windows+=("$wid")
+  done < <(bspc query -N -n .local.window)
+
+  idx=$(printf "%b" "$entries" | rofi -dmenu -i -show-icons -format i -p 'Windows: ')
+
+  if [[ -n "$idx" ]]; then
+    winid="${windows[$idx]}"
+    bspc node "$winid".local.!hidden.window -f
+    save_last_focus "$focused" "$focused_desktop"
+  fi
+}
+
+focus_prev() {
+  focused=$(bspc query -N -n focused)
+  focused_desktop=$(bspc query -D -d)
+  bspc node -f prev.local.!hidden.window
+  save_last_focus "$focused" "$focused_desktop"
+}
+
+focus_next() {
+  focused=$(bspc query -N -n focused)
+  focused_desktop=$(bspc query -D -d)
+  bspc node -f next.local.!hidden.window
+  save_last_focus "$focused" "$focused_desktop"
+}
+
+focus_last() {
+  focused_desktop=$(bspc query -D -d)
+  lastid="$(read_last_focus "$focused_desktop")"
+  focused=$(bspc query -N -n focused)
+  bspc node "$lastid".local.!hidden.window -f
+  save_last_focus "$focused" "$focused_desktop"
+}
+
+[ "$#" -ne 1 ] && print_help && exit 1
+
+command="$1"
+
+case "$command" in
+prev)
+  focus_prev
+  ;;
+
+next)
+  focus_next
+  ;;
+
+menu)
+  select_from_menu
+  ;;
+
+last)
+  focus_last
+  ;;
+
+-h | --help)
+  print_help
+  exit 0
+  ;;
+
+*)
+  print_err "Unknown command: $command"
+  ;;
+esac

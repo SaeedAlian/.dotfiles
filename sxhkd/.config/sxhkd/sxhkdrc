@@ -19,7 +19,7 @@ super + e
 
 # win fzf
 super + w
-  winfzf
+  winfocus menu
 
 # gui fm
 super + shift + Return
@@ -209,9 +209,9 @@ super + {bracketleft,bracketright,backslash}
 super + shift + s
 	bspstickytoggle
 
-# focus the next/previous node in the current desktop
+# focus the next/previous/last node in the current desktop
 super + {j,k,grave}
-    bspc node -f {prev,next,next}.local.!hidden.window
+  winfocus {prev,next,last}
 
 # focus on the node in the given direction
 super + {h,l}
