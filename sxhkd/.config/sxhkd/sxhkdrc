@@ -19,7 +19,7 @@ super + e
 
 # win fzf
 super + w
-  winfocus menu
+  winfzf
 
 # gui fm
 super + shift + Return
@@ -211,7 +211,7 @@ super + shift + s
 
 # focus the next/previous/last node in the current desktop
 super + {j,k,grave}
-  winfocus {prev,next,last}
+    bspc node -f {prev,next,last}.local.!hidden.window
 
 # focus on the node in the given direction
 super + {h,l}
