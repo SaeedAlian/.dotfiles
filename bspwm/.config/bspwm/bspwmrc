@@ -17,6 +17,9 @@ BSPWM_SPLIT_RATIO=${BSPWM_SPLIT_RATIO:-0.5}
 BSPWM_COLOR_BORDER_NORMAL=${BSPWM_COLOR_BORDER_NORMAL:-"#333333"}
 BSPWM_COLOR_BORDER_FOCUSED=${BSPWM_COLOR_BORDER_FOCUSED:-"#333377"}
 
+###### remove winfocus temp files at startup ######
+rm -r /tmp/winfzf-last-focus-id*
+
 ###### remove all rules ######
 bspc rule -r "*"
 
