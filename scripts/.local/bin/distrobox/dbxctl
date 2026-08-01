@@ -30,9 +30,24 @@ GROUP_PACKAGES_ARCH[latex]="texlive texlive-lang biber"
 GROUP_PACKAGES_ARCH[pandoc]="pandoc pandoc-crossref"
 GROUP_PACKAGES_ARCH[editors]="neovim vim vi nano"
 GROUP_PACKAGES_ARCH[utils]="fzf ripgrep git tree-sitter-cli tree-sitter"
+GROUP_PACKAGES_ARCH[desktop]="qt5ct qt6ct lxappearance"
 GROUP_PACKAGES_ARCH[net]="curl wget nmap openssh rsync mtr bind"
 
-GROUP_ORDER=(develcpp develc develpython develjs develgo develrust develgraphics latex pandoc editors utils net)
+GROUP_ORDER=(
+  develcpp
+  develc
+  develpython
+  develjs
+  develgo
+  develrust
+  develgraphics
+  latex
+  pandoc
+  editors
+  utils
+  desktop
+  net
+)
 
 CONTAINER_RUNTIME=""
 
