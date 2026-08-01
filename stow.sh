@@ -17,9 +17,10 @@ STOW_FLAGS=""
 TARGET_HOME="$USER_HOME"
 
 CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
+CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
 SCRIPTS="scripts"
 RUNIT_SERVICES="thinkfan"
-DESKTOP_PACKAGES="X11 alacritty bspwm dconf dunst fonts mpv picom polybar redshift rofi sxhkd sxiv yazi zathura"
+HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar redshift rofi sxhkd sxiv zathura"
 
 usage() {
   echo "Usage: $0 [--home=/path/to/target/home] group [group ...]"
@@ -40,9 +41,9 @@ group_count=0
 for arg in "$@"; do
   case "$arg" in
   --home=*)
-      TARGET_HOME="${arg#--home=}"
-      ;;
-  core | desktop | scripts | runit)
+    TARGET_HOME="${arg#--home=}"
+    ;;
+  core | core-desktop | desktop | scripts | runit)
     GROUP_ARGS="${GROUP_ARGS}${arg} "
     group_count=$((group_count + 1))
     ;;
@@ -84,6 +85,13 @@ setup_core_dirs() {
   mkdir -p "$XDG_CONFIG_HOME/tmux"
 }
 
+setup_core_desktop_dirs() {
+  mkdir -p "$XDG_CONFIG_HOME/X11"
+  mkdir -p "$XDG_CONFIG_HOME/dconf"
+  mkdir -p "$XDG_CONFIG_HOME/fontconfig"
+  mkdir -p "$XDG_CONFIG_HOME/yazi"
+}
+
 setup_scripts_dirs() {
   mkdir -p "$SCRIPTS_DIR"
 }
@@ -94,12 +102,9 @@ setup_runit_services_dirs() {
 }
 
 setup_desktop_dirs() {
-  mkdir -p "$XDG_CONFIG_HOME/X11"
   mkdir -p "$XDG_CONFIG_HOME/alacritty"
   mkdir -p "$XDG_CONFIG_HOME/bspwm"
-  mkdir -p "$XDG_CONFIG_HOME/dconf"
   mkdir -p "$XDG_CONFIG_HOME/dunst"
-  mkdir -p "$XDG_CONFIG_HOME/fontconfig"
   mkdir -p "$XDG_CONFIG_HOME/mpv"
   mkdir -p "$XDG_CONFIG_HOME/picom"
   mkdir -p "$XDG_CONFIG_HOME/polybar"
@@ -107,13 +112,19 @@ setup_desktop_dirs() {
   mkdir -p "$XDG_CONFIG_HOME/rofi"
   mkdir -p "$XDG_CONFIG_HOME/sxhkd"
   mkdir -p "$XDG_CONFIG_HOME/sxiv"
-  mkdir -p "$XDG_CONFIG_HOME/yazi"
   mkdir -p "$XDG_CONFIG_HOME/zathura"
 }
 
 stow_core() {
   setup_core_dirs
   for pkg in $CORE_PACKAGES; do
+    stow $STOW_FLAGS "$pkg"
+  done
+}
+
+stow_core_desktop() {
+  setup_core_desktop_dirs
+  for pkg in $CORE_DESKTOP_PACKAGES; do
     stow $STOW_FLAGS "$pkg"
   done
 }
@@ -141,6 +152,9 @@ for group in "$@"; do
   case "$group" in
   core)
     stow_core
+    ;;
+  core-desktop)
+    stow_core_desktop
     ;;
   desktop)
     stow_desktop
