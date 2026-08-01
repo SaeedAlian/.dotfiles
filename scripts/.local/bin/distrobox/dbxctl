@@ -26,12 +26,13 @@ GROUP_PACKAGES_ARCH[develgo]="go gopls delve"
 GROUP_PACKAGES_ARCH[develrust]="rustup rust-analyzer"
 GROUP_PACKAGES_ARCH[develc]="base-devel gdb make cmake"
 GROUP_PACKAGES_ARCH[develgraphics]="vulkan-tools mesa-utils glfw-x11 glew cmake"
-GROUP_PACKAGES_ARCH[latex]="texlive-most texlive-lang biber"
+GROUP_PACKAGES_ARCH[latex]="texlive texlive-lang biber"
 GROUP_PACKAGES_ARCH[pandoc]="pandoc pandoc-crossref"
 GROUP_PACKAGES_ARCH[editors]="neovim vim vi nano"
+GROUP_PACKAGES_ARCH[utils]="fzf ripgrep git tree-sitter-cli tree-sitter"
 GROUP_PACKAGES_ARCH[net]="curl wget nmap openssh rsync mtr bind"
 
-GROUP_ORDER=(develcpp develc develpython develjs develgo develrust develgraphics latex pandoc editors net)
+GROUP_ORDER=(develcpp develc develpython develjs develgo develrust develgraphics latex pandoc editors utils net)
 
 CONTAINER_RUNTIME=""
 
