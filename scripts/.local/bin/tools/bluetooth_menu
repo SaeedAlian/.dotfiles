@@ -281,6 +281,11 @@ get_status() {
   fi
 }
 
+if ! pgrep -x bluetoothd >/dev/null 2>&1; then
+  notify-send -u critical -t 3000 "bluetoothd is not running"
+  print_err "bluetoothd is not running"
+fi
+
 if [ $# == 0 ]; then
   show_menu
   exit 0
