@@ -29,11 +29,13 @@ Options:
   -h, --help                Show this help message and exit.
 
 Notes:
- • Services are searched in:
+ - Services are searched in:
 $(printf "   - %s\n" "${SV_DIRS[@]}")
-
- • Active services are linked into:
+ - Active services are linked into:
    $ACTIVE_DIR
+ - Deactivating a service creates a blocking dotfile symlink (.name) in
+   $ACTIVE_DIR so that runit's boot-time auto-enable (trigger_sv) does not
+   re-enable it on the next reboot.
 "
 
   if command -v less >/dev/null 2>&1; then
@@ -77,6 +79,8 @@ list_services() {
 
       if [ -L "$ACTIVE_DIR/$name" ]; then
         status="active"
+      elif [ -L "$ACTIVE_DIR/.$name" ]; then
+        status="inactive"
       else
         status="inactive"
       fi
@@ -88,6 +92,7 @@ list_services() {
 
 activate_service() {
   local srv="$1"
+  local service_path
   service_path=$(find_service "$srv")
 
   if [ $? -ne 0 ]; then
@@ -98,6 +103,10 @@ activate_service() {
     print_err "Service is already active"
   fi
 
+  if [ -L "$ACTIVE_DIR/.$srv" ]; then
+    sudo rm -f "$ACTIVE_DIR/.$srv"
+  fi
+
   sudo ln -s "$service_path" "$ACTIVE_DIR"
 
   echo "Service $srv activated"
@@ -105,12 +114,20 @@ activate_service() {
 
 deactivate_service() {
   local srv="$1"
+  local service_path
+  service_path=$(find_service "$srv")
 
-  if ! [ -L "$ACTIVE_DIR/$srv" ]; then
+  if [ $? -ne 0 ]; then
+    print_err "Service not found"
+  fi
+
+  if ! [ -L "$ACTIVE_DIR/$srv" ] && [ -L "$ACTIVE_DIR/.$srv" ]; then
     print_err "Service is already deactive"
   fi
 
-  sudo rm -rf "$ACTIVE_DIR/$srv"
+  sudo rm -f "$ACTIVE_DIR/$srv"
+  sudo ln -sf "$service_path" "$ACTIVE_DIR/.$srv"
+
   echo "Service $srv deactivated"
 }
 
