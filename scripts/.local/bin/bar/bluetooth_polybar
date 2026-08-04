@@ -7,6 +7,11 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
 require_vars BAR_COLOR_RED BAR_COLOR_BLUE
 
+if ! pgrep -x bluetoothd >/dev/null 2>&1; then
+  echo "%{F$BAR_COLOR_RED}󰂲"
+  exit 0
+fi
+
 if [ "$(bluetoothctl show | grep "Powered: yes" | wc -c)" -eq 0 ]; then
   echo "%{F$BAR_COLOR_RED}󰂲"
 else
