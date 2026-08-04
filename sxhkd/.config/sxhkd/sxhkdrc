@@ -75,8 +75,11 @@ super + shift + Escape
   startup --force
 
 # screen cast
-super + v : {f,v,o,m,k}
-  sccast -n {-f,-v,-a -v,-m -v,-k}
+super + apostrophe
+  sccast -n -f
+
+super + semicolon
+  sccast -n -k --compress --compress-no-remove --compress-detach
 
 # toggle mobile broadband
 super + shift + w
