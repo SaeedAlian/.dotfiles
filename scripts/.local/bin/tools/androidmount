@@ -9,6 +9,7 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 require_vars MOUNT_DIR
 
 need_bin "aft-mtp-mount"
+need_bin "fusermount"
 
 print_help() {
   help="A command-line tool for safely mounting Android devices over MTP to $MOUNT_DIR/<mountpoint> with user ownership.
