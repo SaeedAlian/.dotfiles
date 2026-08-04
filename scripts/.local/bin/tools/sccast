@@ -43,7 +43,11 @@ print_help() {
   echo ""
   echo "  --clean, -c                   Clean and delete all the temp files."
   echo ""
-  echo "  --compress                    Compress the final output file (used with --stop). Slower, smaller file."
+  echo "  --compress, -p                Compress the final output file (used with --stop). Slower, smaller file."
+  echo ""
+  echo "  --compress-no-remove          Compress the final output file, but don't remove the original file."
+  echo ""
+  echo "  --compress-detach             Compress the final output file in a separate thread and you will get notified when it's finished."
   echo ""
   echo "  --loglevel=[ffmpeg loglevel]  Set loglevel for ffmpeg."
   echo ""
@@ -55,6 +59,8 @@ print_help() {
   echo "  - The --stop option will only stop screen recording processes started by this script."
   echo ""
   echo "  - --compress can be combined with --stop to shrink the final file after recording ends."
+  echo ""
+  echo "  - --compress-no-remove and --compress-detach can only be used together with --compress."
   echo ""
 }
 
@@ -79,8 +85,9 @@ diff_calc() {
   echo $diff
 }
 
-compress_file() {
+compress_file_sync() {
   target="$1"
+  no_remove="$2"
 
   if ! [ -f "$target" ]; then
     print_err "Cannot compress, file not found: $target"
@@ -97,7 +104,30 @@ compress_file() {
     print_err "Compression not supported for .$ext files"
   fi
 
-  mv -f "$tmp_out" "$target"
+  if [ "$no_remove" != 1 ]; then
+    mv -f "$tmp_out" "$target"
+  fi
+}
+
+compress_file() {
+  target="$1"
+  no_remove="$2"
+  detach="$3"
+  send_notification="$4"
+
+  if [ "$detach" == 1 ]; then
+    (
+      compress_file_sync "$target" "$no_remove"
+      echo "Compression finished: $(basename "$target")"
+      [ "$send_notification" == 1 ] && notify-send -t 2500 "Compression finished: $(basename "$target")"
+    ) >"$TEMP_DIR/compress-$(basename "$target").log" 2>&1 &
+    disown
+
+    echo "Compressing in background: $(basename "$target")"
+    [ "$send_notification" == 1 ] && notify-send -t 1500 "Compressing in background: $(basename "$target")"
+  else
+    compress_file_sync "$target" "$no_remove"
+  fi
 }
 
 start_rec() {
@@ -174,6 +204,8 @@ start_rec() {
 kill_rec() {
   send_notification=$1
   do_compress=$2
+  compress_no_remove=$3
+  compress_detach=$4
 
   if ! [ -f "$FILENAME_FILE" ]; then
     [ $send_notification == 1 ] && notify-send -u critical -t 2500 "No screen cast is currently running!"
@@ -226,7 +258,7 @@ kill_rec() {
       cp "$TEMP_DIR/vid-$filename.mp4" "$DEFAULT_DIR/$filename.mp4"
 
       if [ $do_compress == 1 ]; then
-        compress_file "$DEFAULT_DIR/$filename.mp4"
+        compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
       fi
 
       echo "Screen cast ended"
@@ -238,7 +270,7 @@ kill_rec() {
     ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/vid-$filename.mp4" -i "$TEMP_DIR/final-aud-$filename.wav" -c:v copy -c:a aac -b:a 192k "$DEFAULT_DIR/$filename.mp4"
 
     if [ $do_compress == 1 ]; then
-      compress_file "$DEFAULT_DIR/$filename.mp4"
+      compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
     fi
 
     echo "Screen cast ended"
@@ -249,7 +281,7 @@ kill_rec() {
       ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$DEFAULT_DIR/$filename.wav"
 
       if [ $do_compress == 1 ]; then
-        compress_file "$DEFAULT_DIR/$filename.wav"
+        compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
       fi
 
       echo "Screen cast ended"
@@ -266,7 +298,7 @@ kill_rec() {
     fi
 
     if [ $do_compress == 1 ]; then
-      compress_file "$DEFAULT_DIR/$filename.wav"
+      compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
     fi
 
     echo "Screen cast ended"
@@ -280,6 +312,8 @@ rec_aud=0
 kill_flag=0
 send_notification=0
 compress_flag=0
+compress_no_remove_flag=0
+compress_detach_flag=0
 
 while [ $# -gt 0 ]; do
   case $1 in
@@ -315,8 +349,14 @@ while [ $# -gt 0 ]; do
   --audio | -a)
     rec_aud=1
     ;;
-  --compress)
+  --compress | -p)
     compress_flag=1
+    ;;
+  --compress-no-remove)
+    compress_no_remove_flag=1
+    ;;
+  --compress-detach)
+    compress_detach_flag=1
     ;;
   *)
     print_err "Invalid option $1"
@@ -330,12 +370,30 @@ if [ $kill_flag == 1 ]; then
     print_err "You cannot use [kill flag] with any recording option"
   fi
 
-  kill_rec $send_notification $compress_flag
+  if [ $compress_flag == 0 ]; then
+    if [ $compress_no_remove_flag == 1 ]; then
+      print_err "[compress-no-remove flag] can only be used together with [compress flag]"
+    fi
+
+    if [ $compress_detach_flag == 1 ]; then
+      print_err "[compress-detach flag] can only be used together with [compress flag]"
+    fi
+  fi
+
+  kill_rec $send_notification $compress_flag $compress_no_remove_flag $compress_detach_flag
   exit 0
 fi
 
 if [ $compress_flag == 1 ]; then
   print_err "[compress flag] can only be used together with [kill flag]"
+fi
+
+if [ $compress_no_remove_flag == 1 ]; then
+  print_err "[compress-no-remove flag] can only be used together with [compress flag] and [kill flag]"
+fi
+
+if [ $compress_detach_flag == 1 ]; then
+  print_err "[compress-detach flag] can only be used together with [compress flag] and [kill flag]"
 fi
 
 start_rec $rec_vid $rec_mic $rec_aud $send_notification
