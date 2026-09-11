@@ -46,6 +46,7 @@ print_help() {
 
 check_dirname() {
     dirname="$1"
+    dirname="$(printf '%s' "$dirname" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
 
     if [ -z "$dirname" ]; then
         print_err "Directory name is empty"
@@ -63,9 +64,6 @@ check_dirname() {
         print_err "Directory name must not be '.' or '..'"
     fi
 
-    dirname="${dirname%% }"
-    dirname="${dirname## }"
-
     if [[ "$dirname" == *"$'\0'"* ]]; then
         print_err "Directory name contains null bytes"
     fi
@@ -73,6 +71,8 @@ check_dirname() {
     if [[ ${#dirname} -gt 255 ]]; then
         print_err "Directory name exceeds 255 characters"
     fi
+
+    printf '%s' "$dirname"
 }
 
 create_dir() {
@@ -87,122 +87,121 @@ create_dir() {
     echo "Created directory: $base_dirname/$dirname"
 }
 
-ask_and_create_project_files() {
-    base_dirname="$1"
-    project_name="$2"
+append_gitignore() {
+    if [ "$#" -gt 0 ]; then
+        printf '%s\n' "$@" >>.gitignore
+    fi
+    printf '.personal_temp/\npersonal_temp/\ntemp/\n' >>.gitignore
+}
 
-    cd "$base_dirname" || exit 1
+setup_react() {
+    need_bin yarn
+    yarn create vite "$project_name" --template react
+    cd "$project_name" || exit 1
+    [ -f .gitignore ] && append_gitignore
+}
 
-    question="What is the project type ??"
-    options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
+setup_react_ts() {
+    need_bin yarn
+    yarn create vite "$project_name" --template react-ts
+    cd "$project_name" || exit 1
+    [ -f .gitignore ] && append_gitignore
+}
 
-    select project_type in "${options[@]}"; do
-        case $project_type in
+setup_nextjs() {
+    need_bin npx
+    npx create-next-app@latest "$project_name"
+    cd "$project_name" || exit 1
+    [ -f .gitignore ] && append_gitignore
+}
 
-        "react")
-            need_bin yarn
-            yarn create vite $project_name --template react
-            break
-            ;;
+setup_rust_bin() {
+    need_bin cargo
+    cargo init "$project_name" --bin
+    cd "$project_name" || exit 1
+    [ -f .gitignore ] && append_gitignore
+}
 
-        "react-ts")
-            need_bin yarn
-            yarn create vite $project_name --template react-ts
-            break
-            ;;
+setup_go() {
+    need_bin go
+    cd "$project_name" || exit 1
 
-        "go")
-            need_bin go
-            cd "$project_name" || exit 1
-            go mod init github.com/$GITHUB_USERNAME/$project_name
-            touch .gitignore
-            touch main.go
-            touch Makefile
+    go mod init "github.com/$GITHUB_USERNAME/$project_name"
+    touch .gitignore
 
-            echo "package main
+    cat >main.go <<'EOF'
+package main
 
 import (
-	\"fmt\"
+	"fmt"
 )
 
 func main() {
-  fmt.Println(\"Hello world\")
-}" >main.go
+	fmt.Println("Hello world")
+}
+EOF
 
-            echo "build:
+    cat >Makefile <<EOF
+build:
 	@go build -o bin/$project_name main.go
 
 test:
 	@go test -v ./...
-	
+
 run: build
-	@./bin/$project_name" >Makefile
+	@./bin/$project_name
+EOF
 
-            echo ".env
-bin/" >.gitignore
+    append_gitignore ".env" "bin/"
+}
 
-            break
-            ;;
+setup_c() {
+    cd "$project_name" || exit 1
+    mkdir src
+    touch .gitignore
 
-        "nextjs")
-            need_bin npx
-            npx create-next-app@latest $project_name
-            break
-            ;;
-
-        "rust-bin")
-            need_bin cargo
-            cargo init $project_name --bin
-            break
-            ;;
-
-        "c")
-            cd "$project_name" || exit 1
-            mkdir src
-            touch src/main.c
-            touch .gitignore
-            touch Makefile
-
-            echo "#include <stdio.h>
+    cat >src/main.c <<'EOF'
+#include <stdio.h>
 
 int main() {
-  printf(\"Hello world\");
-  return 0;
-}" >src/main.c
+	printf("Hello world\n");
+	return 0;
+}
+EOF
 
-            echo "build:
-	@g++ -o main.out src/main.c
+    cat >Makefile <<'EOF'
+build:
+	@gcc -o main.out src/main.c
 
 debug:
-	@g++ -g -o main.out src/main.c && gdb ./main.out
+	@gcc -g -o main.out src/main.c && gdb ./main.out
 
 run:
 	@./main.out
 
 valgrind: build
-	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
-" >Makefile
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out
+EOF
 
-            echo "main.out" >.gitignore
+    append_gitignore "main.out"
+}
 
-            break
-            ;;
+setup_cpp() {
+    cd "$project_name" || exit 1
+    mkdir src
+    touch .gitignore
 
-        "cpp")
-            cd "$project_name" || exit 1
-            mkdir src
-            touch src/main.cpp
-            touch .gitignore
-            touch Makefile
-
-            echo "#include <iostream>
+    cat >src/main.cpp <<'EOF'
+#include <iostream>
 
 int main() {
-  std::cout << \"Hello world\" << std::endl;
-  return 0;
-}" >src/main.cpp
+	std::cout << "Hello world" << std::endl;
+	return 0;
+}
+EOF
 
-            echo "build:
+    cat >Makefile <<'EOF'
+build:
 	@g++ -o main.out src/main.cpp
 
 debug:
@@ -212,45 +211,82 @@ run:
 	@./main.out
 
 valgrind: build
-	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
-" >Makefile
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out
+EOF
 
-            echo "main.out" >.gitignore
+    append_gitignore "main.out"
+}
 
+setup_python() {
+    need_bin python3
+    cd "$project_name" || exit 1
+    touch main.py .gitignore
+
+    append_gitignore ".venv" "**/__pycache__/"
+
+    python3 -m venv .venv
+}
+
+setup_empty() {
+    mkdir "$project_name"
+    cd "$project_name" || exit 1
+    touch .gitignore
+    append_gitignore
+}
+
+ask_and_create_project_files() {
+    local base_dirname="$1"
+    project_name="$2"
+
+    cd "$base_dirname" || exit 1
+
+    local question="What is the project type ??"
+    local options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
+
+    select project_type in "${options[@]}"; do
+        case "$project_type" in
+        "react")
+            setup_react
             break
             ;;
-
+        "react-ts")
+            setup_react_ts
+            break
+            ;;
+        "go")
+            setup_go
+            break
+            ;;
+        "nextjs")
+            setup_nextjs
+            break
+            ;;
+        "rust-bin")
+            setup_rust_bin
+            break
+            ;;
+        "c")
+            setup_c
+            break
+            ;;
+        "cpp")
+            setup_cpp
+            break
+            ;;
         "python")
-            need_bin python3
-            cd "$project_name" || exit 1
-            touch main.py
-            touch .gitignore
-
-            echo ".venv
-/**/**/__pycache__" >.gitignore
-
-            python3 -m venv .venv
+            setup_python
             break
             ;;
-
         "empty")
-            mkdir $project_name
-            cd $project_name || exit 1
-            touch .gitignore
+            setup_empty
             break
             ;;
-
-        "cancel")
-            exit 0
-            ;;
-
-        *)
-            print_err "Invalid option!"
-            ;;
+        "cancel") exit 0 ;;
+        *) print_err "Invalid option!" ;;
         esac
     done
 
-    cd $HOME || exit 1
+    cd "$HOME" || exit 1
 }
 
 if [[ "$1" == "-h" ]] ||
@@ -261,7 +297,7 @@ if [[ "$1" == "-h" ]] ||
     exit 0
 fi
 
-case $1 in
+case "$1" in
 work)
     base_dir="$WORK_DIR"
     base_prefix="$WORK_PREFIX"
@@ -292,7 +328,7 @@ study)
 esac
 
 read -e -p "$prompt" doc_dir
-check_dirname "$doc_dir"
+doc_dir="$(check_dirname "$doc_dir")"
 create_dir "$base_dir" "$doc_dir"
 
 if [[ "$1" == "project" ]]; then
