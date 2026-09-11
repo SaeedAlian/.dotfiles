@@ -358,7 +358,10 @@ local function set_diagnostics()
 		new_str = string.format("%sH %d ", new_str, hints)
 	end
 
-	return new_str
+	if new_str ~= "" then
+		return string.format("[ %s]", new_str)
+	end
+	return ""
 end
 
 local function modified_flag()
@@ -420,12 +423,12 @@ vim.api.nvim_create_autocmd({ "WinEnter", "BufEnter", "ModeChanged" }, {
 
 		vim.opt_local.statusline = table.concat({
 			mode_color() .. " %{v:lua.mode_icon()} ",
-			"%#StatusLine#",
-			" %{v:lua.file_name()}%{v:lua.modified_flag()} ",
-			"│ %{v:lua.git_branch()} ",
-			"│ %{v:lua.file_type()} ",
-			"│ %{v:lua.file_size()} ",
-			"│ %{v:lua.set_diagnostics()} ",
+			"%#StatusLine# ",
+			"%{v:lua.file_name()}%{v:lua.modified_flag()} ",
+			"| %{v:lua.git_branch()}  ",
+			"%{v:lua.file_type()}  ",
+			"%{v:lua.file_size()}  ",
+			"%{v:lua.set_diagnostics()} ",
 			"%=",
 			"%l ",
 		})
