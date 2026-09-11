@@ -23,6 +23,7 @@ if ok_lspconf then
 			"tailwindcss",
 			"lua_ls",
 			"pyright",
+			"postgres_lsp",
 			"bashls",
 			"clangd",
 			"rust_analyzer",

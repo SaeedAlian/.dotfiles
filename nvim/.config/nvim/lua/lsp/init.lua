@@ -34,6 +34,8 @@ if not _G.USE_MINIMAL then
 
 	vim.lsp.config("bash_ls", require("lsp.bashls"))
 
+	vim.lsp.config("postgres_lsp", require("lsp.pgsql"))
+
 	vim.lsp.enable({
 		"lua_ls",
 		"gopls",
@@ -45,6 +47,7 @@ if not _G.USE_MINIMAL then
 		"rust_analyzer",
 		"bash_ls",
 		"tailwind_ls",
+		"postgres_lsp",
 	})
 
 	vim.api.nvim_create_autocmd("LspAttach", {
