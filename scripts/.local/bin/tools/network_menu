@@ -5,7 +5,7 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
 . "$DOTFILES_DIR/coreconfig/helpers.sh"
 
-SIMCARD_MODULE="cdc-wdm0"
+SIMCARD_MODULE="cdc-wdm1"
 TERMINAL="${TERMINAL:-alacritty}"
 TERMINAL_FLOAT_CLASS="${TERMINAL_FLOAT_CLASS:-"Alacritty-float"}"
 DMENU_CMD="rofi -dmenu -i -p"
