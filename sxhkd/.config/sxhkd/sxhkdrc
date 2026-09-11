@@ -11,7 +11,7 @@
 
 # terminal
 super + Return
-  $TERMINAL
+  tmux_fzf_session -n default
 
 # primary notes
 super + e
@@ -38,8 +38,12 @@ super + shift + control + w
   webcam
 
 # sxiv in wallpapers
-super + shift + z
+super + alt + w
   sxiv $WALLPAPERS_DIR
+
+# sxiv in screenshots
+super + alt + s
+  sxiv $SCREENSHOTS_DIR
 
 ######### menus #########
 
@@ -74,10 +78,11 @@ super + control + q
 super + shift + Escape
   startup --force
 
-# screen cast
+# screen cast start
 super + apostrophe
   sccast -n -f
 
+# screen cast stop
 super + semicolon
   sccast -n -k --compress --compress-no-remove --compress-detach
 
