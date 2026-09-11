@@ -8,14 +8,14 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 require_vars XDG_DATA_HOME
 
 SV_DIRS=(
-  "/etc/sv"
-  "$XDG_DATA_HOME/sv"
-  "/usr/share/runit/sv.now"
+    "/etc/sv"
+    "$XDG_DATA_HOME/sv"
+    "/usr/share/runit/sv.now"
 )
 ACTIVE_DIR="/etc/runit/runsvdir/default"
 
 print_help() {
-  help="A simple command-line tool for managing runit services.
+    help="A simple command-line tool for managing runit services.
 
 Usage: $(basename "$0") [options] [service]
 
@@ -38,119 +38,119 @@ $(printf "   - %s\n" "${SV_DIRS[@]}")
    re-enable it on the next reboot.
 "
 
-  if command -v less >/dev/null 2>&1; then
-    echo "$help" | less
-  else
-    echo "$help"
-  fi
+    if command -v less >/dev/null 2>&1; then
+        echo "$help" | less
+    else
+        echo "$help"
+    fi
 }
 
 find_service() {
-  local srv="$1"
+    local srv="$1"
 
-  for dir in "${SV_DIRS[@]}"; do
-    if [ -e "$dir/$srv" ]; then
-      echo "$dir/$srv"
-      return 0
-    fi
-  done
+    for dir in "${SV_DIRS[@]}"; do
+        if [ -e "$dir/$srv" ]; then
+            echo "$dir/$srv"
+            return 0
+        fi
+    done
 
-  return 1
+    return 1
 }
 
 list_services() {
-  printf "%-30s | %-10s\n" "Service" "Status"
-  printf "%-30s-+-%-10s\n" "------------------------------" "----------"
+    printf "%-30s | %-10s\n" "Service" "Status"
+    printf "%-30s-+-%-10s\n" "------------------------------" "----------"
 
-  declare -A seen
+    declare -A seen
 
-  for dir in "${SV_DIRS[@]}"; do
-    [ -d "$dir" ] || continue
+    for dir in "${SV_DIRS[@]}"; do
+        [ -d "$dir" ] || continue
 
-    for service in "$dir"/*; do
-      [ -e "$service" ] || continue
-      name=$(basename "$service")
+        for service in "$dir"/*; do
+            [ -e "$service" ] || continue
+            name=$(basename "$service")
 
-      if [[ ${seen[$name]} ]]; then
-        continue
-      fi
+            if [[ ${seen[$name]} ]]; then
+                continue
+            fi
 
-      seen[$name]=1
+            seen[$name]=1
 
-      if [ -L "$ACTIVE_DIR/$name" ]; then
-        status="active"
-      elif [ -L "$ACTIVE_DIR/.$name" ]; then
-        status="inactive"
-      else
-        status="inactive"
-      fi
+            if [ -L "$ACTIVE_DIR/$name" ]; then
+                status="active"
+            elif [ -L "$ACTIVE_DIR/.$name" ]; then
+                status="inactive"
+            else
+                status="inactive"
+            fi
 
-      printf "%-30s | %-10s\n" "$name" "$status"
+            printf "%-30s | %-10s\n" "$name" "$status"
+        done
     done
-  done
 }
 
 activate_service() {
-  local srv="$1"
-  local service_path
-  service_path=$(find_service "$srv")
+    local srv="$1"
+    local service_path
+    service_path=$(find_service "$srv")
 
-  if [ $? -ne 0 ]; then
-    print_err "Service not found"
-  fi
+    if [ $? -ne 0 ]; then
+        print_err "Service not found"
+    fi
 
-  if [ -L "$ACTIVE_DIR/$srv" ]; then
-    print_err "Service is already active"
-  fi
+    if [ -L "$ACTIVE_DIR/$srv" ]; then
+        print_err "Service is already active"
+    fi
 
-  if [ -L "$ACTIVE_DIR/.$srv" ]; then
-    sudo rm -f "$ACTIVE_DIR/.$srv"
-  fi
+    if [ -L "$ACTIVE_DIR/.$srv" ]; then
+        sudo rm -f "$ACTIVE_DIR/.$srv"
+    fi
 
-  sudo ln -s "$service_path" "$ACTIVE_DIR"
+    sudo ln -s "$service_path" "$ACTIVE_DIR"
 
-  echo "Service $srv activated"
+    echo "Service $srv activated"
 }
 
 deactivate_service() {
-  local srv="$1"
-  local service_path
-  service_path=$(find_service "$srv")
+    local srv="$1"
+    local service_path
+    service_path=$(find_service "$srv")
 
-  if [ $? -ne 0 ]; then
-    print_err "Service not found"
-  fi
+    if [ $? -ne 0 ]; then
+        print_err "Service not found"
+    fi
 
-  if ! [ -L "$ACTIVE_DIR/$srv" ] && [ -L "$ACTIVE_DIR/.$srv" ]; then
-    print_err "Service is already deactive"
-  fi
+    if ! [ -L "$ACTIVE_DIR/$srv" ] && [ -L "$ACTIVE_DIR/.$srv" ]; then
+        print_err "Service is already deactive"
+    fi
 
-  sudo rm -f "$ACTIVE_DIR/$srv"
-  sudo ln -sf "$service_path" "$ACTIVE_DIR/.$srv"
+    sudo rm -f "$ACTIVE_DIR/$srv"
+    sudo ln -sf "$service_path" "$ACTIVE_DIR/.$srv"
 
-  echo "Service $srv deactivated"
+    echo "Service $srv deactivated"
 }
 
 case "$1" in
 --list | -l)
-  list_services
-  ;;
+    list_services
+    ;;
 --activate | -a)
-  if [ -z "$2" ]; then
-    print_err "Service is empty"
-  fi
-  activate_service "$2"
-  ;;
+    if [ -z "$2" ]; then
+        print_err "Service is empty"
+    fi
+    activate_service "$2"
+    ;;
 --deactivate | -d)
-  if [ -z "$2" ]; then
-    print_err "Service is empty"
-  fi
-  deactivate_service "$2"
-  ;;
+    if [ -z "$2" ]; then
+        print_err "Service is empty"
+    fi
+    deactivate_service "$2"
+    ;;
 --help | -h)
-  print_help
-  ;;
+    print_help
+    ;;
 *)
-  print_help
-  ;;
+    print_help
+    ;;
 esac

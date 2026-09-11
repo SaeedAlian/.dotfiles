@@ -13,7 +13,7 @@ set +a
 . "$DOTFILES_DIR/coreconfig/helpers.sh"
 
 if in_container; then
-  load_all_and_require_for_distrobox true
+    load_all_and_require_for_distrobox true
 fi
 
 ######## options ########
@@ -32,29 +32,29 @@ export PROMPT_COMMAND="history -a;$PROMPT_COMMAND" # makes history immediately w
 
 ######## launch x server ########
 if ! in_container && [[ "$(tty)" = "/dev/tty1" ]]; then
-  startx "$XINITRC"
+    startx "$XINITRC"
 fi
 
 ######## functions ########
 
 # ability to change the current working directory when exiting Yazi
 function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
+    local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
 }
 
 # better cd with fzf
 function bettercd() {
-  s="$(ls -a | fzf --height 50% --reverse)"
-  if [ -d "$s" ]; then
-    cd "$s"
-  elif [ -f "$s" ]; then
-    xdg-open "$s"
-  fi
+    s="$(ls -a | fzf --height 50% --reverse)"
+    if [ -d "$s" ]; then
+        cd "$s"
+    elif [ -f "$s" ]; then
+        xdg-open "$s"
+    fi
 }
 
 ######## binds ########
@@ -119,46 +119,46 @@ alias apt="sudo apt"
 ######## prompt ########
 
 parse_git_dirty() {
-  STATUS="$(git status 2>/dev/null)" || {
-    printf ""
-    return
-  }
-  echo "$STATUS" | grep -q "tree clean" && {
-    printf ""
-    return
-  }
+    STATUS="$(git status 2>/dev/null)" || {
+        printf ""
+        return
+    }
+    echo "$STATUS" | grep -q "tree clean" && {
+        printf ""
+        return
+    }
 
-  flags=""
-  echo "$STATUS" | grep -q "renamed:" && flags="${flags}r"
-  echo "$STATUS" | grep -q "branch is ahead:" && flags="${flags}!"
-  echo "$STATUS" | grep -q "new file:" && flags="${flags}n"
-  echo "$STATUS" | grep -q "Untracked files:" && flags="${flags}u"
-  echo "$STATUS" | grep -q "modified:" && flags="${flags}m"
-  echo "$STATUS" | grep -q "deleted:" && flags="${flags}d"
+    flags=""
+    echo "$STATUS" | grep -q "renamed:" && flags="${flags}r"
+    echo "$STATUS" | grep -q "branch is ahead:" && flags="${flags}!"
+    echo "$STATUS" | grep -q "new file:" && flags="${flags}n"
+    echo "$STATUS" | grep -q "Untracked files:" && flags="${flags}u"
+    echo "$STATUS" | grep -q "modified:" && flags="${flags}m"
+    echo "$STATUS" | grep -q "deleted:" && flags="${flags}d"
 
-  [ -n "$flags" ] && printf " (%s)" "$flags"
+    [ -n "$flags" ] && printf " (%s)" "$flags"
 }
 
 parse_git_branch() {
-  BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
-  [ -n "$BRANCH" ] && printf " (%s)" "$BRANCH"
+    BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null | sed -e 's/.*\/\(.*\)/\1/')
+    [ -n "$BRANCH" ] && printf " (%s)" "$BRANCH"
 }
 
 parse_logo() {
-  OS="$(sed -n 's/^NAME="\?\([^"]*\)"\?$/\1/p' /etc/os-release | head -n1)"
+    OS="$(sed -n 's/^NAME="\?\([^"]*\)"\?$/\1/p' /etc/os-release | head -n1)"
 
-  case "$OS" in
-  *Fedora*) printf " 󰣛 " ;;
-  *Artix*) printf "  " ;;
-  *Devuan*) printf "  " ;;
-  *Arch*) printf " 󰣇 " ;;
-  *Void*) printf "  " ;;
-  *) printf " 󰌽 " ;;
-  esac
+    case "$OS" in
+    *Fedora*) printf " 󰣛 " ;;
+    *Artix*) printf "  " ;;
+    *Devuan*) printf "  " ;;
+    *Arch*) printf " 󰣇 " ;;
+    *Void*) printf "  " ;;
+    *) printf " 󰌽 " ;;
+    esac
 }
 
 parse_container_flag() {
-  in_container && printf "(cont)"
+    in_container && printf "(cont)"
 }
 
 PS1="\[\033[1;34m\]\$(parse_logo)\[\e[1;34m\]\$(parse_container_flag)\[\e[1;37m\] \W\[\e[1;32m\]\$(parse_git_branch)\[\033[31m\]\$(parse_git_dirty)\[\e[1;34m\] \[\e[1;34m\] \[\033[00m\]"

@@ -15,5 +15,5 @@ xset +dpms dpms 0 0 $SCREEN_TIMEOUT
 pgrep -x xss-lock >/dev/null || xss-lock -l -- $START_LOCKSCREEN_SCRIPT_PATH &
 
 if [ $? == 0 ]; then
-  DISPLAY=:0.0 notify-send --expire-time=2000 "DPMS turned on"
+    DISPLAY=:0.0 notify-send --expire-time=2000 "DPMS turned on"
 fi

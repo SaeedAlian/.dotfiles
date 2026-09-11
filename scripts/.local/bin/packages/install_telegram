@@ -30,7 +30,7 @@ echo "Extracting..."
 ex "$ARCHIVE" --outdir "$WORKDIR"
 
 if [ ! -d "$WORKDIR/Telegram" ]; then
-  print_err "Unexpected archive layout, aborting"
+    print_err "Unexpected archive layout, aborting"
 fi
 
 echo "Installing to $INSTALL_DIR..."

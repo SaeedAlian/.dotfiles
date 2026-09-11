@@ -30,10 +30,10 @@ echo "Extracting..."
 ex "$ARCHIVE" --outdir "$WORKDIR"
 
 if [ ! -d "$WORKDIR/nvim-linux-x86_64" ] ||
-  [ ! -x "$WORKDIR/nvim-linux-x86_64/bin/nvim" ] ||
-  [ ! -d "$WORKDIR/nvim-linux-x86_64/lib" ] ||
-  [ ! -d "$WORKDIR/nvim-linux-x86_64/share/nvim" ]; then
-  print_err "Unexpected archive layout, aborting"
+    [ ! -x "$WORKDIR/nvim-linux-x86_64/bin/nvim" ] ||
+    [ ! -d "$WORKDIR/nvim-linux-x86_64/lib" ] ||
+    [ ! -d "$WORKDIR/nvim-linux-x86_64/share/nvim" ]; then
+    print_err "Unexpected archive layout, aborting"
 fi
 
 echo "Installing to $INSTALL_DIR..."
@@ -46,33 +46,33 @@ echo "Creating symlink /usr/local/bin/nvim..."
 run_root ln -sf "$INSTALL_DIR/bin/nvim" /usr/local/bin/nvim
 
 if [ -f "$INSTALL_DIR/share/man/man1/nvim.1" ]; then
-  echo "Linking man page (share/man)..."
-  run_root mkdir -p /usr/local/share/man/man1
-  run_root ln -sf "$INSTALL_DIR/share/man/man1/nvim.1" /usr/local/share/man/man1/nvim.1
+    echo "Linking man page (share/man)..."
+    run_root mkdir -p /usr/local/share/man/man1
+    run_root ln -sf "$INSTALL_DIR/share/man/man1/nvim.1" /usr/local/share/man/man1/nvim.1
 fi
 
 if [ -d "$INSTALL_DIR/share/applications" ]; then
-  echo "Linking desktop entries (share/applications)..."
-  run_root mkdir -p /usr/local/share/applications
-  for f in "$INSTALL_DIR"/share/applications/*.desktop; do
-    [ -f "$f" ] && run_root ln -sf "$f" "/usr/local/share/applications/$(basename "$f")"
-  done
+    echo "Linking desktop entries (share/applications)..."
+    run_root mkdir -p /usr/local/share/applications
+    for f in "$INSTALL_DIR"/share/applications/*.desktop; do
+        [ -f "$f" ] && run_root ln -sf "$f" "/usr/local/share/applications/$(basename "$f")"
+    done
 fi
 
 if [ -d "$INSTALL_DIR/share/icons" ]; then
-  echo "Linking icons (share/icons)..."
-  run_root mkdir -p /usr/local/share/icons
-  for dir in "$INSTALL_DIR"/share/icons/*/; do
-    [ -d "$dir" ] || continue
-    name=$(basename "$dir")
-    find "$dir" -type f | while IFS= read -r icon; do
-      rel="${icon#"$INSTALL_DIR"/share/icons/}"
-      dest="/usr/local/share/icons/$rel"
-      run_root mkdir -p "$(dirname "$dest")"
-      run_root ln -sf "$icon" "$dest"
+    echo "Linking icons (share/icons)..."
+    run_root mkdir -p /usr/local/share/icons
+    for dir in "$INSTALL_DIR"/share/icons/*/; do
+        [ -d "$dir" ] || continue
+        name=$(basename "$dir")
+        find "$dir" -type f | while IFS= read -r icon; do
+            rel="${icon#"$INSTALL_DIR"/share/icons/}"
+            dest="/usr/local/share/icons/$rel"
+            run_root mkdir -p "$(dirname "$dest")"
+            run_root ln -sf "$icon" "$dest"
+        done
+        : "$name"
     done
-    : "$name"
-  done
 fi
 
 echo "Cleaning cache..."

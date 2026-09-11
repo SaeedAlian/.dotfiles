@@ -22,288 +22,288 @@ mkdir -p $DEFAULT_DIR
 mkdir -p $TEMP_DIR
 
 print_help() {
-  echo "Usage: $SCRIPT_NAME [OPTIONS]"
-  echo ""
-  echo "Screen recording script using ffmpeg."
-  echo ""
-  echo "Options:"
-  echo "  --help                        Show this help message and exit."
-  echo ""
-  echo "  --notify, -n                  Send a desktop notification when starting or stopping screen recording."
-  echo ""
-  echo "  --stop, --kill, -k            Stop all $SCRIPT_NAME processes and their associated ffmpeg child processes."
-  echo ""
-  echo "  --full, --all, -f             Record the full screen, microphone, and system audio."
-  echo ""
-  echo "  --video, -v                   Record the screen (video only, no audio)."
-  echo ""
-  echo "  --mic, -m                     Record microphone audio only."
-  echo ""
-  echo "  --audio, -a                   Record system audio only."
-  echo ""
-  echo "  --clean, -c                   Clean and delete all the temp files."
-  echo ""
-  echo "  --compress, -p                Compress the final output file (used with --stop). Slower, smaller file."
-  echo ""
-  echo "  --compress-no-remove          Compress the final output file, but don't remove the original file."
-  echo ""
-  echo "  --compress-detach             Compress the final output file in a separate thread and you will get notified when it's finished."
-  echo ""
-  echo "  --loglevel=[ffmpeg loglevel]  Set loglevel for ffmpeg."
-  echo ""
-  echo "Notes:"
-  echo "  - By default, the output files are saved in: $DEFAULT_DIR"
-  echo ""
-  echo "  - You must specify at least one recording option (--video, --mic, or --audio)."
-  echo ""
-  echo "  - The --stop option will only stop screen recording processes started by this script."
-  echo ""
-  echo "  - --compress can be combined with --stop to shrink the final file after recording ends."
-  echo ""
-  echo "  - --compress-no-remove and --compress-detach can only be used together with --compress."
-  echo ""
+    echo "Usage: $SCRIPT_NAME [OPTIONS]"
+    echo ""
+    echo "Screen recording script using ffmpeg."
+    echo ""
+    echo "Options:"
+    echo "  --help                        Show this help message and exit."
+    echo ""
+    echo "  --notify, -n                  Send a desktop notification when starting or stopping screen recording."
+    echo ""
+    echo "  --stop, --kill, -k            Stop all $SCRIPT_NAME processes and their associated ffmpeg child processes."
+    echo ""
+    echo "  --full, --all, -f             Record the full screen, microphone, and system audio."
+    echo ""
+    echo "  --video, -v                   Record the screen (video only, no audio)."
+    echo ""
+    echo "  --mic, -m                     Record microphone audio only."
+    echo ""
+    echo "  --audio, -a                   Record system audio only."
+    echo ""
+    echo "  --clean, -c                   Clean and delete all the temp files."
+    echo ""
+    echo "  --compress, -p                Compress the final output file (used with --stop). Slower, smaller file."
+    echo ""
+    echo "  --compress-no-remove          Compress the final output file, but don't remove the original file."
+    echo ""
+    echo "  --compress-detach             Compress the final output file in a separate thread and you will get notified when it's finished."
+    echo ""
+    echo "  --loglevel=[ffmpeg loglevel]  Set loglevel for ffmpeg."
+    echo ""
+    echo "Notes:"
+    echo "  - By default, the output files are saved in: $DEFAULT_DIR"
+    echo ""
+    echo "  - You must specify at least one recording option (--video, --mic, or --audio)."
+    echo ""
+    echo "  - The --stop option will only stop screen recording processes started by this script."
+    echo ""
+    echo "  - --compress can be combined with --stop to shrink the final file after recording ends."
+    echo ""
+    echo "  - --compress-no-remove and --compress-detach can only be used together with --compress."
+    echo ""
 }
 
 diff_calc() {
-  f1=$1
-  f2=$2
+    f1=$1
+    f2=$2
 
-  f1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f1" | awk '{printf "%.0f\n", $1 * 1000}')
-  f2_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f2" | awk '{printf "%.0f\n", $1 * 1000}')
+    f1_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f1" | awk '{printf "%.0f\n", $1 * 1000}')
+    f2_dur=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f2" | awk '{printf "%.0f\n", $1 * 1000}')
 
-  diff=$(($f2_dur - $f1_dur))
-  if [ $diff -lt 0 ]; then
-    diff=$(($diff * -1))
-  fi
+    diff=$(($f2_dur - $f1_dur))
+    if [ $diff -lt 0 ]; then
+        diff=$(($diff * -1))
+    fi
 
-  diff=$(($diff - 100))
+    diff=$(($diff - 100))
 
-  if [ $diff -lt 0 ]; then
-    diff=0
-  fi
+    if [ $diff -lt 0 ]; then
+        diff=0
+    fi
 
-  echo $diff
+    echo $diff
 }
 
 compress_file_sync() {
-  target="$1"
-  no_remove="$2"
+    target="$1"
+    no_remove="$2"
 
-  if ! [ -f "$target" ]; then
-    print_err "Cannot compress, file not found: $target"
-  fi
+    if ! [ -f "$target" ]; then
+        print_err "Cannot compress, file not found: $target"
+    fi
 
-  ext="${target##*.}"
-  tmp_out="${target%.*}-compressed.$ext"
+    ext="${target##*.}"
+    tmp_out="${target%.*}-compressed.$ext"
 
-  if [ "$ext" == "mp4" ]; then
-    ffmpeg -y -loglevel $LOG_LEVEL -hide_banner -i "$target" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 160k "$tmp_out"
-  elif [ "$ext" == "wav" ]; then
-    ffmpeg -y -loglevel $LOG_LEVEL -hide_banner -i "$target" -ar 32000 -sample_fmt s16 "$tmp_out"
-  else
-    print_err "Compression not supported for .$ext files"
-  fi
+    if [ "$ext" == "mp4" ]; then
+        ffmpeg -y -loglevel $LOG_LEVEL -hide_banner -i "$target" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 160k "$tmp_out"
+    elif [ "$ext" == "wav" ]; then
+        ffmpeg -y -loglevel $LOG_LEVEL -hide_banner -i "$target" -ar 32000 -sample_fmt s16 "$tmp_out"
+    else
+        print_err "Compression not supported for .$ext files"
+    fi
 
-  if [ "$no_remove" != 1 ]; then
-    mv -f "$tmp_out" "$target"
-  fi
+    if [ "$no_remove" != 1 ]; then
+        mv -f "$tmp_out" "$target"
+    fi
 }
 
 compress_file() {
-  target="$1"
-  no_remove="$2"
-  detach="$3"
-  send_notification="$4"
+    target="$1"
+    no_remove="$2"
+    detach="$3"
+    send_notification="$4"
 
-  if [ "$detach" == 1 ]; then
-    (
-      compress_file_sync "$target" "$no_remove"
-      echo "Compression finished: $(basename "$target")"
-      [ "$send_notification" == 1 ] && notify-send -t 2500 "Compression finished: $(basename "$target")"
-    ) >"$TEMP_DIR/compress-$(basename "$target").log" 2>&1 &
-    disown
+    if [ "$detach" == 1 ]; then
+        (
+            compress_file_sync "$target" "$no_remove"
+            echo "Compression finished: $(basename "$target")"
+            [ "$send_notification" == 1 ] && notify-send -t 2500 "Compression finished: $(basename "$target")"
+        ) >"$TEMP_DIR/compress-$(basename "$target").log" 2>&1 &
+        disown
 
-    echo "Compressing in background: $(basename "$target")"
-    [ "$send_notification" == 1 ] && notify-send -t 1500 "Compressing in background: $(basename "$target")"
-  else
-    compress_file_sync "$target" "$no_remove"
-  fi
+        echo "Compressing in background: $(basename "$target")"
+        [ "$send_notification" == 1 ] && notify-send -t 1500 "Compressing in background: $(basename "$target")"
+    else
+        compress_file_sync "$target" "$no_remove"
+    fi
 }
 
 start_rec() {
-  rec_vid=$1
-  rec_mic=$2
-  rec_aud=$3
-  send_notification=$4
+    rec_vid=$1
+    rec_mic=$2
+    rec_aud=$3
+    send_notification=$4
 
-  if [ -f "$FILENAME_FILE" ]; then
-    [ $send_notification == 1 ] && notify-send -u critical -t 2500 "Already recording!"
-    print_err "$SCRIPT_NAME already recording"
-  fi
-
-  filename="cast-$(date +%s%3N)-$(date +%F)"
-
-  if [ $rec_vid == 1 ]; then
-    resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
-    nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -crf 23 -preset ultrafast -pix_fmt yuv420p -thread_queue_size 1024 "$TEMP_DIR/vid-$filename.mp4" >"$TEMP_DIR/vid-$filename.log" 2>&1 &
-    disown
-
-    if [ $? != 0 ]; then
-      [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
-      print_err "Cannot record screen"
+    if [ -f "$FILENAME_FILE" ]; then
+        [ $send_notification == 1 ] && notify-send -u critical -t 2500 "Already recording!"
+        print_err "$SCRIPT_NAME already recording"
     fi
 
-    echo $! >"$VIDPID_FILE"
-  fi
+    filename="cast-$(date +%s%3N)-$(date +%F)"
 
-  if [ $rec_aud == 1 ]; then
-    nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 0 "$TEMP_DIR/aud-$filename.wav" >"$TEMP_DIR/aud-$filename.log" 2>&1 &
-    disown
+    if [ $rec_vid == 1 ]; then
+        resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
+        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -crf 23 -preset ultrafast -pix_fmt yuv420p -thread_queue_size 1024 "$TEMP_DIR/vid-$filename.mp4" >"$TEMP_DIR/vid-$filename.log" 2>&1 &
+        disown
 
-    if [ $? != 0 ]; then
-      if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
-        kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
-        rm "$TEMP_DIR/vid-$filename.mp4"
-      fi
+        if [ $? != 0 ]; then
+            [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+            print_err "Cannot record screen"
+        fi
 
-      [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
-      print_err "Cannot record screen"
+        echo $! >"$VIDPID_FILE"
     fi
 
-    echo $! >"$AUDPID_FILE"
-  fi
+    if [ $rec_aud == 1 ]; then
+        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 0 "$TEMP_DIR/aud-$filename.wav" >"$TEMP_DIR/aud-$filename.log" 2>&1 &
+        disown
 
-  if [ $rec_mic == 1 ]; then
-    nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 1 "$TEMP_DIR/mic-$filename.wav" >"$TEMP_DIR/mic-$filename.log" 2>&1 &
-    disown
+        if [ $? != 0 ]; then
+            if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
+                kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+                rm "$TEMP_DIR/vid-$filename.mp4"
+            fi
 
-    if [ $? != 0 ]; then
-      if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
-        kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
-        rm "$TEMP_DIR/vid-$filename.mp4"
-      fi
+            [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+            print_err "Cannot record screen"
+        fi
 
-      if [ $rec_aud == 1 ] && [ -f "$AUDPID_FILE" ]; then
-        kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
-        rm "$TEMP_DIR/aud-$filename.wav"
-      fi
-
-      [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
-      print_err "Cannot record screen"
+        echo $! >"$AUDPID_FILE"
     fi
 
-    echo $! >"$MICPID_FILE"
-  fi
+    if [ $rec_mic == 1 ]; then
+        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 1 "$TEMP_DIR/mic-$filename.wav" >"$TEMP_DIR/mic-$filename.log" 2>&1 &
+        disown
 
-  echo "$filename" >"$FILENAME_FILE"
+        if [ $? != 0 ]; then
+            if [ $rec_vid == 1 ] && [ -f "$VIDPID_FILE" ]; then
+                kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+                rm "$TEMP_DIR/vid-$filename.mp4"
+            fi
 
-  echo "Screen cast started"
-  [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast started"
+            if [ $rec_aud == 1 ] && [ -f "$AUDPID_FILE" ]; then
+                kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
+                rm "$TEMP_DIR/aud-$filename.wav"
+            fi
+
+            [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
+            print_err "Cannot record screen"
+        fi
+
+        echo $! >"$MICPID_FILE"
+    fi
+
+    echo "$filename" >"$FILENAME_FILE"
+
+    echo "Screen cast started"
+    [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast started"
 }
 
 kill_rec() {
-  send_notification=$1
-  do_compress=$2
-  compress_no_remove=$3
-  compress_detach=$4
+    send_notification=$1
+    do_compress=$2
+    compress_no_remove=$3
+    compress_detach=$4
 
-  if ! [ -f "$FILENAME_FILE" ]; then
-    [ $send_notification == 1 ] && notify-send -u critical -t 2500 "No screen cast is currently running!"
-    print_err "No screen cast is currently running!"
-  fi
-
-  echo "Ending screen cast..."
-  [ $send_notification == 1 ] && notify-send -t 2000 "Ending screen cast..."
-
-  cmd="ffmpeg"
-
-  is_recording_vid=0
-  is_recording_aud=0
-  is_recording_mic=0
-
-  if [ -f "$VIDPID_FILE" ]; then
-    kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
-    is_recording_vid=1
-  fi
-
-  if [ -f "$AUDPID_FILE" ]; then
-    kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
-    is_recording_aud=1
-  fi
-
-  if [ -f "$MICPID_FILE" ]; then
-    kill -15 "$(cat "$MICPID_FILE")" && rm $MICPID_FILE
-    is_recording_mic=1
-  fi
-
-  filename=$(cat "$FILENAME_FILE")
-  rm "$FILENAME_FILE"
-
-  sleep 1
-
-  if [ $is_recording_vid == 1 ]; then
-    if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
-      diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
-
-      ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$TEMP_DIR/final-aud-$filename.wav"
-    elif [ $is_recording_aud == 1 ] && [ $is_recording_mic != 1 ]; then
-      diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
-
-      ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
-    elif [ $is_recording_aud != 1 ] && [ $is_recording_mic == 1 ]; then
-      diff=$(diff_calc "$TEMP_DIR/mic-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
-
-      ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
-    else
-      cp "$TEMP_DIR/vid-$filename.mp4" "$DEFAULT_DIR/$filename.mp4"
-
-      if [ $do_compress == 1 ]; then
-        compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
-      fi
-
-      echo "Screen cast ended"
-      [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
-      exit 0
+    if ! [ -f "$FILENAME_FILE" ]; then
+        [ $send_notification == 1 ] && notify-send -u critical -t 2500 "No screen cast is currently running!"
+        print_err "No screen cast is currently running!"
     fi
+
+    echo "Ending screen cast..."
+    [ $send_notification == 1 ] && notify-send -t 2000 "Ending screen cast..."
+
+    cmd="ffmpeg"
+
+    is_recording_vid=0
+    is_recording_aud=0
+    is_recording_mic=0
+
+    if [ -f "$VIDPID_FILE" ]; then
+        kill -15 "$(cat "$VIDPID_FILE")" && rm $VIDPID_FILE
+        is_recording_vid=1
+    fi
+
+    if [ -f "$AUDPID_FILE" ]; then
+        kill -15 "$(cat "$AUDPID_FILE")" && rm $AUDPID_FILE
+        is_recording_aud=1
+    fi
+
+    if [ -f "$MICPID_FILE" ]; then
+        kill -15 "$(cat "$MICPID_FILE")" && rm $MICPID_FILE
+        is_recording_mic=1
+    fi
+
+    filename=$(cat "$FILENAME_FILE")
+    rm "$FILENAME_FILE"
 
     sleep 1
-    ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/vid-$filename.mp4" -i "$TEMP_DIR/final-aud-$filename.wav" -c:v copy -c:a aac -b:a 192k "$DEFAULT_DIR/$filename.mp4"
 
-    if [ $do_compress == 1 ]; then
-      compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
+    if [ $is_recording_vid == 1 ]; then
+        if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
+            diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
+
+            ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$TEMP_DIR/final-aud-$filename.wav"
+        elif [ $is_recording_aud == 1 ] && [ $is_recording_mic != 1 ]; then
+            diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
+
+            ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
+        elif [ $is_recording_aud != 1 ] && [ $is_recording_mic == 1 ]; then
+            diff=$(diff_calc "$TEMP_DIR/mic-$filename.wav" "$TEMP_DIR/vid-$filename.mp4")
+
+            ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -filter_complex "adelay=$diff|$diff" "$TEMP_DIR/final-aud-$filename.wav"
+        else
+            cp "$TEMP_DIR/vid-$filename.mp4" "$DEFAULT_DIR/$filename.mp4"
+
+            if [ $do_compress == 1 ]; then
+                compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
+            fi
+
+            echo "Screen cast ended"
+            [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+            exit 0
+        fi
+
+        sleep 1
+        ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/vid-$filename.mp4" -i "$TEMP_DIR/final-aud-$filename.wav" -c:v copy -c:a aac -b:a 192k "$DEFAULT_DIR/$filename.mp4"
+
+        if [ $do_compress == 1 ]; then
+            compress_file "$DEFAULT_DIR/$filename.mp4" "$compress_no_remove" "$compress_detach" "$send_notification"
+        fi
+
+        echo "Screen cast ended"
+        [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+    else
+        if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
+            diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
+            ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$DEFAULT_DIR/$filename.wav"
+
+            if [ $do_compress == 1 ]; then
+                compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
+            fi
+
+            echo "Screen cast ended"
+            [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
+            exit 0
+        fi
+
+        if [ $is_recording_mic == 1 ]; then
+            cp "$TEMP_DIR/mic-$filename.wav" "$DEFAULT_DIR/$filename.wav"
+        fi
+
+        if [ $is_recording_aud == 1 ]; then
+            cp "$TEMP_DIR/aud-$filename.wav" "$DEFAULT_DIR/$filename.wav"
+        fi
+
+        if [ $do_compress == 1 ]; then
+            compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
+        fi
+
+        echo "Screen cast ended"
+        [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
     fi
-
-    echo "Screen cast ended"
-    [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
-  else
-    if [ $is_recording_mic == 1 ] && [ $is_recording_aud == 1 ]; then
-      diff=$(diff_calc "$TEMP_DIR/aud-$filename.wav" "$TEMP_DIR/mic-$filename.wav")
-      ffmpeg -loglevel $LOG_LEVEL -hide_banner -i "$TEMP_DIR/mic-$filename.wav" -i "$TEMP_DIR/aud-$filename.wav" -filter_complex "[1]adelay=$diff|$diff[delayed];[0][delayed]amix=inputs=2:duration=longest" "$DEFAULT_DIR/$filename.wav"
-
-      if [ $do_compress == 1 ]; then
-        compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
-      fi
-
-      echo "Screen cast ended"
-      [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
-      exit 0
-    fi
-
-    if [ $is_recording_mic == 1 ]; then
-      cp "$TEMP_DIR/mic-$filename.wav" "$DEFAULT_DIR/$filename.wav"
-    fi
-
-    if [ $is_recording_aud == 1 ]; then
-      cp "$TEMP_DIR/aud-$filename.wav" "$DEFAULT_DIR/$filename.wav"
-    fi
-
-    if [ $do_compress == 1 ]; then
-      compress_file "$DEFAULT_DIR/$filename.wav" "$compress_no_remove" "$compress_detach" "$send_notification"
-    fi
-
-    echo "Screen cast ended"
-    [ $send_notification == 1 ] && notify-send -t 1500 "Screen cast ended"
-  fi
 }
 
 rec_vid=0
@@ -316,84 +316,84 @@ compress_no_remove_flag=0
 compress_detach_flag=0
 
 while [ $# -gt 0 ]; do
-  case $1 in
-  --loglevel=*)
-    LOG_LEVEL="${1#--loglevel=}"
-    ;;
-  --help)
-    print_help
-    exit 0
-    ;;
-  --clean | -c)
-    rm -rf "$TEMP_DIR"
-    mkdir -p "$TEMP_DIR"
-    exit 0
-    ;;
-  --notify | -n)
-    send_notification=1
-    ;;
-  --stop | --kill | -k)
-    kill_flag=1
-    ;;
-  --full | --all | -f)
-    rec_vid=1
-    rec_mic=1
-    rec_aud=1
-    ;;
-  --video | -v)
-    rec_vid=1
-    ;;
-  --mic | -m)
-    rec_mic=1
-    ;;
-  --audio | -a)
-    rec_aud=1
-    ;;
-  --compress | -p)
-    compress_flag=1
-    ;;
-  --compress-no-remove)
-    compress_no_remove_flag=1
-    ;;
-  --compress-detach)
-    compress_detach_flag=1
-    ;;
-  *)
-    print_err "Invalid option $1"
-    ;;
-  esac
-  shift 1
+    case $1 in
+    --loglevel=*)
+        LOG_LEVEL="${1#--loglevel=}"
+        ;;
+    --help)
+        print_help
+        exit 0
+        ;;
+    --clean | -c)
+        rm -rf "$TEMP_DIR"
+        mkdir -p "$TEMP_DIR"
+        exit 0
+        ;;
+    --notify | -n)
+        send_notification=1
+        ;;
+    --stop | --kill | -k)
+        kill_flag=1
+        ;;
+    --full | --all | -f)
+        rec_vid=1
+        rec_mic=1
+        rec_aud=1
+        ;;
+    --video | -v)
+        rec_vid=1
+        ;;
+    --mic | -m)
+        rec_mic=1
+        ;;
+    --audio | -a)
+        rec_aud=1
+        ;;
+    --compress | -p)
+        compress_flag=1
+        ;;
+    --compress-no-remove)
+        compress_no_remove_flag=1
+        ;;
+    --compress-detach)
+        compress_detach_flag=1
+        ;;
+    *)
+        print_err "Invalid option $1"
+        ;;
+    esac
+    shift 1
 done
 
 if [ $kill_flag == 1 ]; then
-  if [ $rec_vid == 1 ] || [ $rec_mic == 1 ] || [ $rec_aud == 1 ]; then
-    print_err "You cannot use [kill flag] with any recording option"
-  fi
-
-  if [ $compress_flag == 0 ]; then
-    if [ $compress_no_remove_flag == 1 ]; then
-      print_err "[compress-no-remove flag] can only be used together with [compress flag]"
+    if [ $rec_vid == 1 ] || [ $rec_mic == 1 ] || [ $rec_aud == 1 ]; then
+        print_err "You cannot use [kill flag] with any recording option"
     fi
 
-    if [ $compress_detach_flag == 1 ]; then
-      print_err "[compress-detach flag] can only be used together with [compress flag]"
-    fi
-  fi
+    if [ $compress_flag == 0 ]; then
+        if [ $compress_no_remove_flag == 1 ]; then
+            print_err "[compress-no-remove flag] can only be used together with [compress flag]"
+        fi
 
-  kill_rec $send_notification $compress_flag $compress_no_remove_flag $compress_detach_flag
-  exit 0
+        if [ $compress_detach_flag == 1 ]; then
+            print_err "[compress-detach flag] can only be used together with [compress flag]"
+        fi
+    fi
+
+    kill_rec $send_notification $compress_flag $compress_no_remove_flag $compress_detach_flag
+    exit 0
 fi
 
 if [ $compress_flag == 1 ]; then
-  print_err "[compress flag] can only be used together with [kill flag]"
+    print_err "[compress flag] can only be used together with [kill flag]"
 fi
 
 if [ $compress_no_remove_flag == 1 ]; then
-  print_err "[compress-no-remove flag] can only be used together with [compress flag] and [kill flag]"
+    print_err "[compress-no-remove flag] can only be used together with [compress flag] and [kill flag]"
 fi
 
 if [ $compress_detach_flag == 1 ]; then
-  print_err "[compress-detach flag] can only be used together with [compress flag] and [kill flag]"
+    print_err "[compress-detach flag] can only be used together with [compress flag] and [kill flag]"
 fi
 
 start_rec $rec_vid $rec_mic $rec_aud $send_notification

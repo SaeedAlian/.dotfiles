@@ -7,10 +7,10 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 . "$DOTFILES_DIR/coreconfig/helpers.sh"
 
 require_vars GITHUB_USERNAME \
-  PROJECTS_DIR \
-  NOTES_DIR \
-  WORK_DIR \
-  STUDY_DIR
+    PROJECTS_DIR \
+    NOTES_DIR \
+    WORK_DIR \
+    STUDY_DIR
 
 need_bin tmux
 
@@ -20,106 +20,106 @@ STUDY_PREFIX="${TMUX_FZF_SESSION_STUDY_PREFIX:-study}"
 PROJECTS_PREFIX="${TMUX_FZF_SESSION_PROJECTS_PREFIX:-proj}"
 
 print_help() {
-  echo "Document Creator"
-  echo ""
-  echo "Usage:"
-  echo "  $(basename "$0") [Type] [OPTIONS]"
-  echo ""
-  echo "Types:"
-  echo "  work             Create work directory at $WORK_DIR"
-  echo ""
-  echo "  project          Create project directory at $PROJECTS_DIR"
-  echo ""
-  echo "  study            Create study directory at $STUDY_DIR"
-  echo ""
-  echo "  note             Create note directory at $NOTES_DIR"
-  echo ""
-  echo "Options:"
-  echo "  -h, --help       Show this help message and exit"
-  echo ""
-  echo "Description:"
-  echo "  This script creates a new document based on the [Type]."
-  echo ""
-  echo "  After creating the directory, it will start or attach a tmux session for the document directory."
-  echo ""
+    echo "Document Creator"
+    echo ""
+    echo "Usage:"
+    echo "  $(basename "$0") [Type] [OPTIONS]"
+    echo ""
+    echo "Types:"
+    echo "  work             Create work directory at $WORK_DIR"
+    echo ""
+    echo "  project          Create project directory at $PROJECTS_DIR"
+    echo ""
+    echo "  study            Create study directory at $STUDY_DIR"
+    echo ""
+    echo "  note             Create note directory at $NOTES_DIR"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help       Show this help message and exit"
+    echo ""
+    echo "Description:"
+    echo "  This script creates a new document based on the [Type]."
+    echo ""
+    echo "  After creating the directory, it will start or attach a tmux session for the document directory."
+    echo ""
 }
 
 check_dirname() {
-  dirname="$1"
+    dirname="$1"
 
-  if [ -z "$dirname" ]; then
-    print_err "Directory name is empty"
-  fi
+    if [ -z "$dirname" ]; then
+        print_err "Directory name is empty"
+    fi
 
-  if grep -q '[\\/:*?"<>|;]' <<<"$dirname"; then
-    print_err "Invalid directory name, it contains illegal characters"
-  fi
+    if grep -q '[\\/:*?"<>|;]' <<<"$dirname"; then
+        print_err "Invalid directory name, it contains illegal characters"
+    fi
 
-  if [[ "$dirname" =~ ^[-_] ]]; then
-    print_err "Directory name must not start with '-' or '_'"
-  fi
+    if [[ "$dirname" =~ ^[-_] ]]; then
+        print_err "Directory name must not start with '-' or '_'"
+    fi
 
-  if [[ "$dirname" == "." ]] || [[ "$dirname" == ".." ]]; then
-    print_err "Directory name must not be '.' or '..'"
-  fi
+    if [[ "$dirname" == "." ]] || [[ "$dirname" == ".." ]]; then
+        print_err "Directory name must not be '.' or '..'"
+    fi
 
-  dirname="${dirname%% }"
-  dirname="${dirname## }"
+    dirname="${dirname%% }"
+    dirname="${dirname## }"
 
-  if [[ "$dirname" == *"$'\0'"* ]]; then
-    print_err "Directory name contains null bytes"
-  fi
+    if [[ "$dirname" == *"$'\0'"* ]]; then
+        print_err "Directory name contains null bytes"
+    fi
 
-  if [[ ${#dirname} -gt 255 ]]; then
-    print_err "Directory name exceeds 255 characters"
-  fi
+    if [[ ${#dirname} -gt 255 ]]; then
+        print_err "Directory name exceeds 255 characters"
+    fi
 }
 
 create_dir() {
-  base_dirname="$1"
-  dirname="$2"
+    base_dirname="$1"
+    dirname="$2"
 
-  if [ -d "$base_dirname/$dirname" ]; then
-    print_err "Another directory with this name already exists!"
-  fi
+    if [ -d "$base_dirname/$dirname" ]; then
+        print_err "Another directory with this name already exists!"
+    fi
 
-  mkdir -p "$base_dirname/$dirname"
-  echo "Created directory: $base_dirname/$dirname"
+    mkdir -p "$base_dirname/$dirname"
+    echo "Created directory: $base_dirname/$dirname"
 }
 
 ask_and_create_project_files() {
-  base_dirname="$1"
-  project_name="$2"
+    base_dirname="$1"
+    project_name="$2"
 
-  cd "$base_dirname" || exit 1
+    cd "$base_dirname" || exit 1
 
-  question="What is the project type ??"
-  options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
+    question="What is the project type ??"
+    options=("react" "react-ts" "nextjs" "rust-bin" "c" "go" "cpp" "python" "empty" "cancel")
 
-  select project_type in "${options[@]}"; do
-    case $project_type in
+    select project_type in "${options[@]}"; do
+        case $project_type in
 
-    "react")
-      need_bin yarn
-      yarn create vite $project_name --template react
-      break
-      ;;
+        "react")
+            need_bin yarn
+            yarn create vite $project_name --template react
+            break
+            ;;
 
-    "react-ts")
-      need_bin yarn
-      yarn create vite $project_name --template react-ts
-      break
-      ;;
+        "react-ts")
+            need_bin yarn
+            yarn create vite $project_name --template react-ts
+            break
+            ;;
 
-    "go")
-      need_bin go
-      cd "$project_name" || exit 1
-      go mod init github.com/$GITHUB_USERNAME/$project_name
-      touch .gitignore
-      touch main.go
-      touch Makefile
+        "go")
+            need_bin go
+            cd "$project_name" || exit 1
+            go mod init github.com/$GITHUB_USERNAME/$project_name
+            touch .gitignore
+            touch main.go
+            touch Makefile
 
-      echo "package main
+            echo "package main
 
 import (
 	\"fmt\"
@@ -129,7 +129,7 @@ func main() {
   fmt.Println(\"Hello world\")
 }" >main.go
 
-      echo "build:
+            echo "build:
 	@go build -o bin/$project_name main.go
 
 test:
@@ -138,39 +138,39 @@ test:
 run: build
 	@./bin/$project_name" >Makefile
 
-      echo ".env
+            echo ".env
 bin/" >.gitignore
 
-      break
-      ;;
+            break
+            ;;
 
-    "nextjs")
-      need_bin npx
-      npx create-next-app@latest $project_name
-      break
-      ;;
+        "nextjs")
+            need_bin npx
+            npx create-next-app@latest $project_name
+            break
+            ;;
 
-    "rust-bin")
-      need_bin cargo
-      cargo init $project_name --bin
-      break
-      ;;
+        "rust-bin")
+            need_bin cargo
+            cargo init $project_name --bin
+            break
+            ;;
 
-    "c")
-      cd "$project_name" || exit 1
-      mkdir src
-      touch src/main.c
-      touch .gitignore
-      touch Makefile
+        "c")
+            cd "$project_name" || exit 1
+            mkdir src
+            touch src/main.c
+            touch .gitignore
+            touch Makefile
 
-      echo "#include <stdio.h>
+            echo "#include <stdio.h>
 
 int main() {
   printf(\"Hello world\");
   return 0;
 }" >src/main.c
 
-      echo "build:
+            echo "build:
 	@g++ -o main.out src/main.c
 
 debug:
@@ -183,26 +183,26 @@ valgrind: build
 	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
 " >Makefile
 
-      echo "main.out" >.gitignore
+            echo "main.out" >.gitignore
 
-      break
-      ;;
+            break
+            ;;
 
-    "cpp")
-      cd "$project_name" || exit 1
-      mkdir src
-      touch src/main.cpp
-      touch .gitignore
-      touch Makefile
+        "cpp")
+            cd "$project_name" || exit 1
+            mkdir src
+            touch src/main.cpp
+            touch .gitignore
+            touch Makefile
 
-      echo "#include <iostream>
+            echo "#include <iostream>
 
 int main() {
   std::cout << \"Hello world\" << std::endl;
   return 0;
 }" >src/main.cpp
 
-      echo "build:
+            echo "build:
 	@g++ -o main.out src/main.cpp
 
 debug:
@@ -215,80 +215,80 @@ valgrind: build
 	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./main.out 
 " >Makefile
 
-      echo "main.out" >.gitignore
+            echo "main.out" >.gitignore
 
-      break
-      ;;
+            break
+            ;;
 
-    "python")
-      need_bin python3
-      cd "$project_name" || exit 1
-      touch main.py
-      touch .gitignore
+        "python")
+            need_bin python3
+            cd "$project_name" || exit 1
+            touch main.py
+            touch .gitignore
 
-      echo ".venv
+            echo ".venv
 /**/**/__pycache__" >.gitignore
 
-      python3 -m venv .venv
-      break
-      ;;
+            python3 -m venv .venv
+            break
+            ;;
 
-    "empty")
-      mkdir $project_name
-      cd $project_name || exit 1
-      touch .gitignore
-      break
-      ;;
+        "empty")
+            mkdir $project_name
+            cd $project_name || exit 1
+            touch .gitignore
+            break
+            ;;
 
-    "cancel")
-      exit 0
-      ;;
+        "cancel")
+            exit 0
+            ;;
 
-    *)
-      print_err "Invalid option!"
-      ;;
-    esac
-  done
+        *)
+            print_err "Invalid option!"
+            ;;
+        esac
+    done
 
-  cd $HOME || exit 1
+    cd $HOME || exit 1
 }
 
 if [[ "$1" == "-h" ]] ||
-  [[ "$1" == "--help" ]] ||
-  [[ "$2" == "-h" ]] ||
-  [[ "$2" == "--help" ]]; then
-  print_help
-  exit 0
+    [[ "$1" == "--help" ]] ||
+    [[ "$2" == "-h" ]] ||
+    [[ "$2" == "--help" ]]; then
+    print_help
+    exit 0
 fi
 
 case $1 in
 work)
-  base_dir="$WORK_DIR"
-  base_prefix="$WORK_PREFIX"
-  prompt="Enter the work directory name: "
-  ;;
+    base_dir="$WORK_DIR"
+    base_prefix="$WORK_PREFIX"
+    prompt="Enter the work directory name: "
+    ;;
 
 project)
-  base_dir="$PROJECTS_DIR"
-  base_prefix="$PROJECTS_PREFIX"
-  prompt="Enter the project name: "
-  ;;
+    base_dir="$PROJECTS_DIR"
+    base_prefix="$PROJECTS_PREFIX"
+    prompt="Enter the project name: "
+    ;;
 
 note)
-  base_dir="$NOTES_DIR"
-  base_prefix="$NOTES_PREFIX"
-  prompt="Enter the note directory name: "
-  ;;
+    base_dir="$NOTES_DIR"
+    base_prefix="$NOTES_PREFIX"
+    prompt="Enter the note directory name: "
+    ;;
 
 study)
-  base_dir="$STUDY_DIR"
-  base_prefix="$STUDY_PREFIX"
-  prompt="Enter the study directory name: "
-  ;;
+    base_dir="$STUDY_DIR"
+    base_prefix="$STUDY_PREFIX"
+    prompt="Enter the study directory name: "
+    ;;
 
 *)
-  print_err "Invalid option $1"
-  ;;
+    print_err "Invalid option $1"
+    ;;
 esac
 
 read -e -p "$prompt" doc_dir
@@ -296,17 +296,17 @@ check_dirname "$doc_dir"
 create_dir "$base_dir" "$doc_dir"
 
 if [[ "$1" == "project" ]]; then
-  ask_and_create_project_files "$base_dir" "$doc_dir"
+    ask_and_create_project_files "$base_dir" "$doc_dir"
 fi
 
 session_name="$base_prefix--$doc_dir"
 
 if ! tmux has-session -t="$session_name" 2>/dev/null; then
-  tmux new-session -ds "$session_name" -c "$base_dir/$doc_dir"
+    tmux new-session -ds "$session_name" -c "$base_dir/$doc_dir"
 fi
 
 if [ -z "$TMUX" ]; then
-  tmux attach -t "$session_name"
+    tmux attach -t "$session_name"
 else
-  tmux switch-client -t "$session_name"
+    tmux switch-client -t "$session_name"
 fi

@@ -21,18 +21,18 @@ IFS=' ' read -a pids <<<"$pids_str"
 len=${#pids[@]}
 
 if [ $len -eq 0 ]; then
-  redshift \
-    -b "$BRIGHTNESS":"$BRIGHTNESS" \
-    -g "$GAMMA" \
-    -l "$LAT":"$LON" \
-    -l "$PROVIDER" \
-    -m "$METHOD" \
-    -t "$TEMP":"$TEMP" &
-  notify-send -t 1500 "Redshift activated"
+    redshift \
+        -b "$BRIGHTNESS":"$BRIGHTNESS" \
+        -g "$GAMMA" \
+        -l "$LAT":"$LON" \
+        -l "$PROVIDER" \
+        -m "$METHOD" \
+        -t "$TEMP":"$TEMP" &
+    notify-send -t 1500 "Redshift activated"
 else
-  for pid in "${pids[@]}"; do
-    kill $pid
-  done
+    for pid in "${pids[@]}"; do
+        kill $pid
+    done
 
-  notify-send -t 1500 "Redshift deactivated"
+    notify-send -t 1500 "Redshift deactivated"
 fi

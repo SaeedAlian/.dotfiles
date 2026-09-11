@@ -12,7 +12,7 @@ USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 
 print_help() {
-  help="A command-line tool for safely mounting devices to $MOUNT_DIR/<mountpoint> with user ownership.
+    help="A command-line tool for safely mounting devices to $MOUNT_DIR/<mountpoint> with user ownership.
 
 Usage:
 
@@ -44,46 +44,46 @@ Notes:
 
 "
 
-  if type "less" >/dev/null; then
-    echo "$help" | less
-  else
-    echo "$help"
-  fi
+    if type "less" >/dev/null; then
+        echo "$help" | less
+    else
+        echo "$help"
+    fi
 }
 
 if ! [ -d "$MOUNT_DIR" ]; then
-  mkdir -p "$MOUNT_DIR"
+    mkdir -p "$MOUNT_DIR"
 fi
 
 if [ "$1" = "--help" ]; then
-  print_help
-  exit 0
+    print_help
+    exit 0
 fi
 
 device=$1
 mountpoint=$2
 
 if [ -z "$device" ]; then
-  print_err "Device is empty"
+    print_err "Device is empty"
 fi
 
 if [ -z "$mountpoint" ]; then
-  print_err "Mountpoint is empty"
+    print_err "Mountpoint is empty"
 fi
 
 device="/dev/$device"
 mountpoint="$MOUNT_DIR/$mountpoint"
 
 if grep -qs "$device" /proc/mounts; then
-  print_err "Device is already mounted!!"
+    print_err "Device is already mounted!!"
 fi
 
 if mountpoint -q "$mountpoint"; then
-  print_err "$mountpoint is already a mountpoint!!"
+    print_err "$mountpoint is already a mountpoint!!"
 fi
 
 if ! [ -d "$mountpoint" ]; then
-  sudo mkdir -p "$mountpoint"
+    sudo mkdir -p "$mountpoint"
 fi
 
 sudo mount -o uid="$USER_ID",gid="$GROUP_ID",fmask=0111,dmask=0000 "$device" "$mountpoint"

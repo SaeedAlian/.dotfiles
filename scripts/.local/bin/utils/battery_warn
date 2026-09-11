@@ -9,5 +9,5 @@ PERCENT="$(cat "$BAT_DIR/capacity")"
 STATUS="$(cat "$BAT_DIR/status")"
 
 if [[ "$STATUS" == "Discharging" && -n $PERCENT && $PERCENT -lt $WARN_PERCENT ]]; then
-  DISPLAY=:0.0 notify-send -u critical "Low Battery!!"
+    DISPLAY=:0.0 notify-send -u critical "Low Battery!!"
 fi

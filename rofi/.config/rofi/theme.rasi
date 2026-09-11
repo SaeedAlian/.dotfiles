@@ -1,62 +1,62 @@
 @import "colors.rasi"
 
 window {
-  background-color: @bg-norm;
-  padding: 10px;
-  border: 1;
-  border-radius: 0.0em;
-  border-color: @border-color;
-  width: 35%;
-  height: 37%;
-  location: center;
-  anchor: north;
-  y-offset: -25%;
+    background-color: @bg-norm;
+    padding: 10px;
+    border: 1;
+    border-radius: 0.0em;
+    border-color: @border-color;
+    width: 35%;
+    height: 37%;
+    location: center;
+    anchor: north;
+    y-offset: -25%;
 }
 
 element {
-  background-color: transparent;
-  text-color: @fg-norm;
-  border-radius: 0.0em;
+    background-color: transparent;
+    text-color: @fg-norm;
+    border-radius: 0.0em;
 }
 
 element selected {
-  text-color: @fg-sel;
-  background-color: @bg-sel;
+    text-color: @fg-sel;
+    background-color: @bg-sel;
 }
 
 element-text {
-  padding: 0.3em;
-  background-color: transparent;
-  text-color: inherit;
+    padding: 0.3em;
+    background-color: transparent;
+    text-color: inherit;
 }
 
 element-icon {
-  size: 20;
-  padding: 0.3em;
-  background-color: transparent;
+    size: 20;
+    padding: 0.3em;
+    background-color: transparent;
 }
 
 entry {
-  background-color: @bg-norm;
-  text-color: @fg-norm;
+    background-color: @bg-norm;
+    text-color: @fg-norm;
 }
 
 inputbar {
-  children: [prompt, entry];
-  background-color: @bg-norm;
-  text-color: @fg-norm;
-  padding: 0.3em;
+    children: [prompt, entry];
+    background-color: @bg-norm;
+    text-color: @fg-norm;
+    padding: 0.3em;
 }
 
 listview {
-  background-color: @bg-norm;
+    background-color: @bg-norm;
 }
 
 mainbox {
-  background-color: @bg-norm;
+    background-color: @bg-norm;
 }
 
 prompt {
-  background-color: @bg-label;
-  text-color: @fg-label;
+    background-color: @bg-label;
+    text-color: @fg-label;
 }

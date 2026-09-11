@@ -15,14 +15,14 @@ count=$1
 hist=""
 
 if [[ $count == "max" ]]; then
-  hist="$(cat $HISTORY_FILE)"
+    hist="$(cat $HISTORY_FILE)"
 else
-  c=1000
-  if [[ $count =~ ^[0-9]+$ ]]; then
-    c=$count
-  fi
+    c=1000
+    if [[ $count =~ ^[0-9]+$ ]]; then
+        c=$count
+    fi
 
-  hist="$(tail -$c $HISTORY_FILE)"
+    hist="$(tail -$c $HISTORY_FILE)"
 fi
 
 selection=$(echo "$hist" | fzf -x +s -e --tac)

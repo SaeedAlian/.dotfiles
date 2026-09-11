@@ -11,211 +11,211 @@
 
 # terminal
 super + Return
-  tmux_fzf_session -n default
+    tmux_fzf_session -n default
 
 # primary notes
 super + e
-  pnote
+    pnote
 
 # win fzf
 super + w
-  winfzf
+    winfzf
 
 # gui fm
 super + shift + Return
-  $FILEMANAGER
+    $FILEMANAGER
 
 # calculator
 super + shift + q 
-  $CALCULATOR
+    $CALCULATOR
 
 # yad calendar
 super + t
-  yad_calendar
+    yad_calendar
 
 # webcam
 super + shift + control + w
-  webcam
+    webcam
 
 # sxiv in wallpapers
 super + alt + w
-  sxiv $WALLPAPERS_DIR
+    sxiv $WALLPAPERS_DIR
 
 # sxiv in screenshots
 super + alt + s
-  sxiv $SCREENSHOTS_DIR
+    sxiv $SCREENSHOTS_DIR
 
 ######### menus #########
 
 # program launcher
 super + d
-	rofi -show drun -show-icons
+    rofi -show drun -show-icons
 
 # network menu
 super + n
-	network_menu
+    network_menu
 
 # bluetooth menu
 super + p
-	bluetooth_menu
+    bluetooth_menu
 
 # power menu
 super + x
-	power_menu
+    power_menu
 
 # tmux session menu
 super + q
-  tmux_fzf_session
+    tmux_fzf_session
 
 # tmux session menu with new terminal instance
 super + control + q
-  tmux_fzf_session -n
+    tmux_fzf_session -n
 
 
 ######### functions #########
 
 # force run startup script
 super + shift + Escape
-  startup --force
+    startup --force
 
 # screen cast start
 super + apostrophe
-  sccast -n -f
+    sccast -n -f
 
 # screen cast stop
 super + semicolon
-  sccast -n -k --compress --compress-no-remove --compress-detach
+    sccast -n -k --compress --compress-no-remove --compress-detach
 
 # toggle mobile broadband
 super + shift + w
-  network_menu --cellular-toggle
+    network_menu --cellular-toggle
 
 # toggle bluetooth
 super + shift + p
-  bluetooth_menu --toggle
+    bluetooth_menu --toggle
 
 # toggle wifi
 super + control + w
-  network_menu --toggle
+    network_menu --toggle
 
 # toggle touchpad
 super + comma
-  toggle_touchpad
+    toggle_touchpad
 
 # toggle touchscreen
 super + period
-  toggle_touchscreen
+    toggle_touchscreen
 
 # toggle polybar
 super + b
-  polybar_visibility -t
+    polybar_visibility -t
 
 # music play/pause
 F11
-  music_ctrl -t
+    music_ctrl -t
 
 # music play next
 F12
-  music_ctrl -n
+    music_ctrl -n
 
 # music play previous
 F10
-  music_ctrl -p
+    music_ctrl -p
 
 # light up
 XF86MonBrightnessUp
-  set_light -u
+    set_light -u
 
 # light down
 XF86MonBrightnessDown
-  set_light -d
+    set_light -d
 
 # lockscreen
 super + shift + x
-  start_lockscreen
+    start_lockscreen
 
 # volume up
 XF86AudioRaiseVolume
-  volume -u
+    volume -u
 
 # volume dowm
 XF86AudioLowerVolume
-  volume -d
+    volume -d
 
 # volume mute
 XF86AudioMute
-  volume -m
+    volume -m
 
 # microphone mute
 XF86AudioMicMute
-  microphone -t
+    microphone -t
 
 # screenshot
 Print
-  screenshot
+    screenshot
 
 # screenshot select
 shift + Print
-  screenshot -s
+    screenshot -s
 
 # toggle redshift
 super + control + r
-  toggle_redshift
+    toggle_redshift
 
 # dpms off
 super + shift + m
-  dpms_off
+    dpms_off
 
 # dpms on
 super + shift + n
-  dpms_on
+    dpms_on
 
 
 ######### hotkeys #########
 
 # restart bspwm
 super + shift + r
-	bspc wm -r; notify-send 'bspwm' 'Reloaded config'
+    bspc wm -r; notify-send 'bspwm' 'Reloaded config'
 
 # reload sxhkdrc
 super + shift + control + r
-  pkill sxhkd 2>/dev/null; sxhkd; notify-send 'sxhkd' 'Reloaded config'
+    pkill sxhkd 2>/dev/null; sxhkd; notify-send 'sxhkd' 'Reloaded config'
 
 # centerize floating node
 super + slash
-  bspfloatcenterize
+    bspfloatcenterize
 
 # close
 super + c
-	bspc node -c
+    bspc node -c
 
 # kill
 super + shift + c
-	bspc node -k
+    bspc node -k
 
 # alternate between the tiled and monocle layout
 super + f
-	bspfullscreen 
+    bspfullscreen 
 
 # fullscreen the focused node
 super + shift + f
-	bspfullscreen -f
+    bspfullscreen -f
 
 # set the window state
 super + space
-  bspfloattoggle
+    bspfloattoggle
 
 # move the node in the given direction
 super + shift + {h,j,k,l}
-	bspc node -s {west,south,north,east}
+    bspc node -s {west,south,north,east}
 
 # change the layer of the node
 super + {bracketleft,bracketright,backslash}
-	bspc node -l {below,above,normal}
+    bspc node -l {below,above,normal}
 
 # toggle sticky flag
 super + shift + s
-	bspstickytoggle
+    bspstickytoggle
 
 # focus the next/previous/last node in the current desktop
 super + {j,k,grave}
@@ -227,40 +227,40 @@ super + {h,l}
 
 # focus the last desktop
 super + Tab
-	bspc desktop -f last
+    bspc desktop -f last
 
 # focus or send to the given desktop
 super + {_,shift + }{1-4,7-9,0}
-	bspc {desktop -f,node -d} '^{1-4,5-7,8}'
+    bspc {desktop -f,node -d} '^{1-4,5-7,8}'
 
 # preselect the direction south
 super + minus
-	bspc node -p south
+    bspc node -p south
 
 # preselect the direction east
 super + equal
-	bspc node -p east
+    bspc node -p east
 
 # cancel the preselection for the focused node
 super + Escape
-	bspc node -p cancel
+    bspc node -p cancel
 
 # cancel the preselection for the focused desktop
 super + shift + {equal,minus}
-	bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
+    bspc query -N -d | xargs -I id -n 1 bspc node id -p cancel
 
 # resize windows
 super + r : {h,j,k,l,super + h,super + j,super + k,super + l}
-  STEP=20; SELECTION={1,2,3,4,5,6,7,8}; \
-  bspc node -z $(echo \
-    "left -$STEP 0,bottom 0 $STEP,top 0 -$STEP,right $STEP 0,right -$STEP 0,top 0 $STEP,bottom 0 -$STEP,left $STEP 0" | \
-    cut -d',' -f$SELECTION \
-  ) || \
-  bspc node -z $(echo \
-    "right -$STEP 0,top 0 $STEP,bottom 0 -$STEP,left $STEP 0,left -$STEP 0,bottom 0 $STEP,top 0 -$STEP,right $STEP 0" | \
-    cut -d',' -f$SELECTION \
-  )
+    STEP=20; SELECTION={1,2,3,4,5,6,7,8}; \
+    bspc node -z $(echo \
+        "left -$STEP 0,bottom 0 $STEP,top 0 -$STEP,right $STEP 0,right -$STEP 0,top 0 $STEP,bottom 0 -$STEP,left $STEP 0" | \
+        cut -d',' -f$SELECTION \
+    ) || \
+    bspc node -z $(echo \
+        "right -$STEP 0,top 0 $STEP,bottom 0 -$STEP,left $STEP 0,left -$STEP 0,bottom 0 $STEP,top 0 -$STEP,right $STEP 0" | \
+        cut -d',' -f$SELECTION \
+    )
 
 # move a floating window
 super + m : {h,j,k,l}
-	bspc node -v {-20 0,0 20,0 -20,20 0}
+    bspc node -v {-20 0,0 20,0 -20,20 0}

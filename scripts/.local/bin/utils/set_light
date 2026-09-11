@@ -8,32 +8,32 @@ lightdown=0
 NOTIF_ID="99919191"
 
 notify() {
-  notify-send -r "$NOTIF_ID" -t 1000 "Brightness" "$(light)"
+    notify-send -r "$NOTIF_ID" -t 1000 "Brightness" "$(light)"
 }
 
 case $arg in
 -u | --up)
-  lightup=1
-  ;;
+    lightup=1
+    ;;
 -d | --down)
-  lightdown=1
-  ;;
+    lightdown=1
+    ;;
 *)
-  echo "Invalid option" >&2
-  exit 1
-  ;;
+    echo "Invalid option" >&2
+    exit 1
+    ;;
 esac
 
 if [ $lightup == 1 ]; then
-  light -O && light -A 5
-  notify
-  exit 0
+    light -O && light -A 5
+    notify
+    exit 0
 fi
 
 if [ $lightdown == 1 ]; then
-  light -O && light -U 5
-  notify
-  exit 0
+    light -O && light -U 5
+    notify
+    exit 0
 fi
 
 echo "Invalid option" >&2

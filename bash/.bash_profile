@@ -8,10 +8,10 @@ set +a
 load_all_and_require true
 
 if in_container; then
-  mkdir -p "$XDG_CONFIG_HOME"
-  mkdir -p "$XDG_DATA_HOME"
-  mkdir -p "$XDG_STATE_HOME"
-  mkdir -p "$XDG_CACHE_HOME"
+    mkdir -p "$XDG_CONFIG_HOME"
+    mkdir -p "$XDG_DATA_HOME"
+    mkdir -p "$XDG_STATE_HOME"
+    mkdir -p "$XDG_CACHE_HOME"
 fi
 
 export PATH="$PATH:\

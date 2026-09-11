@@ -40,7 +40,7 @@ pgrep -x xfce-polkit >/dev/null || /usr/libexec/xfce-polkit &
 pgrep -x picom >/dev/null || picom -b ${PICOM_CONF_PATH:+--config "$PICOM_CONF_PATH"} &
 
 [[ -n "$START_LOCKSCREEN_SCRIPT_PATH" ]] &&
-  pgrep -x xss-lock >/dev/null || xss-lock -l -- "$START_LOCKSCREEN_SCRIPT_PATH" &
+    pgrep -x xss-lock >/dev/null || xss-lock -l -- "$START_LOCKSCREEN_SCRIPT_PATH" &
 
 setxkbmap -layout us,ir -option 'grp:alt_shift_toggle' &
 setxkbmap -option caps:none &
@@ -91,7 +91,7 @@ bspc rule -a qalculate-qt state=floating rectangle=850x650+535+215 focus=on
 bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=off sticky=on
 
 ! [[ -z "$TERMINAL_FLOAT_CLASS" ]] &&
-  bspc rule -a "$TERMINAL_FLOAT_CLASS" state=floating rectangle=1200x800+360+140 focus=on
+    bspc rule -a "$TERMINAL_FLOAT_CLASS" state=floating rectangle=1200x800+360+140 focus=on
 
 ###### scripts ######
 pgrep -f bspfloatpos >/dev/null || bspfloatpos &

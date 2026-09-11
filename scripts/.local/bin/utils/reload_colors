@@ -14,33 +14,33 @@ require_vars XDG_CONFIG_HOME SCRIPTS_DIR
 
 # xresources
 envsubst <$DOTFILES_DIR/X11/.config/X11/Xresources.in \
-  >$DOTFILES_DIR/X11/.config/X11/Xresources
+    >$DOTFILES_DIR/X11/.config/X11/Xresources
 xrdb $XDG_CONFIG_HOME/X11/Xresources &
 
 # alacritty
 envsubst <$DOTFILES_DIR/alacritty/.config/alacritty/colors.toml.in \
-  >$DOTFILES_DIR/alacritty/.config/alacritty/colors.toml
+    >$DOTFILES_DIR/alacritty/.config/alacritty/colors.toml
 
 # dunst
 envsubst <$DOTFILES_DIR/dunst/.config/dunst/dunstrc.in \
-  >$DOTFILES_DIR/dunst/.config/dunst/dunstrc
+    >$DOTFILES_DIR/dunst/.config/dunst/dunstrc
 pgrep -x dunst >/dev/null && pkill dunst
 
 # bar
 envsubst <$DOTFILES_DIR/polybar/.config/polybar/colors.ini.in \
-  >$DOTFILES_DIR/polybar/.config/polybar/colors.ini
+    >$DOTFILES_DIR/polybar/.config/polybar/colors.ini
 
 # nvim
 envsubst <$DOTFILES_DIR/nvim/.config/nvim/lua/core/colors.lua.in \
-  >$DOTFILES_DIR/nvim/.config/nvim/lua/core/colors.lua
+    >$DOTFILES_DIR/nvim/.config/nvim/lua/core/colors.lua
 
 # rofi
 envsubst <$DOTFILES_DIR/rofi/.config/rofi/colors.rasi.in \
-  >$DOTFILES_DIR/rofi/.config/rofi/colors.rasi
+    >$DOTFILES_DIR/rofi/.config/rofi/colors.rasi
 
 # zathura
 envsubst <$DOTFILES_DIR/zathura/.config/zathura/colors.conf.in \
-  >$DOTFILES_DIR/zathura/.config/zathura/colors.conf
+    >$DOTFILES_DIR/zathura/.config/zathura/colors.conf
 
 # bspwm
 bspc wm -r

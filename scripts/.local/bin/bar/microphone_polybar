@@ -9,7 +9,7 @@ require_vars BAR_COLOR_RED BAR_COLOR_BLUE
 
 s=$(pactl get-source-mute @DEFAULT_SOURCE@ | sed 's/Mute: //')
 if [ "$s" == "yes" ]; then
-  echo "%{F$BAR_COLOR_RED}󰍭"
+    echo "%{F$BAR_COLOR_RED}󰍭"
 else
-  echo "%{F$BAR_COLOR_BLUE}󰍬"
+    echo "%{F$BAR_COLOR_BLUE}󰍬"
 fi
