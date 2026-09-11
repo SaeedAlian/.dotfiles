@@ -20,11 +20,11 @@ CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
 CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
 SCRIPTS="scripts"
 RUNIT_SERVICES="thinkfan"
-HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar redshift rofi sxhkd sxiv zathura"
+HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rofi sxhkd sxiv zathura"
 
 usage() {
   echo "Usage: $0 [--home=/path/to/target/home] group [group ...]"
-  echo "Available groups: core desktop scripts runit"
+  echo "Available groups: core core-desktop desktop scripts runit"
 }
 
 case $1 in
@@ -63,9 +63,8 @@ fi
 
 set -- $GROUP_ARGS
 
-STOW_FLAGS="$STOW_FLAGS -t $TARGET_HOME"
-
 if [ "$TARGET_HOME" != "$HOME" ]; then
+  STOW_FLAGS="$STOW_FLAGS -t $TARGET_HOME"
   XDG_CONFIG_HOME="$TARGET_HOME/.config"
   XDG_DATA_HOME="$TARGET_HOME/.local/share"
   SCRIPTS_DIR="$TARGET_HOME/.local/scripts"
@@ -108,7 +107,6 @@ setup_desktop_dirs() {
   mkdir -p "$XDG_CONFIG_HOME/mpv"
   mkdir -p "$XDG_CONFIG_HOME/picom"
   mkdir -p "$XDG_CONFIG_HOME/polybar"
-  mkdir -p "$XDG_CONFIG_HOME/redshift"
   mkdir -p "$XDG_CONFIG_HOME/rofi"
   mkdir -p "$XDG_CONFIG_HOME/sxhkd"
   mkdir -p "$XDG_CONFIG_HOME/sxiv"
