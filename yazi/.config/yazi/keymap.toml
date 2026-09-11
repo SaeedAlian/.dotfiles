@@ -82,8 +82,8 @@ keymap = [
 	{ on = [ "<C-s>" ],     run = "search none",                 desc = "Cancel the ongoing search" },
 	{ on = [ "Z" ],         run = "plugin zoxide",               desc = "Jump to a directory using zoxide" },
 	{ on = [ "z" ],         run = "plugin fzf",                  desc = "Jump to a directory, or reveal a file using fzf" },
-  { on = [ "m", "d" ],    run = "create --dir",                desc = "Create directory" },
-  { on = [ "m", "f" ],    run = "create",                      desc = "Create a file or directory (ends with / for directories)" },
+    { on = [ "m", "d" ],    run = "create --dir",                desc = "Create directory" },
+    { on = [ "m", "f" ],    run = "create",                      desc = "Create a file or directory (ends with / for directories)" },
 
 	# Linemode
 	{ on = [ "m", "s" ], run = "linemode size",        desc = "Set linemode to size" },

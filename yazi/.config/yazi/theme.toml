@@ -19,6 +19,7 @@ marker_copied   = { fg = "lightgreen", bg = "lightgreen" }
 marker_cut      = { fg = "lightred", bg = "lightred" }
 marker_marked   = { fg = "lightcyan", bg = "lightcyan" }
 marker_selected = { fg = "lightyellow", bg = "lightyellow" }
+marker_symbol   = "│"
 
 # Count
 count_copied   = { fg = "darkgray", bg = "lightgreen" }
@@ -29,6 +30,9 @@ count_selected = { fg = "darkgray", bg = "lightyellow" }
 border_symbol = "│"
 border_style  = { fg = "gray" }
 
+# Highlighting
+syntect_theme = ""
+
 ########## END Manager ##########
 
 
@@ -38,7 +42,21 @@ border_style  = { fg = "gray" }
 active   = { fg = "black", bg = "blue", bold = true }
 inactive = { fg = "blue", bg = "darkgray" }
 
+# Separator
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
 ########## END Tabs ##########
+
+########## Indicator ##########
+
+[indicator]
+parent  = { reversed = true }
+current = { reversed = true }
+preview = { underline = true }
+padding = { open = "", close = "" }
+
+########## END Indicator ##########
 
 
 ########## Mode ##########
@@ -62,6 +80,10 @@ unset_alt  = { fg = "lightred", bg = "darkgray" }
 ########## Status bar ##########
 
 [status]
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
 # Permissions
 perm_sep   = { fg = "gray" }
 perm_type  = { fg = "blue" }
@@ -157,6 +179,11 @@ tbl_cell = { fg = "white", bg = "darkgray" }
 title_info  = { fg = "green" }
 title_warn  = { fg = "lightyellow" }
 title_error = { fg = "red" }
+
+# Icons
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
 
 ########## END Notification ##########
 
