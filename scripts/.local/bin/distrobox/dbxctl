@@ -32,6 +32,7 @@ GROUP_PACKAGES_ARCH[editors]="neovim vim vi nano"
 GROUP_PACKAGES_ARCH[utils]="fzf ripgrep git tree-sitter-cli tree-sitter"
 GROUP_PACKAGES_ARCH[desktop]="qt5ct qt6ct lxappearance"
 GROUP_PACKAGES_ARCH[net]="curl wget nmap openssh rsync mtr bind"
+GROUP_PACKAGES_ARCH[docker]="docker-buildx docker-compose docker"
 
 GROUP_ORDER=(
   develcpp
@@ -47,6 +48,7 @@ GROUP_ORDER=(
   utils
   desktop
   net
+  docker
 )
 
 CONTAINER_RUNTIME=""
@@ -286,6 +288,8 @@ DISTRO_IMAGES[arch]="archlinux:latest"
 DISTRO_ORDER=(arch)
 
 create_box() {
+  EXTRA_FLAGS=""
+
   local distro
   distro=$(printf '%s\n' "${DISTRO_ORDER[@]}" |
     fzf --prompt="Select base distro> " --height=40% --reverse --border)
@@ -306,12 +310,39 @@ create_box() {
     print_err "Name was empty"
   fi
 
+  local rootful=0
+  if confirm "Do you want this container to be rootful?"; then
+    rootful=1
+  fi
+
+  local use_init=0
+  if confirm "Do you want to use init system?"; then
+    use_init=1
+  fi
+
+  local unshare_all=0
+  if confirm "Do you want to unshare everything with container?"; then
+    unshare_all=1
+  fi
+
+  if [ $rootful -eq 1 ]; then
+    EXTRA_FLAGS="$EXTRA_FLAGS --root"
+  fi
+
+  if [ $use_init -eq 1 ]; then
+    EXTRA_FLAGS="$EXTRA_FLAGS --init"
+  fi
+
+  if [ $unshare_all -eq 1 ]; then
+    EXTRA_FLAGS="$EXTRA_FLAGS --unshare-all"
+  fi
+
   echo "Creating distrobox '$cname' from image '$image'..."
   distrobox create \
+    "$EXTRA_FLAGS" \
     --name "$cname" \
     --home "$DISTRO_BOX_HOME_BASE_PATH/$cname" \
-    --image "$image" \
-    --yes
+    --image "$image"
 
   echo "Distrobox created"
 }
