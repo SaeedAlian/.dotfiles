@@ -5,6 +5,14 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
 . "$DOTFILES_DIR/coreconfig/helpers.sh"
 
+BRIGHTNESS="1.0"
+GAMMA="0.90"
+LAT="37.16055"
+LON="49.35076"
+PROVIDER="manual"
+METHOD="randr"
+TEMP="2100"
+
 need_bin redshift
 
 pids_str=$(pidof -x redshift)
@@ -13,9 +21,18 @@ IFS=' ' read -a pids <<<"$pids_str"
 len=${#pids[@]}
 
 if [ $len -eq 0 ]; then
-  redshift &
+  redshift \
+    -b "$BRIGHTNESS":"$BRIGHTNESS" \
+    -g "$GAMMA" \
+    -l "$LAT":"$LON" \
+    -l "$PROVIDER" \
+    -m "$METHOD" \
+    -t "$TEMP":"$TEMP" &
+  notify-send -t 1500 "Redshift activated"
 else
   for pid in "${pids[@]}"; do
     kill $pid
   done
+
+  notify-send -t 1500 "Redshift deactivated"
 fi
