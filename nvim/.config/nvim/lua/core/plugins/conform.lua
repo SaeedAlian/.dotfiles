@@ -3,7 +3,7 @@ local ok, conform = pcall(require, "conform")
 if ok then
 	conform.setup({
 		formatters_by_ft = {
-			go = { "goimports", "gofmt" },
+			go = { "goimports", "gofmt", "golines" },
 			lua = { "stylua" },
 
 			javascript = { "prettierd" },
@@ -30,6 +30,14 @@ if ok then
 			cpp = { "clang-format" },
 			h = { "clang-format" },
 			hpp = { "clang-format" },
+		},
+		formatters = {
+			golines = {
+				prepend_args = {
+					"--max-len=50",
+					"--base-formatter=gofumpt",
+				},
+			},
 		},
 		default_format_opts = {
 			lsp_format = "fallback",
