@@ -55,6 +55,7 @@ SUBS=(
 EXTRA_DIRS=(
     "default"
     ".dotfiles"
+    "books"
 )
 
 CACHE_DIR="${XDG_CACHE_HOME}/tmux-sessionizer"
@@ -98,6 +99,10 @@ rebuild_cache() {
             display="default"
             session="default"
             dir="$USER_HOME"
+        elif [ "$d" = "books" ]; then
+            display="books"
+            session="books"
+            dir="$USER_HOME/documents/books"
         else
             display="$d"
             session="${d//./}"
