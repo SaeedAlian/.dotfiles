@@ -1,6 +1,7 @@
 7zip
 acpi
 alacritty
+alsa-utils
 android-file-transfer
 bluez
 brave-browser
@@ -30,6 +31,7 @@ less
 libfuse2t64
 libnotify-bin
 light
+linux-cpupower
 maim
 mpv
 nano
@@ -69,7 +71,7 @@ xfce-polkit
 xinput
 xorg
 xserver-xorg-core
-xserver-xorg-video-intel
+xserver-xorg-video-amdgpu
 xss-lock
 xz-utils
 yad
