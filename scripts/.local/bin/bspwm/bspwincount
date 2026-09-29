@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+print_count() {
+    local nodes focused total index=0
+
+    nodes=($(bspc query -N -d focused --node .window))
+    focused=$(bspc query -N -d focused -n focused 2>/dev/null)
+    total=${#nodes[@]}
+
+    if [ "$total" -eq 0 ]; then
+        echo ""
+        return
+    fi
+
+    for i in "${!nodes[@]}"; do
+        if [ "${nodes[$i]}" == "$focused" ]; then
+            index=$((i + 1))
+            break
+        fi
+    done
+
+    echo "$index/$total"
+}
+
+print_count
+
+bspc subscribe node_focus node_add node_remove node_transfer desktop_focus | while read -r _; do
+    print_count
+done
