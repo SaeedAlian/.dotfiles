@@ -96,6 +96,8 @@ alias getfan="cat /proc/acpi/ibm/fan | grep 'speed:' | sed 's/speed:[[:space:]]*
 
 alias pprof="sudo $USER_HOME/.local/bin/utils/powerprofile"
 
+alias dns="resolv_edit"
+
 alias h="htop"
 alias v="${EDITOR:-vim}"
 alias v.="${EDITOR:-vim} ."
