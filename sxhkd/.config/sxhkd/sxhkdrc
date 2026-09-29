@@ -11,7 +11,7 @@
 
 # terminal
 super + Return
-    tmux_fzf_session -n default
+    $TERMINAL
 
 # primary notes
 super + e
