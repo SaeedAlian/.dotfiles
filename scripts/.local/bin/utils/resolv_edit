@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CACHE_HOME
+
+RESOLV_CONF_PATH="/etc/resolv.conf"
+CACHE_DIR="$XDG_CACHE_HOME/resolv-edit"
+CACHE_FILE="$CACHE_DIR/resolv.conf"
+EDITOR_CMD="${EDITOR:-vim}"
+
+need_bin "$EDITOR_CMD"
+
+write_template() {
+    cat >"$CACHE_FILE" <<'EOF'
+# Managed by resolv-edit
+
+# Cloudflare
+#nameserver 1.1.1.1
+#nameserver 1.0.0.1
+
+# Google
+#nameserver 8.8.8.8
+#nameserver 8.8.4.4
+
+# Quad9
+#nameserver 9.9.9.9
+#nameserver 149.112.112.112
+
+# OpenDNS
+#nameserver 208.67.222.222
+#nameserver 208.67.220.220
+
+# Shecan
+#nameserver 178.22.122.100
+#nameserver 185.51.200.2
+
+# ElectroDNS
+#nameserver 78.157.42.100
+#nameserver 78.157.42.101
+
+EOF
+}
+
+mkdir -p "$CACHE_DIR"
+
+if [ "${1:-}" = "--reset" ] || [ ! -f "$CACHE_FILE" ]; then
+    write_template
+    echo "Template written to $CACHE_FILE"
+fi
+
+before=$(mktemp)
+trap 'rm -f "$before"' EXIT
+cp "$CACHE_FILE" "$before"
+
+"$EDITOR_CMD" "$CACHE_FILE"
+
+if cmp -s "$before" "$CACHE_FILE"; then
+    echo "No changes, $RESOLV_CONF_PATH left untouched"
+    exit 0
+fi
+
+[ -e "$RESOLV_CONF_PATH" ] && sudo chattr -i "$RESOLV_CONF_PATH"
+sudo cp "$CACHE_FILE" "$RESOLV_CONF_PATH"
+sudo chattr +i "$RESOLV_CONF_PATH"
+
+echo "$RESOLV_CONF_PATH updated and locked"

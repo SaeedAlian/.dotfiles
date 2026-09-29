@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-set -e
-
-RESOLV_CONF_PATH="/etc/resolv.conf"
-
-sudo chattr -i "$RESOLV_CONF_PATH"
-sudo vim "$RESOLV_CONF_PATH"
-sudo chattr +i "$RESOLV_CONF_PATH"
