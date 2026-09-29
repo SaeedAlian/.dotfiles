@@ -19,7 +19,7 @@ TARGET_HOME="$USER_HOME"
 CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
 CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
 SCRIPTS="scripts"
-RUNIT_SERVICES="thinkfan"
+RUNIT_SERVICES="thinkfan powerprofile"
 HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rofi sxhkd sxiv zathura"
 
 usage() {
@@ -98,6 +98,7 @@ setup_scripts_dirs() {
 setup_runit_services_dirs() {
     mkdir -p "$XDG_CONFIG_HOME/thinkfan"
     mkdir -p "$XDG_DATA_HOME/sv/thinkfan"
+    mkdir -p "$XDG_DATA_HOME/sv/powerprofile"
 }
 
 setup_desktop_dirs() {

@@ -1,0 +1,401 @@
+#!/bin/bash
+set -e
+
+CPU_SYS="/sys/devices/system/cpu"
+BOOST_FILE="$CPU_SYS/cpufreq/boost"
+SMT_FILE="$CPU_SYS/smt/control"
+PLATFORM_PROFILE="/sys/firmware/acpi/platform_profile"
+PLATFORM_CHOICES="/sys/firmware/acpi/platform_profile_choices"
+
+print_help() {
+    echo "CPU Power Manager"
+    echo ""
+    echo "Usage:"
+    echo "  $(basename "$0") [Type] [OPTIONS]"
+    echo ""
+    echo "Types:"
+    echo "  performance      Performance governor, turbo on"
+    echo ""
+    echo "  balanced         Schedutil governor, turbo on"
+    echo ""
+    echo "  powersave        Powersave governor, turbo off"
+    echo ""
+    echo "  boost on|off     Turn turbo boost on or off"
+    echo ""
+    echo "  cores N|all      Keep the first N CPUs online and offline the rest"
+    echo ""
+    echo "  cpu on|off N...  Bring specific CPUs online or offline (e.g. cpu off 6 7)"
+    echo ""
+    echo "  smt on|off       Enable or disable hyperthreading globally"
+    echo ""
+    echo "  status           Show the CPU power dashboard (default)"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help       Show this help message and exit"
+    echo ""
+    echo "Description:"
+    echo "  This script manages the CPU power profile and which cores are online."
+    echo ""
+    echo "  Profiles never change which cores are online, core commands never change the profile."
+    echo ""
+    echo "  All types except status need root."
+    echo ""
+}
+
+need_root() {
+    if [ "$(id -u)" -ne 0 ]; then
+        print_err "Must be run as root"
+    fi
+}
+
+read_file() {
+    cat "$1" 2>/dev/null || true
+}
+
+write_sysfs() {
+    local file="$1" value="$2"
+
+    if [ ! -w "$file" ]; then
+        echo "Warning: $file is not writable, skipping" >&2
+        return 0
+    fi
+
+    echo "$value" >"$file"
+}
+
+notify_user() {
+    msg="$1"
+
+    for user in $(getent passwd | awk -F: '$3 >= 1000 && $3 < 60000 {print $1}'); do
+        [ "$user" = "root" ] && continue
+
+        for pid in $(pgrep -u "$user"); do
+            envfile="/proc/$pid/environ"
+            [ -r "$envfile" ] || continue
+
+            dbus_addr="$(tr '\0' '\n' <"$envfile" 2>/dev/null | sed -n 's/^DBUS_SESSION_BUS_ADDRESS=//p')"
+            [ -n "$dbus_addr" ] || continue
+
+            disp="$(tr '\0' '\n' <"$envfile" 2>/dev/null | sed -n 's/^DISPLAY=//p')"
+            disp="${disp:-:0}"
+
+            su -s /bin/sh "$user" -c \
+                "DBUS_SESSION_BUS_ADDRESS='$dbus_addr' DISPLAY='$disp' notify-send -t 3500 'CPU Power' \"$msg\"" \
+                >/dev/null 2>&1 && return 0
+        done
+    done
+
+    return 0
+}
+
+finish() {
+    echo "$1"
+    notify_user "$1"
+    show_status
+}
+
+setup_performance() {
+    cpupower frequency-set -g performance >/dev/null
+    write_sysfs "$BOOST_FILE" 1
+    write_sysfs "$PLATFORM_PROFILE" performance
+}
+
+setup_balanced() {
+    cpupower frequency-set -g schedutil >/dev/null
+    write_sysfs "$BOOST_FILE" 1
+    write_sysfs "$PLATFORM_PROFILE" balanced
+}
+
+setup_powersave() {
+    cpupower frequency-set -g powersave >/dev/null
+    write_sysfs "$BOOST_FILE" 0
+    write_sysfs "$PLATFORM_PROFILE" low-power
+}
+
+set_profile() {
+    need_root
+
+    local mode="$1"
+
+    case "$mode" in
+    performance) setup_performance ;;
+    balanced) setup_balanced ;;
+    powersave) setup_powersave ;;
+    *) print_err "Invalid profile $mode" ;;
+    esac
+
+    finish "Profile set: $mode"
+}
+
+set_boost() {
+    need_root
+
+    local val="$1"
+
+    case "$val" in
+    on) write_sysfs "$BOOST_FILE" 1 ;;
+    off) write_sysfs "$BOOST_FILE" 0 ;;
+    *) print_err "Usage: $(basename "$0") boost on|off" ;;
+    esac
+
+    finish "Turbo boost: $val"
+}
+
+all_cpu_dirs() {
+    ls -d "$CPU_SYS"/cpu[0-9]* 2>/dev/null | sort -V
+}
+
+apply_cpu_state() {
+    local n="$1" state="$2"
+    local f="$CPU_SYS/cpu$n/online"
+
+    if [ ! -d "$CPU_SYS/cpu$n" ]; then
+        echo "CPU $n does not exist" >&2
+        return 1
+    fi
+
+    if [ "$n" = "0" ] && [ "$state" = "0" ]; then
+        echo "CPU 0 cannot be taken offline, skipping" >&2
+        return 1
+    fi
+
+    if [ ! -w "$f" ]; then
+        echo "CPU $n has no writable online control, skipping" >&2
+        return 1
+    fi
+
+    echo "$state" >"$f"
+}
+
+set_cores() {
+    need_root
+
+    local want="$1" total dir n
+    total=$(all_cpu_dirs | wc -l)
+
+    case "$want" in
+    all) want="$total" ;;
+    '' | *[!0-9]*) print_err "Usage: $(basename "$0") cores N|all" ;;
+    esac
+
+    if [ "$want" -lt 1 ] || [ "$want" -gt "$total" ]; then
+        print_err "Core count must be between 1 and $total"
+    fi
+
+    for dir in $(all_cpu_dirs); do
+        n=${dir##*/cpu}
+        [ "$n" = "0" ] && continue
+
+        if [ "$n" -lt "$want" ]; then
+            apply_cpu_state "$n" 1 || true
+        else
+            apply_cpu_state "$n" 0 || true
+        fi
+    done
+
+    finish "Cores online: $want of $total"
+}
+
+set_cpus() {
+    need_root
+
+    local action="$1" state n
+    shift || true
+
+    case "$action" in
+    on) state=1 ;;
+    off) state=0 ;;
+    *) print_err "Usage: $(basename "$0") cpu on|off N [N...]" ;;
+    esac
+
+    if [ "$#" -lt 1 ]; then
+        print_err "Usage: $(basename "$0") cpu on|off N [N...]"
+    fi
+
+    for n in "$@"; do
+        case "$n" in
+        '' | *[!0-9]*)
+            echo "Invalid CPU number: $n" >&2
+            continue
+            ;;
+        esac
+        apply_cpu_state "$n" "$state" || true
+    done
+
+    finish "CPU(s) $*: $action"
+}
+
+set_smt() {
+    need_root
+
+    local val="$1"
+
+    if [ ! -w "$SMT_FILE" ]; then
+        print_err "SMT control not available"
+    fi
+
+    case "$val" in
+    on | off) echo "$val" >"$SMT_FILE" ;;
+    *) print_err "Usage: $(basename "$0") smt on|off" ;;
+    esac
+
+    finish "SMT: $val"
+}
+
+mhz() {
+    [ -n "$1" ] && echo "$(($1 / 1000))" || echo "n/a"
+}
+
+show_general() {
+    local governor driver boost pp online_list total smt
+
+    governor=$(read_file "$CPU_SYS/cpu0/cpufreq/scaling_governor")
+    driver=$(read_file "$CPU_SYS/cpu0/cpufreq/scaling_driver")
+    boost=$(read_file "$BOOST_FILE")
+    pp=$(read_file "$PLATFORM_PROFILE")
+    online_list=$(read_file "$CPU_SYS/online")
+    total=$(all_cpu_dirs | wc -l)
+    smt=$(read_file "$SMT_FILE")
+
+    if [ -n "$boost" ]; then
+        boost=$([ "$boost" = "1" ] && echo on || echo off)
+    fi
+
+    echo "Driver: ${driver:-n/a} | Governor: ${governor:-n/a} | Turbo: ${boost:-n/a} | Profile: ${pp:-n/a}"
+    echo "Online CPUs: ${online_list:-n/a} (of $total) | SMT: ${smt:-n/a}"
+}
+
+show_power() {
+    local bat ac line=""
+
+    bat=$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n1)
+    if [ -n "$bat" ]; then
+        local status pct power_uw watt cur volt
+        status=$(read_file "$bat/status")
+        pct=$(read_file "$bat/capacity")
+
+        if [ -f "$bat/power_now" ]; then
+            power_uw=$(read_file "$bat/power_now")
+        elif [ -f "$bat/current_now" ] && [ -f "$bat/voltage_now" ]; then
+            cur=$(read_file "$bat/current_now")
+            volt=$(read_file "$bat/voltage_now")
+            if [ -n "$cur" ] && [ -n "$volt" ]; then
+                power_uw=$((cur * volt / 1000000))
+            fi
+        fi
+
+        if [ -n "$power_uw" ]; then
+            watt=$(echo "scale=2; $power_uw/1000000" | bc 2>/dev/null || true)
+            [ -z "$watt" ] && watt="$((power_uw / 1000000))"
+            watt="$watt W"
+        else
+            watt="n/a"
+        fi
+
+        line="Battery: ${status:-n/a} ${pct:-n/a}% | Power draw: $watt"
+    fi
+
+    ac=$(ls -d /sys/class/power_supply/A{C,DP}* 2>/dev/null | head -n1)
+    if [ -n "$ac" ]; then
+        local online
+        online=$(read_file "$ac/online")
+        [ -n "$line" ] && line="$line | "
+        line="${line}AC plugged: $([ "$online" = "1" ] && echo Yes || echo No)"
+    fi
+
+    [ -n "$line" ] && echo "$line"
+    return 0
+}
+
+show_cores() {
+    local cpudir dir core freq min max
+
+    echo "Core   Freq   (min-max) MHz"
+    for cpudir in $(all_cpu_dirs); do
+        core=${cpudir##*/cpu}
+        dir="$cpudir/cpufreq"
+
+        if [ ! -d "$dir" ]; then
+            printf "CPU%-3s offline\n" "$core"
+            continue
+        fi
+
+        freq=$(read_file "$dir/scaling_cur_freq")
+        min=$(read_file "$dir/scaling_min_freq")
+        max=$(read_file "$dir/scaling_max_freq")
+        printf "CPU%-3s %-6s (%s-%s)\n" "$core" "$(mhz "$freq")" "$(mhz "$min")" "$(mhz "$max")"
+    done
+}
+
+show_temps() {
+    local temp_found=0 zone name t label tval line=""
+
+    for zone in /sys/class/hwmon/hwmon*; do
+        [ -f "$zone/name" ] || continue
+        name=$(read_file "$zone/name")
+
+        case "$name" in
+        k10temp | coretemp | zenpower)
+            for t in "$zone"/temp*_input; do
+                [ -f "$t" ] || continue
+                label=$(read_file "${t%_input}_label")
+                [ -n "$label" ] || label=$(basename "$t")
+                tval=$(read_file "$t")
+                if [ -n "$tval" ]; then
+                    line="$line$label: $(echo "scale=1; $tval/1000" | bc 2>/dev/null || echo "$((tval / 1000))")°C | "
+                    temp_found=1
+                fi
+            done
+            ;;
+        esac
+    done
+
+    if [ "$temp_found" = "0" ]; then
+        echo "Temperature: n/a (no k10temp/coretemp hwmon found)"
+    else
+        echo "${line% | }"
+    fi
+}
+
+show_status() {
+    echo "CPU Power Dashboard"
+
+    show_general
+    show_power
+    show_cores
+    show_temps
+    echo "Load average: $(cut -d' ' -f1-3 /proc/loadavg)"
+}
+
+if [[ "$1" == "-h" ]] ||
+    [[ "$1" == "--help" ]] ||
+    [[ "$2" == "-h" ]] ||
+    [[ "$2" == "--help" ]]; then
+    print_help
+    exit 0
+fi
+
+case "$1" in
+performance | balanced | powersave)
+    set_profile "$1"
+    ;;
+boost)
+    set_boost "$2"
+    ;;
+cores)
+    set_cores "$2"
+    ;;
+cpu)
+    shift
+    set_cpus "$@"
+    ;;
+smt)
+    set_smt "$2"
+    ;;
+status | "")
+    show_status
+    ;;
+*)
+    print_err "Invalid option $1"
+    ;;
+esac

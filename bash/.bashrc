@@ -79,6 +79,7 @@ bind '"\t":menu-complete'
 bind '"\e[Z":menu-complete-backward'
 bind '"\C-r":"bettercd\n"'
 bind '"\C-e":"dbxctl enter\n"'
+bind '"\C-p":"powerprofile status\n"'
 bind '"\C-f":"tmux_fzf_session\n"'
 bind '"\C-l":"clear\n"'
 bind '"\C-a":"bash_hsearch 3000\n"'
@@ -91,6 +92,9 @@ alias ls='ls --color=auto'
 alias bashsrc="source $HOME/.bashrc"
 
 alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
+alias getfan="cat /proc/acpi/ibm/fan | grep 'speed:' | sed 's/speed:[[:space:]]*//'"
+
+alias pprof="sudo $USER_HOME/.local/bin/utils/powerprofile"
 
 alias h="htop"
 alias v="${EDITOR:-vim}"

@@ -1,0 +1,57 @@
+#!/bin/sh
+exec 2>&1
+
+SCRIPT="/home/entropy/.local/bin/utils/powerprofile"
+BOOST_FILE="/sys/devices/system/cpu/cpufreq/boost"
+POLL_INTERVAL=10
+LOW_BATTERY_THRESHOLD=85
+
+BAT="$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n1)"
+AC="$(ls -d /sys/class/power_supply/AC* 2>/dev/null | head -n1)"
+
+last_mode=""
+
+get_ac_online() {
+    [ -n "$AC" ] && cat "$AC/online" 2>/dev/null || echo 0
+}
+
+get_bat_pct() {
+    [ -n "$BAT" ] && cat "$BAT/capacity" 2>/dev/null || echo 100
+}
+
+get_boost() {
+    if [ -r "$BOOST_FILE" ]; then
+        v="$(cat "$BOOST_FILE" 2>/dev/null)"
+        [ "$v" = "1" ] && echo "on" || echo "off"
+        return
+    fi
+    echo "off"
+}
+
+echo "powerprofile: starting (AC=${AC:-none} BAT=${BAT:-none})"
+
+while :; do
+    online="$(get_ac_online)"
+    pct="$(get_bat_pct)"
+    bst="$(get_boost)"
+
+    if [ "$online" = "1" ]; then
+        mode="balanced"
+        boost="on"
+    elif [ "$pct" -ge "$LOW_BATTERY_THRESHOLD" ]; then
+        mode="balanced"
+        boost="off"
+    else
+        mode="powersave"
+        boost="off"
+    fi
+
+    if [ "$mode" != "$last_mode" ] || [ "$bst" != "$boost" ]; then
+        echo "powerprofile: switching to $mode (AC online=$online, battery=${pct}%)"
+        "$SCRIPT" "$mode" >/dev/null
+        "$SCRIPT" boost "$boost" >/dev/null
+        last_mode="$mode"
+    fi
+
+    sleep "$POLL_INTERVAL"
+done
