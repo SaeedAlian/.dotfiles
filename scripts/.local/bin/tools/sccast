@@ -62,6 +62,49 @@ print_help() {
     echo ""
     echo "  - --compress-no-remove and --compress-detach can only be used together with --compress."
     echo ""
+    echo "  - Wayland sessions require 'wf-recorder' (wlroots-based compositors)."
+    echo ""
+    echo "  - Audio devices are auto-detected via pactl (default sink monitor / default source)."
+    echo "    Override with env vars: SCREEN_CAST_AUDIO_SOURCE, SCREEN_CAST_MIC_SOURCE."
+    echo ""
+}
+
+detect_session_type() {
+    if [ "${XDG_SESSION_TYPE:-}" == "wayland" ] || [ -n "${WAYLAND_DISPLAY:-}" ]; then
+        echo "wayland"
+    else
+        echo "x11"
+    fi
+}
+
+get_system_audio_source() {
+    if [ -n "${SCREEN_CAST_AUDIO_SOURCE:-}" ]; then
+        echo "$SCREEN_CAST_AUDIO_SOURCE"
+        return
+    fi
+
+    command -v pactl >/dev/null 2>&1 || print_err "pactl not found, cannot detect system audio source (set SCREEN_CAST_AUDIO_SOURCE)"
+
+    local sink
+    sink="$(pactl get-default-sink 2>/dev/null || true)"
+    [ -n "$sink" ] || print_err "Cannot detect default audio sink (set SCREEN_CAST_AUDIO_SOURCE)"
+
+    echo "$sink.monitor"
+}
+
+get_mic_source() {
+    if [ -n "${SCREEN_CAST_MIC_SOURCE:-}" ]; then
+        echo "$SCREEN_CAST_MIC_SOURCE"
+        return
+    fi
+
+    command -v pactl >/dev/null 2>&1 || print_err "pactl not found, cannot detect microphone source (set SCREEN_CAST_MIC_SOURCE)"
+
+    local src
+    src="$(pactl get-default-source 2>/dev/null || true)"
+    [ -n "$src" ] || print_err "Cannot detect default microphone source (set SCREEN_CAST_MIC_SOURCE)"
+
+    echo "$src"
 }
 
 diff_calc() {
@@ -141,12 +184,23 @@ start_rec() {
         print_err "$SCRIPT_NAME already recording"
     fi
 
+    aud_source=""
+    mic_source=""
+    [ $rec_aud == 1 ] && aud_source="$(get_system_audio_source)"
+    [ $rec_mic == 1 ] && mic_source="$(get_mic_source)"
+
     filename="cast-$(date +%s%3N)-$(date +%F)"
 
     if [ $rec_vid == 1 ]; then
-        resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
-        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f x11grab -s "$resolution" -i :0.0 -framerate 30 -c:v libx264 -crf 23 -preset ultrafast -pix_fmt yuv420p -thread_queue_size 1024 "$TEMP_DIR/vid-$filename.mp4" >"$TEMP_DIR/vid-$filename.log" 2>&1 &
-        disown
+        if [ "$(detect_session_type)" == "wayland" ]; then
+            command -v wf-recorder >/dev/null 2>&1 || print_err "Wayland session detected but 'wf-recorder' is not installed"
+            nohup wf-recorder -f "$TEMP_DIR/vid-$filename.mp4" -r 30 -c libx264 -x yuv420p -p crf=23 -p preset=ultrafast >"$TEMP_DIR/vid-$filename.log" 2>&1 &
+            disown
+        else
+            resolution="$(xdpyinfo | grep dimension | awk '{print $2}')"
+            nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f x11grab -s "$resolution" -i "${DISPLAY:-:0.0}" -framerate 30 -c:v libx264 -crf 23 -preset ultrafast -pix_fmt yuv420p -thread_queue_size 1024 "$TEMP_DIR/vid-$filename.mp4" >"$TEMP_DIR/vid-$filename.log" 2>&1 &
+            disown
+        fi
 
         if [ $? != 0 ]; then
             [ $send_notification == 1 ] && notify-send -u critical -t 2500 "There was an error in screen recording!"
@@ -157,7 +211,7 @@ start_rec() {
     fi
 
     if [ $rec_aud == 1 ]; then
-        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 0 "$TEMP_DIR/aud-$filename.wav" >"$TEMP_DIR/aud-$filename.log" 2>&1 &
+        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i "$aud_source" "$TEMP_DIR/aud-$filename.wav" >"$TEMP_DIR/aud-$filename.log" 2>&1 &
         disown
 
         if [ $? != 0 ]; then
@@ -174,7 +228,7 @@ start_rec() {
     fi
 
     if [ $rec_mic == 1 ]; then
-        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i 1 "$TEMP_DIR/mic-$filename.wav" >"$TEMP_DIR/mic-$filename.log" 2>&1 &
+        nohup ffmpeg -loglevel $LOG_LEVEL -hide_banner -f pulse -i "$mic_source" "$TEMP_DIR/mic-$filename.wav" >"$TEMP_DIR/mic-$filename.log" 2>&1 &
         disown
 
         if [ $? != 0 ]; then
