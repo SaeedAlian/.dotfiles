@@ -13,6 +13,10 @@
 super + Return
     $TERMINAL
 
+# qvm
+super + v
+    qvm
+
 # primary notes
 super + e
     pnote

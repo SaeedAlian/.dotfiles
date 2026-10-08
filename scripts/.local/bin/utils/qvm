@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars_group qvm
+
+VM_DIR="$QVM_DIR"
+VM_DISPLAY="$QVM_DISPLAY"
+LOG_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/qvm"
+
+print_help() {
+    echo "
+Usage:
+  $(basename "$0") [command]
+
+A simple quickemu VM launcher.
+*Empty command uses fzf in a terminal and rofi everywhere else*
+
+Commands:
+  fzf
+        Pick a VM with fzf and start it in the foreground.
+
+  rofi
+        Pick a VM with rofi and start it in the background.
+
+  list
+        List all VMs.
+
+  help, -h, --help
+        Show this help message.
+
+Environment:
+  QVM_DIR        Directory with the .conf files (default: ~/.vms)
+  QVM_DISPLAY    Quickemu display: sdl, gtk, spice, spice-app
+"
+}
+
+list_names() {
+    local f
+
+    for f in "$VM_DIR"/*.conf; do
+        [ -e "$f" ] || continue
+        basename "$f" .conf
+    done
+}
+
+pick_vm() {
+    local picker="$1"
+
+    if [ "$picker" = "rofi" ]; then
+        list_names | rofi -dmenu -i -p "VM" || true
+    else
+        list_names | fzf --prompt="VM> " --height=40% --reverse --border || true
+    fi
+}
+
+start_vm() {
+    local name="$1" picker="$2"
+    local -a args=(--vm "$name.conf")
+
+    if [ -n "$VM_DISPLAY" ]; then
+        args+=(--display "$VM_DISPLAY")
+    fi
+
+    cd "$VM_DIR"
+
+    if [ "$picker" = "rofi" ]; then
+        mkdir -p "$LOG_DIR"
+        setsid -f quickemu "${args[@]}" >"$LOG_DIR/$name.log" 2>&1 </dev/null
+        echo "Started '$name', log: $LOG_DIR/$name.log"
+    else
+        exec quickemu "${args[@]}"
+    fi
+}
+
+run_picker() {
+    local picker="$1" name
+
+    need_bin quickemu
+    need_bin "$picker"
+
+    [ -d "$VM_DIR" ] || print_err "VM directory not found: $VM_DIR"
+    [ -n "$(list_names)" ] || print_err "No VMs found in $VM_DIR"
+
+    name=$(pick_vm "$picker")
+    [ -z "$name" ] && {
+        echo "Aborted"
+        exit 0
+    }
+
+    start_vm "$name" "$picker"
+}
+
+auto_picker() {
+    if [ -t 0 ] && [ -t 1 ]; then
+        echo "fzf"
+    else
+        echo "rofi"
+    fi
+}
+
+case "${1:-}" in
+fzf | rofi) run_picker "$1" ;;
+list) list_names ;;
+help | -h | --help) print_help ;;
+"") run_picker "$(auto_picker)" ;;
+*) print_err "Unknown command: $1" ;;
+esac

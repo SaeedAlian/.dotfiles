@@ -47,6 +47,7 @@ load_init_env() { load_conf "$@" $INIT_VARS; }
 load_shell_env() { load_conf "$@" $SHELL_VARS; }
 load_user_env() { load_conf "$@" $USER_VARS; }
 load_distrobox_env() { load_conf "$@" $DISTROBOX_VARS; }
+load_qvm_env() { load_conf "$@" $QVM_VARS; }
 load_desktop_env() { load_conf "$@" $DESKTOP_VARS; }
 load_colors() { load_conf "$@" $COLOR_VARS; }
 
@@ -90,6 +91,7 @@ require_vars_group() {
         shell) require_vars_in $SHELL_VARS ;;
         user) require_vars_in $USER_VARS ;;
         distrobox) require_vars_in $DISTROBOX_VARS ;;
+        qvm) require_vars_in $QVM_VARS ;;
         desktop) require_vars_in $DESKTOP_VARS ;;
         colors) require_vars_in $COLOR_VARS ;;
         *)
@@ -113,9 +115,10 @@ load_all_and_require() {
     load_shell_env $EXPORT_FLAG
     load_user_env $EXPORT_FLAG
     load_desktop_env $EXPORT_FLAG
+    load_qvm_env $EXPORT_FLAG
     load_colors $EXPORT_FLAG
 
-    require_vars_group init shell user desktop colors
+    require_vars_group init shell user desktop colors qvm
 }
 
 load_all_and_require_for_distrobox() {
