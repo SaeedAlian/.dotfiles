@@ -20,8 +20,8 @@ TARGET_HOME="$USER_HOME"
 CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
 CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
 SCRIPTS="scripts"
-HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rofi sxhkd sxiv zathura"
 RUNIT_SERVICES="mpd thinkfan powerprofile"
+DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rmpc rofi sxhkd sxiv zathura"
 
 usage() {
     echo "Usage: $0 [--home=/path/to/target/home] group [group ...]"
@@ -118,6 +118,8 @@ setup_desktop_dirs() {
     mkdir -p "$XDG_CONFIG_HOME/mpv"
     mkdir -p "$XDG_CONFIG_HOME/picom"
     mkdir -p "$XDG_CONFIG_HOME/polybar"
+    mkdir -p "$XDG_CONFIG_HOME/rmpc"
+    mkdir -p "$XDG_CONFIG_HOME/rmpc/themes"
     mkdir -p "$XDG_CONFIG_HOME/rofi"
     mkdir -p "$XDG_CONFIG_HOME/sxhkd"
     mkdir -p "$XDG_CONFIG_HOME/sxiv"

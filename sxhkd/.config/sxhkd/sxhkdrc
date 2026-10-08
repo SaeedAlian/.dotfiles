@@ -17,6 +17,10 @@ super + Return
 super + v
     qvm
 
+# rmpc
+super + p
+    rmpc_toggle
+
 # primary notes
 super + e
     pnote
@@ -60,7 +64,7 @@ super + n
     network_menu
 
 # bluetooth menu
-super + p
+super + shift + b
     bluetooth_menu
 
 # power menu
@@ -116,15 +120,27 @@ super + b
 
 # music play/pause
 F11
-    music_ctrl -t
+    music_ctl togglepause
+
+# music stop
+shift + control + F11
+    music_ctl stop
 
 # music play next
 F12
-    music_ctrl -n
+    music_ctl next
 
 # music play previous
 F10
-    music_ctrl -p
+    music_ctl prev
+
+# music toggle repeat
+F9
+    music_ctl togglerepeat
+
+# music toggle single
+shift + control + F9
+    music_ctl togglesingle
 
 # light up
 XF86MonBrightnessUp

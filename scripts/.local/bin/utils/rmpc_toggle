@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars TERMINAL_RMPC_CLASS
+
+pattern="--class ${TERMINAL_RMPC_CLASS}( |\$)"
+
+if pgrep -f -- "$pattern" >/dev/null; then
+    pkill -x rmpc
+    sleep 0.3
+    pkill -f -- "$pattern"
+    for f in /tmp/rmpc/ueberzug-*.pid; do
+        [ -f "$f" ] || continue
+        kill "$(cat "$f")" 2>/dev/null
+        rm -f "$f"
+    done
+else
+    exec $TERMINAL --class "$TERMINAL_RMPC_CLASS" -e rmpc
+fi

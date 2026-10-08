@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+need_bin rmpc
+
+rmpc "$1" || exit 1
+
+status=$(rmpc status)
+song=$(rmpc song 2>/dev/null)
+
+title=$(printf '%s' "$song" | jq -r '.metadata.title // .file // "Nothing playing"')
+artist=$(printf '%s' "$song" | jq -r '.metadata.artist // empty')
+track="$title"
+[ -n "$artist" ] && track="$artist - $title"
+
+case "$1" in
+togglepause)
+    state=$(printf '%s' "$status" | jq -r '.state')
+    case "$state" in
+    Play) summary="▶ Playing" ;;
+    Pause) summary="󰏤 Paused" ;;
+    *) summary="󰓛 Stopped" ;;
+    esac
+    body="$track"
+    ;;
+next | prev)
+    summary="Now playing"
+    body="$track"
+    ;;
+togglerepeat)
+    summary="Repeat"
+    body=$(printf '%s' "$status" | jq -r 'if .repeat then "On" else "Off" end')
+    ;;
+stop)
+    summary="󰓛 Stopped"
+    body="$track"
+    ;;
+togglesingle)
+    summary="Single"
+    body=$(printf '%s' "$status" | jq -r '
+        if .single == true or .single == "On" then "On"
+        elif .single == "Oneshot" then "Oneshot"
+        else "Off" end')
+    ;;
+esac
+
+notify-send -t 1500 -h string:x-dunst-stack-tag:rmpc "$summary" "$body"

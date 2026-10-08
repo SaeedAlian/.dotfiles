@@ -1,0 +1,89 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CACHE_HOME SCRIPTS_DIR
+
+. "$SCRIPTS_DIR/packages/install_helpers.sh"
+
+CACHE_DIR="$XDG_CACHE_HOME/rmpc-installer"
+INSTALL_DIR="/opt/rmpc"
+
+mkdir -p "$CACHE_DIR"
+
+echo "Fetching latest rmpc version..."
+
+LATEST_URL=$(curl -fsSL -o /dev/null -w '%{url_effective}' \
+    "https://github.com/mierak/rmpc/releases/latest")
+TAG="${LATEST_URL##*/}"
+
+if [[ ! "$TAG" =~ ^v[0-9]+(\.[0-9]+)*$ ]]; then
+    print_err "Could not determine latest rmpc version (got: '$TAG'), aborting"
+fi
+
+echo "Latest version: $TAG"
+
+ASSET="rmpc-${TAG}-x86_64-unknown-linux-gnu.tar.gz"
+ARCHIVE="$CACHE_DIR/$ASSET"
+URL="https://github.com/mierak/rmpc/releases/download/$TAG/$ASSET"
+
+echo "Downloading rmpc $TAG (x86_64)..."
+
+download "$ARCHIVE" "$URL"
+
+WORKDIR=$(create_work_dir)
+
+trap 'cleanup "$WORKDIR"' EXIT
+
+STAGE="$WORKDIR/rmpc"
+mkdir -p "$STAGE"
+
+echo "Extracting..."
+ex "$ARCHIVE" --outdir "$STAGE"
+
+if [ ! -f "$STAGE/rmpc" ]; then
+    print_err "Unexpected archive layout, aborting"
+fi
+
+chmod +x "$STAGE/rmpc"
+
+echo "Installing to $INSTALL_DIR..."
+
+run_root rm -rf "$INSTALL_DIR"
+run_root mv "$STAGE" "$INSTALL_DIR"
+run_root chown -R root:root "$INSTALL_DIR"
+
+if [ ! -x "$INSTALL_DIR/rmpc" ]; then
+    print_err "Unexpected archive layout, aborting"
+fi
+
+echo "Creating symlink /usr/local/bin/rmpc..."
+
+run_root ln -sf "$INSTALL_DIR/rmpc" /usr/local/bin/rmpc
+
+if [ -f "$INSTALL_DIR/man/rmpc.1" ]; then
+    echo "Linking man page..."
+    run_root mkdir -p /usr/local/share/man/man1
+    run_root ln -sf "$INSTALL_DIR/man/rmpc.1" /usr/local/share/man/man1/rmpc.1
+fi
+
+COMPLETIONS_DIR="$INSTALL_DIR/completions"
+
+if [ -d "$COMPLETIONS_DIR" ]; then
+    echo "Installing shell completions..."
+
+    if [ -f "$COMPLETIONS_DIR/rmpc.bash" ]; then
+        run_root mkdir -p /usr/share/bash-completion/completions
+        run_root ln -sf "$COMPLETIONS_DIR/rmpc.bash" /usr/share/bash-completion/completions/rmpc
+    fi
+fi
+
+echo "Cleaning cache..."
+rm -rf "$CACHE_DIR"
+
+echo "Installed: $(rmpc --version 2>/dev/null || echo "$TAG")"
+echo "Done"

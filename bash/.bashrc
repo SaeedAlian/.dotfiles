@@ -102,6 +102,7 @@ alias h="htop"
 alias v="${EDITOR:-vim}"
 alias v.="${EDITOR:-vim} ."
 alias fm="${FILEMANAGER:-thunar}"
+alias r="rmpc"
 
 alias bcd="bettercd"
 alias wlp="wallpaper"
