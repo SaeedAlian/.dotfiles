@@ -8,6 +8,7 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 load_init_env
 
 require_vars \
+    XDG_CACHE_HOME \
     XDG_CONFIG_HOME \
     SCRIPTS_DIR \
     XDG_DATA_HOME
@@ -19,8 +20,8 @@ TARGET_HOME="$USER_HOME"
 CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
 CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
 SCRIPTS="scripts"
-RUNIT_SERVICES="thinkfan powerprofile"
 HOST_DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rofi sxhkd sxiv zathura"
+RUNIT_SERVICES="mpd thinkfan powerprofile"
 
 usage() {
     echo "Usage: $0 [--home=/path/to/target/home] group [group ...]"
@@ -67,6 +68,7 @@ if [ "$TARGET_HOME" != "$HOME" ]; then
     STOW_FLAGS="$STOW_FLAGS -t $TARGET_HOME"
     XDG_CONFIG_HOME="$TARGET_HOME/.config"
     XDG_DATA_HOME="$TARGET_HOME/.local/share"
+    XDG_CACHE_HOME="$TARGET_HOME/.cache"
     SCRIPTS_DIR="$TARGET_HOME/.local/scripts"
 fi
 
@@ -96,7 +98,15 @@ setup_scripts_dirs() {
 }
 
 setup_runit_services_dirs() {
+    mkdir -p "$XDG_CONFIG_HOME/mpd"
+    mkdir -p "$XDG_CONFIG_HOME/mpdscribble"
+    mkdir -p "$XDG_DATA_HOME/mpd"
+    mkdir -p "$XDG_DATA_HOME/mpd/playlists"
+    mkdir -p "$XDG_CACHE_HOME/mpd"
+    mkdir -p "$XDG_CACHE_HOME/mpdscribble"
     mkdir -p "$XDG_CONFIG_HOME/thinkfan"
+    mkdir -p "$XDG_DATA_HOME/sv/mpd"
+    mkdir -p "$XDG_DATA_HOME/sv/mpdscribble"
     mkdir -p "$XDG_DATA_HOME/sv/thinkfan"
     mkdir -p "$XDG_DATA_HOME/sv/powerprofile"
 }

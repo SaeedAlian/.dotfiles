@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+require_vars XDG_CONFIG_HOME
+
+dir="$XDG_CONFIG_HOME/mpdscribble"
+tpl="$dir/mpdscribble.conf.in"
+out="$dir/mpdscribble.conf"
+
+[ -r "$tpl" ] || { echo "Template not found: $tpl" >&2; exit 1; }
+
+read -rp 'Last.fm username: ' user
+read -rsp 'Last.fm password: ' pass; echo
+
+umask 077
+
+LF_USER="$user" LF_PASS="$pass" awk '
+function replace(s, tok, val,    out, i) {
+    out = ""
+    while ((i = index(s, tok)) > 0) {
+        out = out substr(s, 1, i - 1) val
+        s = substr(s, i + length(tok))
+    }
+    return out s
+}
+{
+    $0 = replace($0, "@YOURNAME@", ENVIRON["LF_USER"])
+    $0 = replace($0, "@PASSWORD@", ENVIRON["LF_PASS"])
+    print
+}' "$tpl" > "$out"
+
+chmod 600 "$out"
+unset user pass
+echo "Written: $out"

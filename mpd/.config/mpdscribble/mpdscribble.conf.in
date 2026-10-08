@@ -1,0 +1,10 @@
+host = localhost
+port = 6600
+
+journal_interval = 60
+
+[last.fm]
+url = https://post.audioscrobbler.com/
+username = @YOURNAME@
+password = @PASSWORD@
+journal = /home/entropy/.cache/mpdscribble/lastfm.journal

@@ -1,0 +1,6 @@
+#!/bin/sh
+exec 2>&1
+exec env HOME=/home/entropy chpst -u entropy \
+    mpdscribble --no-daemon \
+    --conf /home/entropy/.config/mpdscribble/mpdscribble.conf \
+    --log /home/entropy/.cache/mpdscribble/log.txt

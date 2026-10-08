@@ -1,0 +1,5 @@
+#!/bin/sh
+while [ ! -S /run/user/1000/pulse/native ]; do sleep 2; done
+exec env HOME=/home/entropy XDG_RUNTIME_DIR=/run/user/1000 chpst -u entropy \
+    mpd --no-daemon /home/entropy/.config/mpd/mpd.conf \
+    2>>/home/entropy/.cache/mpd/stderr.log
