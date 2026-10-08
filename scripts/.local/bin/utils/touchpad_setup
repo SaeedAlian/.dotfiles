@@ -16,6 +16,7 @@ ACCEL_SPEED_VALUE="${TOUCHPAD_ACCEL_SPEED_VALUE:--0.160000}"
 NATURAL_SCROLLING_VALUE="${TOUCHPAD_NATURAL_SCROLLING_VALUE:-0}"
 CLICK_METHOD_VALUE="${TOUCHPAD_CLICK_METHOD_VALUE:-0 1}"
 DISABLE_WHILE_TYPING_VALUE="${TOUCHPAD_DISABLE_WHILE_TYPING_VALUE:-1}"
+SCROLLING_PIXEL_DISTANCE="${TOUCHPAD_SCROLLING_PIXEL_DISTANCE:-15}"
 
 xinput set-prop $TOUCHPAD_ID "libinput Tapping Enabled" $TAPPING_VALUE
 xinput set-prop $TOUCHPAD_ID "libinput Accel Profile Enabled" $ACCEL_PROFILE_VALUE
@@ -23,5 +24,6 @@ xinput set-prop $TOUCHPAD_ID "libinput Accel Speed" $ACCEL_SPEED_VALUE
 xinput set-prop $TOUCHPAD_ID "libinput Natural Scrolling Enabled" $NATURAL_SCROLLING_VALUE
 xinput set-prop $TOUCHPAD_ID "libinput Click Method Enabled" $CLICK_METHOD_VALUE
 xinput set-prop $TOUCHPAD_ID "libinput Disable While Typing Enabled" $DISABLE_WHILE_TYPING_VALUE
+xinput set-prop $TOUCHPAD_ID "libinput Scrolling Pixel Distance" $SCROLLING_PIXEL_DISTANCE
 
 notify-send -u normal -t 1500 "Touchpad settings updated"
