@@ -53,6 +53,8 @@ bspc monitor -d 1 2 3 4 7 8 9 10
 bspc desktop 1 -l monocle
 bspc desktop 2 -l monocle
 bspc desktop 3 -l monocle
+bspc desktop 4 -l monocle
+bspc desktop 7 -l monocle
 
 ###### ui ######
 xsetroot -cursor_name left_ptr
@@ -72,6 +74,8 @@ bspc config swallow_first_click false
 bspc config click_to_focus any
 
 ###### rules ######
+bspc rule -a "steam" desktop='^1'
+bspc rule -a "steamwebhelper" desktop='^1'
 bspc rule -a Brave-browser desktop='^3'
 bspc rule -a LibreWolf desktop='^3' state=tiled
 bspc rule -a 'LibreWolf:*' desktop='^3' state=floating rectangle=900x800+500+140
