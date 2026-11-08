@@ -57,6 +57,24 @@ function bettercd() {
     fi
 }
 
+# get the total memory usage of a process
+function memuse() {
+    if [[ -z "$1" ]]; then
+        echo "Usage: memuse <process-name>"
+        return 1
+    fi
+
+    ps -eo comm=,rss= | awk -v name="$1" '
+        $1 ~ name {
+            sum += $2
+            n++
+        }
+        END {
+            printf "%s: %d processes, %.2f MiB RAM\n", name, n, sum / 1024
+        }
+    '
+}
+
 ######## binds ########
 
 # colors
@@ -82,17 +100,19 @@ bind '"\C-e":"dbxctl enter\n"'
 bind '"\C-p":"powerprofile status\n"'
 bind '"\C-f":"tmux_fzf_session\n"'
 bind '"\C-l":"clear\n"'
-bind '"\C-a":"bash_hsearch 3000\n"'
+bind '"\C-a":"bash_hsearch 10000\n"'
 bind '"\C-o":"fastfetch\n"'
 
 ######## aliases ########
 alias grep='grep --color=auto'
 alias ls='ls --color=auto'
+alias q="exit"
 
 alias bashsrc="source $HOME/.bashrc"
 
-alias gettemp="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
-alias getfan="cat /proc/acpi/ibm/fan | grep 'speed:' | sed 's/speed:[[:space:]]*//'"
+alias tmpr="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/\(.\)..$/.\1°C/'"
+alias fn="cat /proc/acpi/ibm/fan | grep 'speed:' | sed 's/speed:[[:space:]]*//'"
+alias btr="upower -i /org/freedesktop/UPower/devices/battery_BAT0"
 
 alias pprof="sudo $USER_HOME/.local/bin/utils/powerprofile"
 
@@ -122,6 +142,7 @@ alias neofetch="fastfetch"
 
 alias pac="sudo pacman"
 alias apt="sudo apt"
+alias uplist="sudo apt list --upgradable"
 
 ######## prompt ########
 
