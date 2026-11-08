@@ -2,7 +2,7 @@
 
 # put XDG_RUNTIME_DIR=/run/user/$(id -u) in the env vars for the cronjob
 
-WARN_PERCENT=30
+WARN_PERCENT=20
 BAT_DIR="/sys/class/power_supply/BAT0"
 
 PERCENT="$(cat "$BAT_DIR/capacity")"
