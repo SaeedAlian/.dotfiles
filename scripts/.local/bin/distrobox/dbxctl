@@ -263,7 +263,7 @@ delete_box() {
         exit 0
     fi
 
-    distrobox rm -f "$name"
+    distrobox rm --rm-home -f "$name"
     echo "Deleted '$name'"
 }
 
@@ -325,21 +325,24 @@ create_box() {
         unshare_all=1
     fi
 
-    if [ $rootful -eq 1 ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS --root"
+    local -a extra_flags=()
+
+    if [ "$rootful" -eq 1 ]; then
+        extra_flags+=(--root)
     fi
 
-    if [ $use_init -eq 1 ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS --init"
+    if [ "$use_init" -eq 1 ]; then
+        extra_flags+=(--init)
     fi
 
-    if [ $unshare_all -eq 1 ]; then
-        EXTRA_FLAGS="$EXTRA_FLAGS --unshare-all"
+    if [ "$unshare_all" -eq 1 ]; then
+        extra_flags+=(--unshare-all)
     fi
 
     echo "Creating distrobox '$cname' from image '$image'..."
+
     distrobox create \
-        "$EXTRA_FLAGS" \
+        "${extra_flags[@]}" \
         --name "$cname" \
         --home "$DISTRO_BOX_HOME_BASE_PATH/$cname" \
         --image "$image"
