@@ -13,13 +13,10 @@ require_vars \
     SCRIPTS_DIR \
     XDG_DATA_HOME
 
-cd "$DOTFILES_DIR"
-STOW_FLAGS=""
 TARGET_HOME="$USER_HOME"
 
 CORE_PACKAGES="bash fastfetch git nvim tmux userconf"
 CORE_DESKTOP_PACKAGES="X11 dconf fonts yazi"
-SCRIPTS="scripts"
 RUNIT_SERVICES="mpd thinkfan powerprofile"
 DESKTOP_PACKAGES="alacritty bspwm dunst mpv picom polybar rmpc rofi sxhkd sxiv zathura"
 
@@ -58,6 +55,10 @@ if [ "$group_count" -eq 0 ]; then
     print_err "Groups are empty, please specify at least one group"
 fi
 
+if [[ ! -d "$DOTFILES_DIR" ]]; then
+    print_err "Dotfiles directory does not exist: $DOTFILES_DIR"
+fi
+
 if [ ! -d "$TARGET_HOME" ]; then
     print_err "Target home does not exist: $TARGET_HOME"
 fi
@@ -65,7 +66,6 @@ fi
 set -- $GROUP_ARGS
 
 if [ "$TARGET_HOME" != "$HOME" ]; then
-    STOW_FLAGS="$STOW_FLAGS -t $TARGET_HOME"
     XDG_CONFIG_HOME="$TARGET_HOME/.config"
     XDG_DATA_HOME="$TARGET_HOME/.local/share"
     XDG_CACHE_HOME="$TARGET_HOME/.cache"
@@ -129,34 +129,39 @@ setup_desktop_dirs() {
 stow_core() {
     setup_core_dirs
     for pkg in $CORE_PACKAGES; do
-        stow $STOW_FLAGS "$pkg"
+        stow --verbose --dir="$DOTFILES_DIR" \
+            --target="$TARGET_HOME" "$pkg"
     done
 }
 
 stow_core_desktop() {
     setup_core_desktop_dirs
     for pkg in $CORE_DESKTOP_PACKAGES; do
-        stow $STOW_FLAGS "$pkg"
+        stow --verbose --dir="$DOTFILES_DIR" \
+            --target="$TARGET_HOME" "$pkg"
     done
 }
 
 stow_desktop() {
     setup_desktop_dirs
     for pkg in $DESKTOP_PACKAGES; do
-        stow $STOW_FLAGS "$pkg"
+        stow --verbose --dir="$DOTFILES_DIR" \
+            --target="$TARGET_HOME" "$pkg"
     done
 }
 
 stow_runit_services() {
     setup_runit_services_dirs
     for srv in $RUNIT_SERVICES; do
-        stow $STOW_FLAGS "$srv"
+        stow --verbose --dir="$DOTFILES_DIR" \
+            --target="$TARGET_HOME" "$srv"
     done
 }
 
 stow_scripts() {
     setup_scripts_dirs
-    stow $STOW_FLAGS scripts
+    stow --verbose --dir="$DOTFILES_DIR" \
+        --target="$TARGET_HOME" scripts
 }
 
 for group in "$@"; do
