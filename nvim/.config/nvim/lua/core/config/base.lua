@@ -21,6 +21,79 @@ vim.g.netrw_liststyle = 0
 vim.g.netrw_winsize = 25
 vim.g.netrw_localcopydircmd = "cp -r"
 
+-- netrw icons
+local icon_ns = vim.api.nvim_create_namespace("netrw_icons")
+
+local icons = {
+	directory = vim.fn.nr2char(0xf07b), --
+	file = vim.fn.nr2char(0xf15b), --
+	symlink = vim.fn.nr2char(0xf0c1), --
+}
+
+local netrw_syntax = {
+	netrwDir = "dir",
+	netrwSymLink = "symlink",
+	netrwExe = "file",
+	netrwPlain = "file",
+}
+
+local function netrw_add_icons(buf)
+	if not vim.api.nvim_buf_is_valid(buf) or vim.bo[buf].filetype ~= "netrw" then
+		return
+	end
+
+	vim.api.nvim_buf_clear_namespace(buf, icon_ns, 0, -1)
+
+	local style = vim.g.netrw_liststyle
+	if style == 2 then
+		return
+	end
+
+	local ok_dev, devicons = pcall(require, "nvim-web-devicons")
+	local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+	vim.api.nvim_buf_call(buf, function()
+		for i, line in ipairs(lines) do
+			local start = (style == 3) and line:find("[^| ]") or line:find("%S")
+
+			if start then
+				local syn = vim.fn.synIDattr(vim.fn.synID(i, start, 0), "name")
+				local kind = netrw_syntax[syn]
+
+				if kind then
+					local text = line:sub(start)
+					if kind == "symlink" then
+						text = text:gsub("%s+%-%->.*$", "")
+					end
+					if style == 1 then
+						text = text:match("^(%S+)") or text
+					end
+					local name = text:gsub("[*@/=|>]$", "")
+
+					local is_dir = kind == "dir" or text:sub(-1) == "/"
+					local icon, hl
+					if is_dir then
+						icon, hl = icons.directory, "Directory"
+					elseif kind == "symlink" then
+						icon, hl = icons.symlink, "netrwSymLink"
+					elseif ok_dev then
+						icon, hl = devicons.get_icon(name, vim.fn.fnamemodify(name, ":e"), { default = true })
+					else
+						icon, hl = icons.file, nil
+					end
+
+					if icon then
+						vim.api.nvim_buf_set_extmark(buf, icon_ns, i - 1, 0, {
+							sign_text = icon,
+							sign_hl_group = hl,
+						})
+					end
+				end
+			end
+		end
+	end)
+end
+
 function ToggleNetRWWindow()
 	if vim.bo.filetype == "netrw" then
 		local count = 0
@@ -65,15 +138,19 @@ end
 
 vim.api.nvim_command("command! ToggleNetRW lua ToggleNetRWWindow()")
 
--- netrw keymaps
+-- netrw keymaps + icons
 vim.api.nvim_create_autocmd("FileType", {
 	group = netrw_group,
 	pattern = "netrw",
 	callback = function()
+		local buf = vim.api.nvim_get_current_buf()
+
 		map("n", "<Esc>", "<CMD>ToggleNetRW<CR>", "Toggle netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "s", "<Nop>", "Disable sort in netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "r", "<Nop>", "Disable reverse sort in netrw", { noremap = true, silent = true, buffer = true })
 		map("n", "<C-l>", "<C-w><C-l>", "Fix move to left split", { noremap = true, silent = true, buffer = true })
+		map("n", "h", "-", "Netrw: up directory", { remap = true, silent = true, buffer = true })
+		map("n", "l", "<CR>", "Netrw: open under cursor", { remap = true, silent = true, buffer = true })
 		map(
 			"n",
 			"P",
@@ -81,6 +158,18 @@ vim.api.nvim_create_autocmd("FileType", {
 			"Explore cwd",
 			{ remap = true, silent = true, buffer = true }
 		)
+
+		-- icons
+		vim.schedule(function()
+			netrw_add_icons(buf)
+		end)
+		vim.api.nvim_create_autocmd({ "TextChanged", "BufWinEnter" }, {
+			group = netrw_group,
+			buffer = buf,
+			callback = function()
+				netrw_add_icons(buf)
+			end,
+		})
 	end,
 })
 
@@ -255,6 +344,7 @@ map("n", "<leader>lg", ":Telescope live_grep<CR>", "Search with live grep in tel
 map("n", "sm", "<cmd>MaximizerToggle<CR>", "Maximize/Minimize a split buffer")
 
 -- file explorer
+map("n", "-", ":ToggleNetRW<CR>", "Toggle file explorer")
 map("n", "<leader>pd", ":ToggleNetRW<CR>", "Toggle file explorer")
 
 -- -- statusline -- --

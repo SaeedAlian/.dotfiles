@@ -7,8 +7,6 @@ local packages = {
 	"https://github.com/nvim-telescope/telescope.nvim",
 	"https://github.com/navarasu/onedark.nvim",
 	"https://github.com/mbbill/undotree",
-
-	{ src = "https://github.com/prichrd/netrw.nvim", version = "90501c6" },
 }
 
 local extra_packages = {
@@ -34,7 +32,6 @@ end
 vim.pack.add(packages)
 
 require("core.plugins.theme")
-require("core.plugins.netrw")
 require("core.plugins.telescope")
 require("core.plugins.gitsigns")
 require("core.plugins.comment")
