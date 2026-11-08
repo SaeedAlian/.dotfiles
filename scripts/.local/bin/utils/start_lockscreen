@@ -6,7 +6,28 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
 . "$DOTFILES_DIR/coreconfig/helpers.sh"
 
+need_bin xprintidle
+
 load_desktop_env -e
 require_vars BACKGROUND_PIC_NAME LOCKSCREENS_DIR
 
-i3lock -k -f -e -i "$LOCKSCREENS_DIR/$BACKGROUND_PIC_NAME.png"
+LOCKED_SCREEN_TIMEOUT=${LOCKED_SCREEN_TIMEOUT:-10}
+POLL=$((LOCKED_SCREEN_TIMEOUT / 2))
+[ "$POLL" -lt 1 ] && POLL=1
+POLL=$((POLL > 5 ? 5 : POLL))
+
+pgrep -x i3lock >/dev/null && exit 0
+
+i3lock -n -k -f -e -i "$LOCKSCREENS_DIR/$BACKGROUND_PIC_NAME.png" &
+LOCK_PID=$!
+
+sleep 1
+xset dpms force off
+
+while kill -0 "$LOCK_PID" 2>/dev/null; do
+    if xset q | grep -q "Monitor is On" &&
+        [ "$(xprintidle)" -ge $((LOCKED_SCREEN_TIMEOUT * 1000)) ]; then
+        xset dpms force off
+    fi
+    sleep "$POLL"
+done
