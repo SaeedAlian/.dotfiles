@@ -12,7 +12,6 @@ run() {
     if pgrep -x bluetoothd >/dev/null 2>&1; then
         bluetooth_menu --off
     fi
-    toggle_touchscreen --off
     touchpad_setup
     trackpoint_setup
 }
