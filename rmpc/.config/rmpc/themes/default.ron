@@ -92,18 +92,18 @@
             width_percent: 5,
         ),
         (
-            prop: (kind: Property(Artist), style: (fg: "gray"),
-                default: (kind: Text("Unknown"), style: (fg: "red"))
-            ),
-            label: "Artist",
-            width_percent: 25,
-        ),
-        (
             prop: (kind: Property(Title), style: (fg: "gray"),
                 default: (kind: Text("Unknown"), style: (fg: "red"))
             ),
             label: "Title",
             width_percent: 35,
+        ),
+        (
+            prop: (kind: Property(Artist), style: (fg: "gray"),
+                default: (kind: Text("Unknown"), style: (fg: "red"))
+            ),
+            label: "Artist",
+            width_percent: 25,
         ),
         (
             prop: (kind: Property(Album), style: (fg: "gray"),

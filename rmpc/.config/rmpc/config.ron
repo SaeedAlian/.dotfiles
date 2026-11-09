@@ -23,6 +23,7 @@
         horizontal_align: Center,
     ),
     keybinds: (
+        clear: true,
         global: {
             ":":       CommandMode,
             "q":       Quit,
@@ -52,8 +53,9 @@
             "c":       ToggleSingle,
             "|":       ToggleConsume,
             "U":       Update,
-            "I":       ShowCurrentSongInfo,
+            "ii":      ShowCurrentSongInfo,
             "<C-o>":   ShowOutputs,
+            "<C-p>":   ShowDecoders,
         },
         navigation: {
             "k":       Up,
@@ -91,7 +93,6 @@
             "<CR>":    Play,
             "d":       Delete,
             "D":       DeleteAll,
-            "a":       AddToPlaylist,
             "<C-s>":   Save,
             "I":       ShowInfo,
             "C":       JumpToCurrent,
@@ -109,6 +110,11 @@
             (value: "filename",    label: "Filename"),
             (value: "genre",       label: "Genre"),
         ],
+    ),
+    artists: (
+        album_display_mode: SplitByDate,
+        album_sort_by: Date,
+        album_date_tags: [Date],
     ),
     tabs: [
         (name: "Queue",         border_type: None, pane: Pane(Queue)),
