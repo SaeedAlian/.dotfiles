@@ -1,6 +1,23 @@
 #!/bin/bash
 set -e
 
+## need to re-define print_err & need_bin because this script will be
+## run as root and cannot load our env variables
+
+print_err() {
+    local script_name="${BASH_SOURCE[1]}"
+    local err="$1"
+
+    echo "Error: $err" >&2
+    echo "Enter [$(basename "$script_name") --help] for help" >&2
+
+    exit 1
+}
+
+need_bin() {
+    command -v "$1" >/dev/null 2>&1 || print_err "'$1' is required but not installed"
+}
+
 CPU_SYS="/sys/devices/system/cpu"
 BOOST_FILE="$CPU_SYS/cpufreq/boost"
 SMT_FILE="$CPU_SYS/smt/control"
@@ -14,11 +31,11 @@ print_help() {
     echo "  $(basename "$0") [Type] [OPTIONS]"
     echo ""
     echo "Types:"
-    echo "  performance      Performance governor, turbo on"
+    echo "  performance      Performance governor"
     echo ""
-    echo "  balanced         Schedutil governor, turbo on"
+    echo "  balanced         Schedutil governor"
     echo ""
-    echo "  powersave        Powersave governor, turbo off"
+    echo "  powersave        Powersave governor"
     echo ""
     echo "  boost on|off     Turn turbo boost on or off"
     echo ""
@@ -60,7 +77,11 @@ write_sysfs() {
         return 0
     fi
 
-    echo "$value" >"$file"
+    if ! echo "$value" >"$file" 2>/dev/null; then
+        echo "Warning: could not write '$value' to $file" >&2
+    fi
+
+    return 0
 }
 
 notify_user() {
@@ -92,23 +113,24 @@ finish() {
     echo "$1"
     notify_user "$1"
     show_status
+    return 0
 }
 
 setup_performance() {
+    need_bin cpupower
     cpupower frequency-set -g performance >/dev/null
-    write_sysfs "$BOOST_FILE" 1
     write_sysfs "$PLATFORM_PROFILE" performance
 }
 
 setup_balanced() {
+    need_bin cpupower
     cpupower frequency-set -g schedutil >/dev/null
-    write_sysfs "$BOOST_FILE" 1
     write_sysfs "$PLATFORM_PROFILE" balanced
 }
 
 setup_powersave() {
+    need_bin cpupower
     cpupower frequency-set -g powersave >/dev/null
-    write_sysfs "$BOOST_FILE" 0
     write_sysfs "$PLATFORM_PROFILE" low-power
 }
 
@@ -164,6 +186,15 @@ apply_cpu_state() {
         return 1
     fi
 
+    if [ "$(read_file "$f")" = "$state" ]; then
+        return 0
+    fi
+
+    if ! echo "$state" >"$f" 2>/dev/null; then
+        echo "CPU $n: could not set online=$state (SMT off?)" >&2
+        return 1
+    fi
+
     echo "$state" >"$f"
 }
 
@@ -177,6 +208,8 @@ set_cores() {
     all) want="$total" ;;
     '' | *[!0-9]*) print_err "Usage: $(basename "$0") cores N|all" ;;
     esac
+
+    want=$((10#$want))
 
     if [ "$want" -lt 1 ] || [ "$want" -gt "$total" ]; then
         print_err "Core count must be between 1 and $total"
