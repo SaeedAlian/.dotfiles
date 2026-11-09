@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+USER_HOME="${USER_HOME:-"/home/$USER"}"
+DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
+
+. "$DOTFILES_DIR/coreconfig/helpers.sh"
+
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+PY_SCRIPT="${CALPOPUP_PY:-$SCRIPT_DIR/calpopup.py}"
+
+if [ -n "$VIRTUAL_ENV" ] && [ -x "$VIRTUAL_ENV/bin/python" ]; then
+    PY="$VIRTUAL_ENV/bin/python"
+else
+    PY=$(command -v python3) || {
+        echo "calpopup: python3 not found" >&2
+        exit 1
+    }
+fi
+
+PIDFILE="${XDG_RUNTIME_DIR:-/tmp}/calpopup-$(id -u).pid"
+if [ -f "$PIDFILE" ]; then
+    old=$(cat "$PIDFILE" 2>/dev/null)
+    if [ -n "$old" ] && grep -qs calpopup "/proc/$old/cmdline" 2>/dev/null; then
+        kill "$old" 2>/dev/null
+        rm -f "$PIDFILE"
+        exit 0
+    fi
+fi
+echo $$ >"$PIDFILE"
+
+exec "$PY" "$PY_SCRIPT" "$@"
