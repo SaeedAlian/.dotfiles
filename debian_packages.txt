@@ -4,7 +4,6 @@ alacritty
 alsa-utils
 android-file-transfer
 bluez
-brave-browser
 bspwm
 btop
 cmake
@@ -14,6 +13,7 @@ desktop-file-utils
 distrobox
 dosfstools
 dunst
+exiftool
 fastfetch
 fd-find
 feh
@@ -33,6 +33,8 @@ libnotify-bin
 light
 linux-cpupower
 maim
+mpd
+mpdscribble
 mpv
 nano
 network-manager
@@ -56,7 +58,6 @@ thinkfan
 thunar
 timeshift
 tmux
-ueberzugpp
 unzip
 upower
 util-linux
@@ -70,6 +71,7 @@ xdotool
 xfce-polkit
 xinput
 xorg
+xprintidle
 xserver-xorg-core
 xserver-xorg-video-amdgpu
 xss-lock
