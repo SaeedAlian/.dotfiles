@@ -8,7 +8,33 @@ DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
 
 need_bin rmpc
 
-rmpc "$1" || exit 1
+fmt_time() {
+    local s=${1%.*}
+    [ "$s" -lt 0 ] && s=0
+    if [ "$s" -ge 3600 ]; then
+        printf '%d:%02d:%02d' $((s / 3600)) $((s % 3600 / 60)) $((s % 60))
+    else
+        printf '%d:%02d' $((s / 60)) $((s % 60))
+    fi
+}
+
+handled=0
+
+if [ "$1" = "togglepause" ]; then
+    pre=$(rmpc status)
+    state=$(printf '%s' "$pre" | jq -r '.state')
+    cur=$(printf '%s' "$pre" | jq -r '.song // empty')
+
+    if [ "$state" = "Stop" ] && [ -z "$cur" ]; then
+        last=$(rmpc queue | jq -r 'length - 1')
+        if [ "$last" -ge 0 ]; then
+            rmpc play "$last" || exit 1
+            handled=1
+        fi
+    fi
+fi
+
+[ "$1" = "info" ] || [ "$handled" = 1 ] || rmpc "$1" || exit 1
 
 status=$(rmpc status)
 song=$(rmpc song 2>/dev/null)
@@ -17,6 +43,8 @@ title=$(printf '%s' "$song" | jq -r '.metadata.title // .file // "Nothing playin
 artist=$(printf '%s' "$song" | jq -r '.metadata.artist // empty')
 track="$title"
 [ -n "$artist" ] && track="$artist - $title"
+
+timeout=1500
 
 case "$1" in
 togglepause)
@@ -47,6 +75,31 @@ togglesingle)
         elif .single == "Oneshot" then "Oneshot"
         else "Off" end')
     ;;
+info)
+    timeout=3000
+    if [ -z "$song" ]; then
+        summary="Nothing playing"
+        body=""
+    else
+        album=$(printf '%s' "$song" | jq -r '.metadata.album // empty')
+        albumartist=$(printf '%s' "$song" | jq -r '.metadata.albumartist // .metadata.artist // empty')
+
+        duration=$(printf '%s' "$song" | jq -r '(.duration | if type=="object" then .secs else . end) // 0')
+        elapsed=$(printf '%s' "$status" | jq -r '(.elapsed | if type=="object" then .secs else . end) // 0')
+
+        albumline="$album"
+        if [ -n "$albumartist" ]; then
+            [ -n "$albumline" ] && albumline="$albumline - "
+            albumline="$albumline$albumartist"
+        fi
+
+        summary="󰎈 $title"
+        body="${albumline:+$albumline$'\n'}-$(fmt_time $((duration - elapsed))) remaining"
+    fi
+    ;;
+*)
+    exit 0
+    ;;
 esac
 
-notify-send -t 1500 -h string:x-dunst-stack-tag:rmpc "$summary" "$body"
+notify-send -t "$timeout" -h string:x-dunst-stack-tag:rmpc "$summary" "$body"
