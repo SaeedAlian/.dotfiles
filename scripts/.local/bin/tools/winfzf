@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+shopt -s nullglob
 
 USER_HOME="${USER_HOME:-"/home/$USER"}"
 DOTFILES_DIR="${DOTFILES_DIR:-$USER_HOME/.dotfiles}"
@@ -11,10 +12,16 @@ require_vars XDG_CACHE_HOME
 ICON_DIR="$XDG_CACHE_HOME/winfzf-icons"
 
 print_help() {
-    echo "Usage: $(basename "$0")"
+    echo "Usage: $(basename "$0") [-c|--current] [-a|--all] [-r|--clear-cache]"
     echo ""
-    echo "This script lists all windows in a desktop (workspace) in bspwm (excluding the focused one) with their icons"
-    echo "and allows switching to a selected window using rofi."
+    echo "Lists windows in bspwm (with icons) in rofi, and on selection"
+    echo "switches to the window's desktop and focuses it."
+    echo ""
+    echo "Options:"
+    echo "  -c, --current       Only windows on the current desktop"
+    echo "  -a, --all           Windows on all desktops (default)"
+    echo "  -r, --clear-cache   Delete cached icons and exit"
+    echo "  -h, --help          Show this help"
     echo ""
     echo "Requirements:"
     echo "  - bspwm"
@@ -23,44 +30,246 @@ print_help() {
     echo ""
 }
 
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+mode="all"
+
+case "$1" in
+-h | --help)
     print_help
     exit 0
+    ;;
+-r | --clear-cache)
+    rm -rf "$ICON_DIR"
+    exit 0
+    ;;
+-c | --current) mode="current" ;;
+-a | --all | "") mode="all" ;;
+*)
+    echo "Unknown option: $1" >&2
+    print_help >&2
+    exit 1
+    ;;
+esac
+
+if [[ "$mode" == "current" ]]; then
+    selector=".local.window"
+    prompt="Windows (desktop): "
+else
+    selector=".window"
+    prompt="Windows (all): "
 fi
 
 mkdir -p "$ICON_DIR"
 
-entries=""
-wids=()
+declare -A wm_icon=()
+declare -A name_icon=()
+indexed=0
 
-focused=$(bspc query -N -n focused)
+build_desktop_index() {
+    local -a dirs=() files=() xd=()
+    local d f icon wm base short
 
-while read -r wid; do
-    [[ "$wid" == "$focused" ]] && continue
+    IFS=: read -ra xd <<<"${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+    dirs+=("${XDG_DATA_HOME:-$USER_HOME/.local/share}")
+    dirs+=("${xd[@]}")
+    dirs+=(/var/lib/flatpak/exports/share "$USER_HOME/.local/share/flatpak/exports/share" /var/lib/snapd/desktop)
 
-    title=$(xprop -id "$wid" WM_NAME | sed -E 's/.*= "(.*)"/\1/')
-    title=$(basename "$title")
-    [[ -z "$title" ]] && continue
+    for d in "${dirs[@]}"; do
+        files+=("$d"/applications/*.desktop)
+    done
+    [[ ${#files[@]} -eq 0 ]] && return 0
 
-    pam="$ICON_DIR/$wid.pam"
-    png="$ICON_DIR/$wid.png"
+    while IFS='|' read -r f icon wm; do
+        [[ -z "$icon" ]] && continue
+        base=$(basename "$f" .desktop)
+        base=${base,,}
+        short=${base##*.}
 
-    if [[ ! -f "$png" ]]; then
-        xprop -id "$wid" -notype 32c _NET_WM_ICON |
-            perl -0777 -pe '@_=/\d+/g;
-        printf "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", splice@_,0,2;
-        $_=pack "N*", @_;
-        s/(.)(...)/$2$1/gs' >"$pam" 2>/dev/null
+        [[ -z "${name_icon[$base]:-}" ]] && name_icon["$base"]="$icon"
+        [[ -z "${name_icon[$short]:-}" ]] && name_icon["$short"]="$icon"
+        if [[ -n "$wm" ]]; then
+            wm=${wm,,}
+            [[ -z "${wm_icon[$wm]:-}" ]] && wm_icon["$wm"]="$icon"
+        fi
+    done < <(awk -F= '
+        FNR == 1 { sec = ""; order[n++] = FILENAME }
+        /^\[/ { sec = $0 }
+        sec == "[Desktop Entry]" && $1 == "Icon" && !(FILENAME in icon) {
+            icon[FILENAME] = substr($0, index($0, "=") + 1)
+        }
+        sec == "[Desktop Entry]" && $1 == "StartupWMClass" && !(FILENAME in wm) {
+            wm[FILENAME] = substr($0, index($0, "=") + 1)
+        }
+        END { for (i = 0; i < n; i++) print order[i] "|" icon[order[i]] "|" wm[order[i]] }
+    ' "${files[@]}")
+    return 0
+}
 
-        magick "$pam" -resize 32x32 "$png" 2>/dev/null
-        rm -f "$pam"
+found_icon=""
+find_desktop_icon() {
+    local k
+    found_icon=""
+
+    if ((!indexed)); then
+        build_desktop_index
+        indexed=1
     fi
 
-    entries+="$title\0icon\x1f$png\n"
-    wids+=("$wid")
-done < <(bspc query -N -n .local.window)
+    for k in "$@"; do
+        k=${k,,}
+        [[ -z "$k" ]] && continue
+        if [[ -n "${wm_icon[$k]:-}" ]]; then
+            found_icon="${wm_icon[$k]}"
+            return 0
+        fi
+    done
 
-idx=$(printf "%b" "$entries" | rofi -dmenu -i -show-icons -format i -p 'Windows: ')
+    for k in "$@"; do
+        k=${k,,}
+        [[ -z "$k" ]] && continue
+        if [[ -n "${name_icon[$k]:-}" ]]; then
+            found_icon="${name_icon[$k]}"
+            return 0
+        fi
+    done
+    return 0
+}
+
+make_icon() {
+    local wid="$1" png="$2"
+    local pam="${png%.png}.pam"
+
+    xprop -id "$wid" -notype 32c _NET_WM_ICON 2>/dev/null |
+        perl -0777 -ne '
+            @n = /\d+/g; ($bw, $bh, $bo) = (0, 0, 0); $i = 0;
+            while ($i + 1 < @n) {
+                ($w, $h) = @n[$i, $i + 1];
+                last if $w * $h == 0 || $i + 2 + $w * $h > @n;
+                ($bw, $bh, $bo) = ($w, $h, $i + 2) if $w * $h > $bw * $bh;
+                $i += 2 + $w * $h;
+            }
+            exit 1 unless $bw;
+            printf "P7\nWIDTH %d\nHEIGHT %d\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n", $bw, $bh;
+            $d = pack "N*", @n[$bo .. $bo + $bw * $bh - 1];
+            $d =~ s/(.)(...)/$2$1/gs;
+            print $d;
+        ' >"$pam" 2>/dev/null || true
+
+    if [[ -s "$pam" ]]; then
+        magick "$pam" -resize 32x32 "$png" 2>/dev/null || rm -f "$png"
+    fi
+    rm -f "$pam"
+    return 0
+}
+
+icon=""
+resolve_icon() {
+    local wid="$1" class="$2" instance="$3" gtk_id="$4"
+    local key png nf
+
+    icon=""
+    [[ -z "$class" ]] && return 0
+
+    key=${class,,}
+    key=${key//[^a-z0-9._-]/_}
+    png="$ICON_DIR/$key.png"
+    nf="$ICON_DIR/$key.name"
+
+    if [[ -f "$png" ]]; then
+        icon="$png"
+        return 0
+    fi
+    if [[ -f "$nf" ]]; then
+        icon=$(<"$nf")
+        return 0
+    fi
+
+    make_icon "$wid" "$png"
+    if [[ -f "$png" ]]; then
+        icon="$png"
+        return 0
+    fi
+
+    find_desktop_icon "$class" "$instance" "$gtk_id"
+    icon="${found_icon:-${class,,}}"
+    printf '%s' "$icon" >"$nf"
+    return 0
+}
+
+declare -A wdesk=()
+if [[ "$mode" == "all" ]]; then
+    while read -r d; do
+        dname=$(bspc query -D -d "$d" --names)
+        while read -r w; do
+            wdesk["$w"]="$dname"
+        done < <(bspc query -N -d "$d" -n .window)
+    done < <(bspc query -D)
+fi
+
+labels=()
+icons=()
+wids=()
+selected_row=0
+
+focused=$(bspc query -N -n focused || true)
+
+while read -r wid; do
+    props=$(xprop -id "$wid" _NET_WM_NAME WM_NAME WM_CLASS _GTK_APPLICATION_ID 2>/dev/null) || continue
+
+    nname="" wname="" instance="" class="" gtk_id=""
+    while IFS= read -r line; do
+        case "$line" in
+        _NET_WM_NAME*=*)
+            nname=${line#*= \"}
+            nname=${nname%\"}
+            ;;
+        WM_NAME*=*)
+            wname=${line#*= \"}
+            wname=${wname%\"}
+            ;;
+        WM_CLASS*=*)
+            v=${line#*= }
+            instance=${v%%\", \"*}
+            instance=${instance#\"}
+            class=${v##*\", \"}
+            class=${class%\"}
+            ;;
+        _GTK_APPLICATION_ID*=*)
+            gtk_id=${line#*= \"}
+            gtk_id=${gtk_id%\"}
+            ;;
+        esac
+    done <<<"$props"
+
+    title="${nname:-$wname}"
+    [[ -z "$title" ]] && continue
+    title=${title//\\\"/\"}
+
+    resolve_icon "$wid" "$class" "$instance" "$gtk_id"
+
+    if [[ "$mode" == "all" ]]; then
+        label="[${wdesk[$wid]:-?}] ${class:+$class: }$title"
+    else
+        label="${class:+$class: }$title"
+    fi
+
+    [[ "$wid" == "$focused" ]] && selected_row=${#wids[@]}
+
+    labels+=("$label")
+    icons+=("$icon")
+    wids+=("$wid")
+done < <(bspc query -N -n "$selector")
+
+[[ ${#wids[@]} -eq 0 ]] && exit 0
+
+idx=$(
+    for i in "${!labels[@]}"; do
+        if [[ -n "${icons[$i]}" ]]; then
+            printf '%s\0icon\x1f%s\n' "${labels[$i]}" "${icons[$i]}"
+        else
+            printf '%s\n' "${labels[$i]}"
+        fi
+    done | rofi -dmenu -i -show-icons -format i -selected-row "$selected_row" -p "$prompt"
+) || exit 0
 
 if [[ -n "$idx" ]]; then
     bspc node "${wids[$idx]}" -f
