@@ -37,9 +37,9 @@ super + shift + Return
 super + shift + q 
     $CALCULATOR
 
-# yad calendar
+# calendar
 super + t
-    yad_calendar
+    calpopup --jalali --size 24
 
 # webcam
 super + shift + control + w

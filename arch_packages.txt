@@ -55,7 +55,6 @@ xdotool
 xorg-xdpyinfo
 zathura-pdf-poppler
 yazi
-yad
 xorg-xset
 xorg-xsetroot
 xorg-xinput

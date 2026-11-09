@@ -74,6 +74,5 @@ xserver-xorg-core
 xserver-xorg-video-amdgpu
 xss-lock
 xz-utils
-yad
 zathura
 zip

@@ -95,7 +95,6 @@ bspc rule -a 'qemu' desktop='^7' state=tiled
 bspc rule -a 'spicy' desktop='^7' state=tiled
 bspc rule -a 'Spicy' desktop='^7' state=tiled
 bspc rule -a Alacritty rectangle=950x650+0+0
-bspc rule -a Yad state=floating rectangle=400x200+760+40 focus=on
 bspc rule -a qalculate-qt state=floating rectangle=850x650+535+215 focus=on
 bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=off sticky=on
 
