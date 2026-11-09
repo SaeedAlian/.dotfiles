@@ -27,7 +27,9 @@ super + e
 
 # win fzf
 super + w
-    winfzf
+    winfzf -a
+super + shift + w
+    winfzf -c
 
 # gui fm
 super + shift + Return
@@ -64,7 +66,7 @@ super + n
     network_menu
 
 # bluetooth menu
-super + shift + b
+super + s
     bluetooth_menu
 
 # power menu
@@ -94,17 +96,17 @@ super + apostrophe
 super + semicolon
     sccast -n -k --compress --compress-no-remove --compress-detach
 
-# toggle mobile broadband
-super + shift + w
-    network_menu --cellular-toggle
-
 # toggle bluetooth
-super + shift + p
+super + shift + s
     bluetooth_menu --toggle
 
 # toggle wifi
-super + control + w
+super + shift + n
     network_menu --toggle
+
+# toggle mobile broadband
+super + shift + m
+    network_menu --cellular-toggle
 
 # toggle touchpad
 super + comma
@@ -121,6 +123,10 @@ super + b
 # music play/pause
 F11
     music_ctl togglepause
+
+# music info
+{alt,mod5} + F11
+    music_ctl info
 
 # music stop
 shift + control + F11
@@ -183,11 +189,11 @@ super + control + r
     toggle_redshift
 
 # dpms off
-super + shift + m
+super + control + m
     dpms_off
 
 # dpms on
-super + shift + n
+super + control + n
     dpms_on
 
 
@@ -234,7 +240,7 @@ super + {bracketleft,bracketright,backslash}
     bspc node -l {below,above,normal}
 
 # toggle sticky flag
-super + shift + s
+super + control + s
     bspstickytoggle
 
 # focus the next/previous/last node in the current desktop
