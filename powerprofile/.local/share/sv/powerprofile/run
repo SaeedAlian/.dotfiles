@@ -1,56 +1,136 @@
 #!/bin/sh
 exec 2>&1
 
+CONF_USER="entropy"
+
 SCRIPT="/home/entropy/.local/bin/utils/powerprofile"
-BOOST_FILE="/sys/devices/system/cpu/cpufreq/boost"
+CONF_DIR="/home/entropy/.config/powerprofile"
+AC_CONF_FILE="$CONF_DIR/ac.conf"
+BAT_NORMAL_CONF_FILE="$CONF_DIR/bat-normal.conf"
+BAT_LOW_CONF_FILE="$CONF_DIR/bat-low.conf"
+BAT_LOW_THRESH_FILE="$CONF_DIR/bat-thresh"
 POLL_INTERVAL=10
-LOW_BATTERY_THRESHOLD=85
 
-BAT="$(ls -d /sys/class/power_supply/BAT* 2>/dev/null | head -n1)"
-AC="$(ls -d /sys/class/power_supply/AC* 2>/dev/null | head -n1)"
+BAT=""
+AC=""
 
-last_mode=""
+for ps in /sys/class/power_supply/*; do
+    [ -d "$ps" ] || continue
+    type="$(cat "$ps/type" 2>/dev/null)"
+    case "$type" in
+    Battery) [ -z "$BAT" ] && BAT="$ps" ;;
+    Mains) [ -z "$AC" ] && AC="$ps" ;;
+    esac
+done
+
+last_state=""
 
 get_ac_online() {
-    [ -n "$AC" ] && cat "$AC/online" 2>/dev/null || echo 0
+    v=""
+    [ -n "$AC" ] && v="$(cat "$AC/online" 2>/dev/null)"
+    echo "${v:-0}"
 }
 
 get_bat_pct() {
-    [ -n "$BAT" ] && cat "$BAT/capacity" 2>/dev/null || echo 100
+    v=""
+    [ -n "$BAT" ] && v="$(cat "$BAT/capacity" 2>/dev/null)"
+    case "$v" in
+    '' | *[!0-9]*) echo 100 ;;
+    *) echo "$v" ;;
+    esac
 }
 
-get_boost() {
-    if [ -r "$BOOST_FILE" ]; then
-        v="$(cat "$BOOST_FILE" 2>/dev/null)"
-        [ "$v" = "1" ] && echo "on" || echo "off"
-        return
-    fi
-    echo "off"
+get_threshold() {
+    v="$(cat "$BAT_LOW_THRESH_FILE" 2>/dev/null | tr -d ' \r\n')"
+    case "$v" in
+    '' | *[!0-9]*) echo 80 ;;
+    *) echo "$v" ;;
+    esac
 }
 
+setup_config_files() {
+    [ ! -d "$CONF_DIR" ] && mkdir -p "$CONF_DIR"
+
+    [ ! -f "$AC_CONF_FILE" ] &&
+        printf "mode=balanced\nboost=on\ncores=all\n" >"$AC_CONF_FILE"
+
+    [ ! -f "$BAT_NORMAL_CONF_FILE" ] &&
+        printf "mode=balanced\nboost=off\ncores=all\n" >"$BAT_NORMAL_CONF_FILE"
+
+    [ ! -f "$BAT_LOW_CONF_FILE" ] &&
+        printf "mode=powersave\nboost=off\ncores=all\n" >"$BAT_LOW_CONF_FILE"
+
+    [ ! -f "$BAT_LOW_THRESH_FILE" ] && echo "80" >"$BAT_LOW_THRESH_FILE"
+
+    owner="$CONF_USER:$(id -gn "$CONF_USER" 2>/dev/null || echo "$CONF_USER")"
+
+    chown "$owner" "$CONF_DIR" "$AC_CONF_FILE" "$BAT_NORMAL_CONF_FILE" \
+        "$BAT_LOW_CONF_FILE" "$BAT_LOW_THRESH_FILE"
+    chmod 755 "$CONF_DIR"
+    chmod 644 "$AC_CONF_FILE" "$BAT_NORMAL_CONF_FILE" \
+        "$BAT_LOW_CONF_FILE" "$BAT_LOW_THRESH_FILE"
+
+    return 0
+}
+
+read_conf() {
+    sed -n "s/^$2=//p" "$1" 2>/dev/null | tail -n1 | tr -d ' \r'
+}
+
+read_config_mode() {
+    v="$(read_conf "$1" mode)"
+    case "$v" in
+    powersave | balanced | performance) echo "$v" ;;
+    *) echo balanced ;;
+    esac
+}
+
+read_config_cores() {
+    v="$(read_conf "$1" cores)"
+    case "$v" in
+    all) echo all ;;
+    '' | *[!0-9]*) echo all ;;
+    *)
+        [ "$((v + 0))" -lt 1 ] && echo all || echo "$v"
+        ;;
+    esac
+}
+
+read_config_boost() {
+    v="$(read_conf "$1" boost)"
+    case "$v" in
+    on | off) echo "$v" ;;
+    *) echo "" ;;
+    esac
+}
+
+setup_config_files
 echo "powerprofile: starting (AC=${AC:-none} BAT=${BAT:-none})"
 
 while :; do
     online="$(get_ac_online)"
     pct="$(get_bat_pct)"
-    bst="$(get_boost)"
+    threshold="$(get_threshold)"
 
-    if [ "$online" = "1" ]; then
-        mode="balanced"
-        boost="on"
-    elif [ "$pct" -ge "$LOW_BATTERY_THRESHOLD" ]; then
-        mode="balanced"
-        boost="off"
+    if [ "$online" = "1" ] || [ -z "$BAT" ]; then
+        conf="$AC_CONF_FILE"
+    elif [ "$pct" -ge "$threshold" ]; then
+        conf="$BAT_NORMAL_CONF_FILE"
     else
-        mode="powersave"
-        boost="off"
+        conf="$BAT_LOW_CONF_FILE"
     fi
 
-    if [ "$mode" != "$last_mode" ] || [ "$bst" != "$boost" ]; then
-        echo "powerprofile: switching to $mode (AC online=$online, battery=${pct}%)"
+    mode="$(read_config_mode "$conf")"
+    cores="$(read_config_cores "$conf")"
+    boost="$(read_config_boost "$conf")"
+    state="$mode|$boost|$cores"
+
+    if [ "$state" != "$last_state" ]; then
+        echo "powerprofile: applying mode=$mode boost=${boost:-default} cores=$cores (AC online=$online, battery=${pct}%)"
         "$SCRIPT" "$mode" >/dev/null
-        "$SCRIPT" boost "$boost" >/dev/null
-        last_mode="$mode"
+        [ -n "$boost" ] && "$SCRIPT" boost "$boost" >/dev/null
+        "$SCRIPT" cores "$cores" >/dev/null
+        last_state="$state"
     fi
 
     sleep "$POLL_INTERVAL"
