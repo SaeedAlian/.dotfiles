@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/audio-state"
+mkdir -p "$CACHE"
+
+exec 9>"$CACHE/lock"
+flock -n 9 || exit 0
+
+pa_running() { pulseaudio --check 2>/dev/null; }
+
+wait_pa() {
+    local i=0
+    while ! pa_running; do
+        i=$((i + 1))
+        [ $i -gt 30 ] && {
+            echo "pulseaudio not running" >&2
+            return 1
+        }
+        sleep 1
+    done
+}
+
+jack_state() {
+    local c out
+    for c in $(sed -n 's/^ *\([0-9]\+\) \[.*/\1/p' /proc/asound/cards); do
+        out=$(timeout 2 amixer -c "$c" cget iface=CARD,name='Headphone Jack' 2>/dev/null) || continue
+        if echo "$out" | grep -q 'values=on'; then echo headphones; else echo speaker; fi
+        return 0
+    done
+    return 1
+}
+
+profile_state() {
+    timeout 3 pactl list cards 2>/dev/null |
+        sed -n 's/^\tActive Profile: .*\(Headphones\|Speaker\).*/\1/p' |
+        head -1 | tr 'A-Z' 'a-z'
+}
+
+find_profile() {
+    timeout 3 pactl list cards 2>/dev/null | awk -v want="$1" '
+        /^\tName: / {card=$2}
+        /^\tProfiles:/ {inprof=1; next}
+        /^\tActive Profile:/ {inprof=0}
+        inprof && $0 ~ want {
+            line=$0; sub(/^[ \t]+/,"",line); sub(/: .*/,"",line)
+            print card "|" line; exit
+        }'
+}
+
+sink_of() {
+    local id=${1#alsa_card.} i=0 s
+    while [ $i -lt 20 ]; do
+        s=$(timeout 3 pactl list short sinks | awk -v id="$id" 'index($2,id){print $2; exit}')
+        [ -n "$s" ] && {
+            echo "$s"
+            return 0
+        }
+        i=$((i + 1))
+        sleep 0.25
+    done
+    return 1
+}
+
+current_sink() {
+    timeout 3 pactl list short sinks | awk '$2 ~ /alsa_output/ {print $2; exit}'
+}
+
+save() {
+    local state sink vol mute
+    state=$(jack_state) || return 1
+    [ "$(profile_state)" = "$state" ] || return 1
+    sink=$(current_sink)
+    [ -z "$sink" ] && return 1
+    vol=$(timeout 3 pactl get-sink-volume "$sink" | grep -o '[0-9]*%' | head -1 | tr -d %)
+    mute=$(timeout 3 pactl get-sink-mute "$sink" | awk '{print $2}')
+    [ -z "$vol" ] || [ -z "$mute" ] && return 1
+    echo "$vol $mute" >"$CACHE/$state"
+}
+
+apply() {
+    local state=$1 want out card profile sink vol mute
+    case $state in headphones) want=Headphones ;; *) want=Speaker ;; esac
+    out=$(find_profile "$want")
+    [ -z "$out" ] && return 1
+    card=${out%%|*}
+    profile=${out#*|}
+    timeout 5 pactl set-card-profile "$card" "$profile"
+    sink=$(sink_of "$card") || return 1
+    if [ -f "$CACHE/$state" ]; then
+        read -r vol mute <"$CACHE/$state"
+        timeout 3 pactl set-sink-volume "$sink" "${vol}%"
+        timeout 3 pactl set-sink-mute "$sink" "$mute"
+    fi
+}
+
+restore() {
+    local state
+    state=$(jack_state) || {
+        echo "no Headphone Jack control found" >&2
+        return 1
+    }
+    apply "$state"
+}
+
+watch() {
+    local last cur what
+    while true; do
+        pa_running || {
+            sleep 2
+            continue
+        }
+        last=$(jack_state)
+        while read -r _ _ _ what _; do
+            case $what in sink | card) ;; *) continue ;; esac
+
+            while read -r -t 0.4 _; do :; done
+
+            cur=$(jack_state) || continue
+            if [ "$cur" != "$last" ] || [ "$(profile_state)" != "$cur" ]; then
+                apply "$cur" && last=$cur
+                while read -r -t 0.5 _; do :; done
+            else
+                save
+            fi
+        done < <(pactl subscribe 9>&-)
+        sleep 1
+    done
+}
+
+case "${1:-run}" in
+restore) wait_pa && restore ;;
+save) pa_running && save ;;
+run) wait_pa && restore && watch ;;
+esac

@@ -107,3 +107,5 @@ bspc rule -a ffplay state=floating rectangle=280x210+1615+830 follow=on focus=of
 
 ###### scripts ######
 pgrep -f bspfloatpos >/dev/null || bspfloatpos &
+
+pgrep -f restore_audio >/dev/null || restore_audio &
